@@ -20,13 +20,15 @@ kotlin {
                 api(compose.foundation)
                 api(compose.material)
                 api(compose.materialIconsExtended)
+                implementation("app.cash.sqldelight:runtime:2.0.0-alpha05")
+
+                // 以下依赖是安卓平台的特有依赖，在打包桌面端时请注释掉，否则会打包失败
                 api("com.blankj:utilcode:1.30.7")
                 api("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
                 api("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
                 api("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
                 api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
                 api("androidx.lifecycle:lifecycle-service:2.5.1")
-                implementation("app.cash.sqldelight:runtime:2.0.0-alpha05")
             }
         }
         val commonTest by getting {

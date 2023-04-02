@@ -38,5 +38,11 @@ compose.desktop {
                 iconFile.set(project.file("icon.icns"))
             }
         }
+
+
+        buildTypes.release.proguard {
+            obfuscate.set(true)
+            configurationFiles.from(project.file("compose-desktop.pro"))
+        }
     }
 }
