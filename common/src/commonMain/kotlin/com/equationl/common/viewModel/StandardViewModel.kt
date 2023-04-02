@@ -59,15 +59,13 @@ private fun toggleHistory(forceClose: Boolean, viewStates: MutableState<Standard
         ))
 
         CoroutineScope(Dispatchers.IO).launch {
-            withContext(Dispatchers.IO) {
-                var list = dataBase.getAll()
-                if (list.isEmpty()) {
-                    list = listOf(
-                        HistoryData(-1, showText = "", "null", "null", Operator.NUll, "没有历史记录")
-                    )
-                }
-                viewStates.value = viewStates.value.copy(historyList = list)
+            var list = dataBase.getAll()
+            if (list.isEmpty()) {
+                list = listOf(
+                    HistoryData(-1, showText = "", "null", "null", Operator.NUll, "没有历史记录")
+                )
             }
+            viewStates.value = viewStates.value.copy(historyList = list)
         }
     }
 }
@@ -87,21 +85,18 @@ private fun readFromHistory(item: HistoryData, viewStates: MutableState<Standard
 
 private fun deleteHistory(item: HistoryData?, viewStates: MutableState<StandardState>) {
     CoroutineScope(Dispatchers.IO).launch {
-        withContext(Dispatchers.IO) {
-            vibrateOnError()
-            viewStates.value = if (item == null) {
-                dataBase.delete(null)
-                viewStates.value.copy(historyList = listOf())
-            } else {
-                vibrateOnClick()
-                dataBase.delete(item)
-                val newList = mutableListOf<HistoryData>()
-                newList.addAll(viewStates.value.historyList)
-                newList.remove(item)
+        vibrateOnError()
+        viewStates.value = if (item == null) {
+            dataBase.delete(null)
+            viewStates.value.copy(historyList = listOf())
+        } else {
+            vibrateOnClick()
+            dataBase.delete(item)
+            val newList = mutableListOf<HistoryData>()
+            newList.addAll(viewStates.value.historyList)
+            newList.remove(item)
 
-                viewStates.value.copy(historyList = newList)
-            }
-
+            viewStates.value.copy(historyList = newList)
         }
     }
 }
