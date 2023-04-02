@@ -58,6 +58,28 @@ Android 端：
 | ![2](./docs/img/desktop/2.png) | ![4](./docs/img/desktop/4.png) |
 
 
+## 如何使用
+我在 [releases](https://github.com/equationl/calculator-Compose-MultiPlatform/releases) 提供了安卓 APK 安装包和 macOS 的 ARM 安装包，可以直接下载使用。
+
+其他平台（macOS x86、Windows、Linux）需要自己 clone 项目后编译。
+
+将项目 clone 到本地后，使用 IDEA 或者 Android Studio 打开项目，等待项目 Sync 完成后。
+
+运行：
+
+```shell
+./gradlew run
+```
+
+打包：
+
+```shell
+./gradlew packageReleaseDistributionForCurrentOS
+```
+
+你也可以直接在 IDE 的 Gradle 侧栏中找到以上两个 TASK 直接双击执行：
+
+![5](./docs/img/desktop/5.png)
 
 ## 其他
 处理逻辑参考了 *微软计算器*
