@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // TODO 没有增加旋转监听
+
         setContent {
             val standardChannel = remember { Channel<StandardAction>() }
             val standardFlow = remember(standardChannel) { standardChannel.consumeAsFlow() }
