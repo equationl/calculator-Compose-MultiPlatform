@@ -20,7 +20,7 @@ fun homePresenter(
                 is HomeAction.ClickMenu -> {
                     homeState = homeState.copy(keyBoardType = action.changeToType)
 
-                    clickChangeKeyBoardType(action.changeToType)
+                    clickChangeKeyBoardType(action.changeToType, action.isFromUser)
                 }
                 is HomeAction.ClickOverlay -> {
                     if (homeState.isFloat) {
@@ -45,8 +45,8 @@ private fun clickOverlay() {
     showFloatWindows()
 }
 
-private fun clickChangeKeyBoardType(changeToType: Int) {
-    changeKeyBoardType(changeToType)
+private fun clickChangeKeyBoardType(changeToType: Int, isFromUser: Boolean) {
+    changeKeyBoardType(changeToType, isFromUser)
 }
 
 data class HomeState(
@@ -56,5 +56,5 @@ data class HomeState(
 
 sealed class HomeAction {
     object ClickOverlay: HomeAction()
-    data class ClickMenu(val changeToType: Int): HomeAction()
+    data class ClickMenu(val changeToType: Int, val isFromUser: Boolean): HomeAction()
 }

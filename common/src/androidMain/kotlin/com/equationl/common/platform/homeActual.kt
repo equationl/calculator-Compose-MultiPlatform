@@ -42,7 +42,8 @@ actual fun showFloatWindows() {
     }
 }
 
-actual fun changeKeyBoardType(changeTo: Int) {
+actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {
+    if (!isFromUser) return
     vibrateOnClick()
     val activity = ActivityUtils.getTopActivity()
     activity?.requestedOrientation =

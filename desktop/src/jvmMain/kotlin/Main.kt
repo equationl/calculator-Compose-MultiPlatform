@@ -30,6 +30,10 @@ fun main() = application {
         rememberWindowState(size = landWindowSize, position = defaultWindowPosition)
     }
 
+    val homeChannel = remember { Channel<HomeAction>() }
+    val homeFlow = remember(homeChannel) { homeChannel.consumeAsFlow() }
+    val homeState = homePresenter(homeFlow)
+
     val standardChannel = remember { Channel<StandardAction>() }
     val standardFlow = remember(standardChannel) { standardChannel.consumeAsFlow() }
     val standardState = standardPresenter(standardFlow)
@@ -66,7 +70,7 @@ fun main() = application {
                 modifier = Modifier.fillMaxSize(),
                 color = backgroundColor
             ) {
-                HomeScreen(standardChannel, standardState, programmerChannel, programmerState)
+                HomeScreen(homeChannel, homeState, standardChannel, standardState, programmerChannel, programmerState)
             }
         }
     }

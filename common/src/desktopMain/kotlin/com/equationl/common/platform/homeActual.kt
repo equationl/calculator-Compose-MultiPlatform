@@ -6,6 +6,6 @@ actual fun showFloatWindows() {
     Config.isFloat.value = !Config.isFloat.value
 }
 
-actual fun changeKeyBoardType(changeTo: Int) {
+actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {
     Config.boardType.value = changeTo
 }
