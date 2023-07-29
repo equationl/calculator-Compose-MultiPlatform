@@ -2,11 +2,13 @@
 
 这是一款完全使用 Compose MultiPlatform （Compose-jb）实现的跨平台计算器 APP。
 
-支持移动端（Android）和桌面端（Windows、macOS、Linux），后续 Compose 支持 iOS 后也将跟进支持 iOS。
+支持移动端（Android、iOS）和桌面端（Windows、macOS、Linux）。
 
 核心代码迁移自：[calculatorCompose](https://github.com/equationl/calculatorCompose) 。
 
 因此核心功能与其保持一致。
+
+**注意：iOS尚处于 Alpha 阶段，因此没有放到主分支，有需要体验 iOS 的请切换到 `withIOS` 分支查看；另，`withIOS` 分支中部分功能尚未完成移植**
 
 ## 功能特性
 
