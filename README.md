@@ -52,6 +52,14 @@ Android 端：
 | ![5](./docs/img/screenshot5.jpg) <br /> 程序员模式 | ![6](./docs/img/screenshot6.jpg) <br /> 程序员模式 |
 |  ![5](./docs/img/screenshot7.jpg) <br /> 悬浮窗  |  ![6](./docs/img/screenshot8.jpg) <br /> 悬浮窗  |
 
+ios 端：
+
+|                   浅色                    |                   深色                    |
+|:---------------------------------------:|:---------------------------------------:|
+| ![1](./docs/img/ios/1.png) <br /> 标准模式  | ![2](./docs/img/ios/2.png) <br /> 标准模式  |
+| ![3](./docs/img/ios/3.png) <br /> 历史记录  | ![4](./docs/img/ios/4.png) <br /> 历史记录  |
+| ![5](./docs/img/ios/5.png) <br /> 程序员模式 | ![6](./docs/img/ios/6.png) <br /> 程序员模式 |
+
 桌面端：
 
 |               浅色               |               深色               |
