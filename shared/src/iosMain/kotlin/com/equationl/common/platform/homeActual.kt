@@ -1,4 +1,4 @@
-package platform
+package com.equationl.common.platform
 
 // TODO
 

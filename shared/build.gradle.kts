@@ -40,7 +40,7 @@ kotlin {
                 api(compose.foundation)
                 api(compose.material)
                 api(compose.materialIconsExtended)
-                implementation("app.cash.sqldelight:runtime:2.0.0-alpha05")
+                // implementation("app.cash.sqldelight:runtime:2.0.0")
                 implementation("com.ionspin.kotlin:bignum:0.3.8")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
             }
@@ -62,7 +62,7 @@ kotlin {
                 api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
                 api("androidx.lifecycle:lifecycle-service:2.5.1")
 
-                implementation("app.cash.sqldelight:android-driver:2.0.0-alpha05")
+                implementation("app.cash.sqldelight:android-driver:2.0.0")
             }
         }
         /*val androidTest by getting {
@@ -73,7 +73,7 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 api(compose.preview)
-                implementation("app.cash.sqldelight:sqlite-driver:2.0.0-alpha05")
+                implementation("app.cash.sqldelight:sqlite-driver:2.0.0")
             }
         }
         val desktopTest by getting
@@ -86,6 +86,10 @@ kotlin {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
+
+            dependencies {
+                implementation("app.cash.sqldelight:native-driver:2.0.0")
+            }
         }
     }
 }

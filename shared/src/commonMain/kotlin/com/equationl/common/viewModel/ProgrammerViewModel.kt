@@ -262,7 +262,13 @@ private fun String.baseConversion(target: InputBase, current: InputBase): String
     // 如果直接转会出现无法直接转成有符号 long 的问题，所以这里使用 BigInteger 来转
     // 见： https://stackoverflow.com/questions/47452924/kotlin-numberformatexception
 
-    val long = BigInteger.parseString(this, current.number).longValue(false)
+    // FIXME 这里不应该在这里处理，应该在点击删除的地方处理
+    val long = if (this == "-") {
+        0
+    }
+    else {
+        BigInteger.parseString(this, current.number).longValue(false)
+    }
 
     if (target == InputBase.BIN) {
         return LongUtil.toBinaryString(long)
