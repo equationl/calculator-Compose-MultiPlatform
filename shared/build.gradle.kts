@@ -56,11 +56,11 @@ kotlin {
                 api("androidx.core:core-ktx:1.9.0")
                 api("com.google.accompanist:accompanist-systemuicontroller:0.25.1")
                 api("com.blankj:utilcode:1.30.7")
-                api("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-                api("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
-                api("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
-                api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-                api("androidx.lifecycle:lifecycle-service:2.5.1")
+                api("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+                api("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
+                api("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+                api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+                api("androidx.lifecycle:lifecycle-service:2.6.1")
 
                 implementation("app.cash.sqldelight:android-driver:2.0.0")
             }

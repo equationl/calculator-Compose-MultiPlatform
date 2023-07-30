@@ -1,11 +1,12 @@
 package com.equationl.android
 
-//import com.equationl.common.overlay.OverlayService
 import APP
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import com.equationl.common.overlay.OverlayService
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
         // 每次打开主页都要把悬浮界面关闭
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // TOOD stopService(Intent(this, OverlayService::class.java))
+            stopService(Intent(this, OverlayService::class.java))
         }
     }
 }

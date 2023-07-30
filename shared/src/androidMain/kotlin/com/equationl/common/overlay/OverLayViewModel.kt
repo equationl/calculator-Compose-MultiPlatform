@@ -1,13 +1,14 @@
 package com.equationl.common.overlay
 
-// TODO 需要移植
-
-
-/*import android.content.ComponentName
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.blankj.utilcode.util.ActivityUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -96,4 +97,4 @@ sealed class OverlayAction {
 
 sealed class OverlayEvent {
     data class ChangeSize(val scale: Float): OverlayEvent()
-}*/
+}

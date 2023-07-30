@@ -1,9 +1,7 @@
 package com.equationl.common.overlay
 
-// TODO 需要移植
 
-
-/*import android.os.Build
+import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
@@ -13,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.lifecycle.ViewModelStore
 import com.equationl.common.theme.CalculatorComposeTheme
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -46,4 +45,8 @@ class OverlayService : ComposeOverlayViewService() {
             }
         }
     }
-}*/
+
+    // fixme ?????
+    override val viewModelStore: ViewModelStore
+        get() = this.viewModelStore
+}

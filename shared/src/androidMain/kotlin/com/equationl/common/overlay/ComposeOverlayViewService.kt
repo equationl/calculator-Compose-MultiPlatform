@@ -3,7 +3,7 @@ package com.equationl.common.overlay
 
 // TODO 需要移植
 
-/*import android.graphics.PixelFormat
+import android.graphics.PixelFormat
 import android.os.Build
 import android.view.Gravity
 import android.view.WindowManager
@@ -19,22 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
-import androidx.lifecycle.ViewTreeLifecycleOwner
-import androidx.lifecycle.ViewTreeViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.equationl.common.getScreenSize
-import kotlin.math.roundToInt*/
+import kotlin.math.roundToInt
 
 
-/**
- * Service that is ready to display compose overlay view
- * @author Quentin Nivelais
- * @link https://gist.github.com/KONFeature/2f84436e1c0a1926505cac934d470f90
- *
- *  Edit by equationl (likehide.com)
- */
-
-/*@RequiresApi(Build.VERSION_CODES.R)
+@RequiresApi(Build.VERSION_CODES.R)
 abstract class ComposeOverlayViewService : ViewReadyService() {
 
     // Build the layout param for our popup
@@ -74,8 +66,8 @@ abstract class ComposeOverlayViewService : ViewReadyService() {
         super.onCreate()
 
         // Bound the compose lifecycle, view model and view tree saved state, into our view service
-        ViewTreeLifecycleOwner.set(composeView, this)
-        ViewTreeViewModelStoreOwner.set(composeView) { viewModelStore }
+        composeView.setViewTreeLifecycleOwner(this)
+        composeView.setViewTreeViewModelStoreOwner(this)
         composeView.setViewTreeSavedStateRegistryOwner(this)
 
         // Set the content of our compose view
@@ -94,9 +86,7 @@ abstract class ComposeOverlayViewService : ViewReadyService() {
     @Composable
     abstract fun Content()
 
-*//**
-     * Draggable box container (not used by default, since not every overlay should be draggable)
-     *//*
+
     @Composable
     internal fun OverlayDraggableContainer(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) =
         Box(
@@ -127,4 +117,4 @@ abstract class ComposeOverlayViewService : ViewReadyService() {
         }
         windowManager.updateViewLayout(composeView, layoutParams)
     }
-}*/
+}

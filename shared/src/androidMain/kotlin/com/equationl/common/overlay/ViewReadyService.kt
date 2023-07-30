@@ -1,8 +1,6 @@
 package com.equationl.common.overlay
 
-// TODO 需要移植
-
-/*import android.content.Context
+import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Build
 import android.view.Display
@@ -49,6 +47,4 @@ abstract class ViewReadyService : LifecycleService(), SavedStateRegistryOwner, V
 
     override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
-
-    override fun getViewModelStore(): ViewModelStore = internalViewModelStore
-}*/
+}

@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import com.blankj.utilcode.util.ActivityUtils
+import com.equationl.common.overlay.OverlayService
 import com.equationl.common.viewModel.KeyboardTypeStandard
 
 actual fun showFloatWindows() {
@@ -19,7 +20,7 @@ actual fun showFloatWindows() {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         if (Settings.canDrawOverlays(context)) {
-            // TODO context.startService(Intent(context, OverlayService::class.java))
+            context.startService(Intent(context, OverlayService::class.java))
 
             // 返回主页
             Intent(Intent.ACTION_MAIN).apply{
