@@ -1,8 +1,12 @@
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.equationl.common.theme.CalculatorComposeTheme
 import com.equationl.common.view.HomeScreen
@@ -12,8 +16,20 @@ import com.equationl.common.viewModel.StandardAction
 import com.equationl.common.viewModel.homePresenter
 import com.equationl.common.viewModel.programmerPresenter
 import com.equationl.common.viewModel.standardPresenter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.launch
+
+
+val snackbarHostState =  SnackbarHostState()
+
+fun showSnack(msg: String) {
+    CoroutineScope(Dispatchers.Default).launch {
+        snackbarHostState.showSnackbar(msg)
+    }
+}
 
 @Composable
 fun APP(
@@ -40,14 +56,21 @@ fun APP(
             modifier = Modifier.fillMaxSize(),
             color = backgroundColor
         ) {
-            HomeScreen(
-                homeChannel,
-                homeState,
-                standardChannel,
-                standardState,
-                programmerChannel,
-                programmerState
-            )
+            Box(Modifier.fillMaxSize()) {
+                HomeScreen(
+                    homeChannel,
+                    homeState,
+                    standardChannel,
+                    standardState,
+                    programmerChannel,
+                    programmerState
+                )
+
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
+            }
         }
     }
 }

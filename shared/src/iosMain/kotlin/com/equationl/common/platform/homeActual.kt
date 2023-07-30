@@ -1,40 +1,21 @@
 package com.equationl.common.platform
 
-// TODO
+import com.equationl.common.viewModel.KeyboardTypeStandard
+import showSnack
 
 actual fun showFloatWindows() {
-
-/*    val context = ActivityUtils.getTopActivity()
-
-    if (context == null) {
-        Log.e("EL", "showFloatWindows: get Context is null!")
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        if (Settings.canDrawOverlays(context)) {
-            context.startService(Intent(context, OverlayService::class.java))
-
-            // 返回主页
-            Intent(Intent.ACTION_MAIN).apply{
-                addCategory(Intent.CATEGORY_HOME)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }.let { context.startActivity(it) }
-        }
-        else {
-            Toast.makeText(context, "请授予“显示在其他应用上层”权限后重试", Toast.LENGTH_LONG).show()
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:${context.packageName}")
-            )
-            context.startActivity(intent)
-        }
-    }
-    else {
-        Toast.makeText(context, "当前系统不支持！", Toast.LENGTH_LONG).show()
-    }*/
+    showSnack("iOS暂不支持该功能")
 }
 
 actual fun changeKeyBoardType(changeTo: Int) {
+    // TODO 切换横竖屏
+    if (changeTo == KeyboardTypeStandard) {
+        showSnack("请手动旋转屏幕至竖屏")
+    }
+    else {
+        showSnack("请手动旋转屏幕至横屏")
+    }
+
 /*    if (!isFromUser) return
     platform.vibrateOnClick()
     val activity = ActivityUtils.getTopActivity()
