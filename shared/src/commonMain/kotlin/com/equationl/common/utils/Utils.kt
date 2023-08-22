@@ -11,29 +11,27 @@ import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 
+/** 计算精度 */
+const val DecimalPrecision = 64L
+
 /**
  * BigDecimal 的开平方
  *
+ * @param decimalPrecision 计算精度
+ *
  * @link https://stackoverflow.com/a/19743026
  * */
-fun BigDecimal.sqrt(scale: Int): BigDecimal {
-    // TODO
-    return this
-    /*val two = BigDecimal.valueOf(2)
-    var x0 = BigDecimal("0")
-    var x1 = BigDecimal(kotlin.math.sqrt(this.toDouble()))
+fun BigDecimal.sqrt(decimalPrecision: Int = 16): BigDecimal {
+    val two = BigDecimal.TWO
+    var x0 = BigDecimal.ZERO
+    var x1 = BigDecimal.fromDouble(kotlin.math.sqrt(this.doubleValue(false)))
     while (x0 != x1) {
         x0 = x1
-        x1 = this.divide(x0, scale, BigDecimal.ROUND_HALF_UP)
+        x1 = this.divide(x0, DecimalMode(decimalPrecision = decimalPrecision.toLong(), roundingMode = RoundingMode.ROUND_HALF_AWAY_FROM_ZERO))
         x1 = x1.add(x0)
-        x1 = x1.divide(two, scale, BigDecimal.ROUND_HALF_UP)
+        x1 = x1.divide(two, DecimalMode(decimalPrecision = decimalPrecision.toLong(), roundingMode = RoundingMode.ROUND_HALF_AWAY_FROM_ZERO))
     }
-    return x1*/
-}
-
-fun BigDecimal.stripTrailingZeros(): BigDecimal {
-    // TODO
-    return this
+    return x1
 }
 
 /**
@@ -111,7 +109,7 @@ fun String.formatNumber(
 }
 
 
-fun calculate(leftValue: String, rightValue: String, operator: Operator, scale: Int = 16): Result<BigDecimal> {
+fun calculate(leftValue: String, rightValue: String, operator: Operator): Result<BigDecimal> {
     val left = leftValue.toBigDecimal()
     val right = rightValue.toBigDecimal()
 
@@ -129,13 +127,13 @@ fun calculate(leftValue: String, rightValue: String, operator: Operator, scale: 
             if (right.signum() == 0) {
                 return Result.failure(ArithmeticException("Err: 除数不能为零"))
             }
-            return Result.success(left.divide(right, DecimalMode(roundingMode = RoundingMode.ROUND_HALF_AWAY_FROM_ZERO, scale = scale.toLong())).stripTrailingZeros())
+            return Result.success(left.divide(right, DecimalMode(roundingMode = RoundingMode.ROUND_HALF_AWAY_FROM_ZERO, decimalPrecision = DecimalPrecision)))
         }
         Operator.SQRT -> {
             if (left.signum() == -1) {
                 return Result.failure(ArithmeticException("Err: 无效输入"))
             }
-            return Result.success(left.sqrt(scale).stripTrailingZeros())
+            return Result.success(left.sqrt())
         }
         Operator.POW2 -> {
             val result = left.pow(2)

@@ -28,7 +28,7 @@
 
 **注意：**
 
-1. 标准模式使用 BigDecimal 计算，所以理论支持无限位数数字计算
+1. 标准模式使用 BigDecimal 计算，所以理论支持无限位数数字计算（除法和开平方除外，开方使用 16 位精度计算；除法使用 64 位精度计算）
 2. 程序员模式因为涉及到二进制计算，所以采用 64 位储存大小，故不支持无限位数计算
 3. 程序员模式不支持带小数运算，如果运算结果有小数，则会直接抛弃小数部分
 
@@ -90,3 +90,4 @@ Android 端：
 
 1. [使用 Jetpack Compose 实现一个计算器APP](http://www.likehide.com/blogs/android/using_compose_made_a_calculator_app/)
 2. [Kotlin & Compose Multiplatform 跨平台（Android端、桌面端）开发实践之使用 SQLDelight 将数据储存至数据库](http://www.likehide.com/blogs/kotlin/using_sqldelight_on_kotlinmultiplatform_with_android_and_desktop/)
+3. [Kotlin & Compose Multiplatform 跨平台开发实践之加入 iOS 支持](https://juejin.cn/post/7262707042211856443)
