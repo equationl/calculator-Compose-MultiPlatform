@@ -58,7 +58,7 @@ fun HistoryWidget(
                             .fillMaxWidth()
                             .padding(start = 8.dp), horizontalArrangement = Arrangement.Start) {
                         val instant = Instant.fromEpochSeconds(it.createTime)
-                        // TODO val simpleDateFormat = SimpleDateFormat("MM-dd HH:mm:ss", Locale.CHINA)
+                        // val simpleDateFormat = SimpleDateFormat("MM-dd HH:mm:ss", Locale.CHINA)
                         Text(text = instant.toLocalDateTime(TimeZone.currentSystemDefault()).toString())
                     }
                     Text(text = it.showText,fontSize = 22.sp, fontWeight = FontWeight.Light)

@@ -1,8 +1,5 @@
 package com.equationl.common.overlay
 
-
-// TODO 需要移植
-
 import android.graphics.PixelFormat
 import android.os.Build
 import android.view.Gravity

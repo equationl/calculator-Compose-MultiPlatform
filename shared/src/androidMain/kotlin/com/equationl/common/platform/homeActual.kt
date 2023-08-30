@@ -38,7 +38,7 @@ actual fun showFloatWindows() {
         }
     }
     else {
-        Toast.makeText(context, "当前系统不支持！", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "当前安卓系统版本过低不支持该功能", Toast.LENGTH_LONG).show()
     }
 }
 
