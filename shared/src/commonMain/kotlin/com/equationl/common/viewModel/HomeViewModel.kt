@@ -1,11 +1,6 @@
 package com.equationl.common.viewModel
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import com.equationl.common.platform.changeKeyBoardType
 import com.equationl.common.platform.showFloatWindows
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +34,10 @@ fun homePresenter(
                         clickOverlay()
                     }
                 }
+
+                is HomeAction.OnScreenOrientationChange -> {
+                    homeState = homeState.copy(keyBoardType = action.changeToType)
+                }
             }
         }
     }
@@ -62,4 +61,5 @@ data class HomeState(
 sealed class HomeAction {
     object ClickOverlay: HomeAction()
     data class ClickMenu(val changeToType: Int): HomeAction()
+    data class OnScreenOrientationChange(val changeToType: Int): HomeAction()
 }

@@ -10,12 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.equationl.common.theme.CalculatorComposeTheme
 import com.equationl.common.view.HomeScreen
-import com.equationl.common.viewModel.HomeAction
-import com.equationl.common.viewModel.ProgrammerAction
-import com.equationl.common.viewModel.StandardAction
-import com.equationl.common.viewModel.homePresenter
-import com.equationl.common.viewModel.programmerPresenter
-import com.equationl.common.viewModel.standardPresenter
+import com.equationl.common.viewModel.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -35,8 +30,9 @@ fun showSnack(msg: String) {
 fun APP(
     standardChannelTop: Channel<StandardAction>? = null,
     programmerChannelTop: Channel<ProgrammerAction>? = null,
+    homeChannelTop: Channel<HomeAction>? = null,
 ) {
-    val homeChannel = remember { Channel<HomeAction>() }
+    val homeChannel = homeChannelTop ?: remember { Channel() }
     val homeFlow = remember(homeChannel) { homeChannel.consumeAsFlow() }
     val homeState = homePresenter(homeFlow)
 
