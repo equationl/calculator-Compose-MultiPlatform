@@ -50,6 +50,9 @@ fun main() = application {
             true
         }
     ) {
-        APP()
+        APP(
+            standardChannelTop = standardChannel,
+            programmerChannelTop = programmerChannel
+        )
     }
 }
