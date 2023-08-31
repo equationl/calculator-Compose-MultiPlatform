@@ -1,12 +1,7 @@
 package com.equationl.common.view
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -20,14 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.equationl.common.viewModel.HomeAction
-import com.equationl.common.viewModel.HomeState
-import com.equationl.common.viewModel.KeyboardTypeProgrammer
-import com.equationl.common.viewModel.KeyboardTypeStandard
-import com.equationl.common.viewModel.ProgrammerAction
-import com.equationl.common.viewModel.ProgrammerState
-import com.equationl.common.viewModel.StandardAction
-import com.equationl.common.viewModel.StandardState
+import com.equationl.common.viewModel.*
 import kotlinx.coroutines.channels.Channel
 
 @Composable
@@ -39,10 +27,6 @@ fun HomeScreen(
     programmerChannel: Channel<ProgrammerAction>,
     programmerState: ProgrammerState
 ) {
-    val channel = remember { Channel<HomeAction>() }
-    val flow = remember(channel) { channel.consumeAsFlow() }
-    val state = homePresenter(flow)
-
     Column(
         Modifier
             .fillMaxSize()
