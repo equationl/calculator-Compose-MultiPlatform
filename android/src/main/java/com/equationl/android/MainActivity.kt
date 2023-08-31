@@ -1,72 +1,44 @@
 package com.equationl.android
 
+import APP
 import android.content.Intent
-import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import com.equationl.common.overlay.OverlayService
-import com.equationl.common.theme.CalculatorComposeTheme
-import com.equationl.common.view.HomeScreen
-import com.equationl.common.viewModel.*
+import com.equationl.common.viewModel.HomeAction
+import com.equationl.common.viewModel.KeyboardTypeProgrammer
+import com.equationl.common.viewModel.KeyboardTypeStandard
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.consumeAsFlow
 
 class MainActivity : AppCompatActivity() {
+    private var homeChannel: Channel<HomeAction>? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 暂时继续使用 systemUiController 实现沉浸式状态栏，等 activity 发布稳定版本了再迁移到 enableEdgeToEdge()
+        // add on androidx.activity:activity:1.8.0
+        // enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        val homeChannel = Channel<HomeAction>()
-
-        addOnConfigurationChangedListener {
-            if (it.orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                homeChannel.trySend(HomeAction.ClickMenu(changeToType = KeyboardTypeStandard, false))
-            }
-            else {
-                homeChannel.trySend(HomeAction.ClickMenu(changeToType = KeyboardTypeProgrammer, false))
-            }
-        }
-
         setContent {
+            homeChannel = remember { Channel() }
 
-            val homeFlow = remember(homeChannel) { homeChannel.consumeAsFlow() }
-            val homeState = homePresenter(homeFlow)
+            val systemUiController = rememberSystemUiController()
 
-
-            val standardChannel = remember { Channel<StandardAction>() }
-            val standardFlow = remember(standardChannel) { standardChannel.consumeAsFlow() }
-            val standardState = standardPresenter(standardFlow)
-
-            val programmerChannel = remember { Channel<ProgrammerAction>() }
-            val programmerFlow = remember(programmerChannel) { programmerChannel.consumeAsFlow() }
-            val programmerState = programmerPresenter(programmerFlow)
-
-            CalculatorComposeTheme {
-                val backgroundColor = MaterialTheme.colors.background
-
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = backgroundColor
-                ) {
-                    val systemUiController = rememberSystemUiController()
-                    val useDarkIcons = MaterialTheme.colors.isLight
-
-                    SideEffect {
-                        systemUiController.setSystemBarsColor(
-                            color = backgroundColor,
-                            darkIcons = useDarkIcons
-                        )
-                    }
-
-                    HomeScreen(homeChannel, homeState, standardChannel, standardState, programmerChannel, programmerState)
+            APP(
+                homeChannelTop = homeChannel
+            ) { backgroundColor, isLight ->
+                SideEffect {
+                    systemUiController.setSystemBarsColor(
+                        color = backgroundColor,
+                        darkIcons = isLight
+                    )
                 }
             }
         }
@@ -78,6 +50,24 @@ class MainActivity : AppCompatActivity() {
         // 每次打开主页都要把悬浮界面关闭
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             stopService(Intent(this, OverlayService::class.java))
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            homeChannel?.trySend(
+                HomeAction.OnScreenOrientationChange(
+                    changeToType = KeyboardTypeProgrammer
+                )
+            )
+        }
+        else {
+            homeChannel?.trySend(
+                HomeAction.OnScreenOrientationChange(
+                    changeToType = KeyboardTypeStandard
+                )
+            )
         }
     }
 }

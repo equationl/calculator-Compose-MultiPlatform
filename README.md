@@ -30,16 +30,26 @@
 
 **注意：**
 
-1. 标准模式使用 BigDecimal 计算，所以理论支持无限位数数字计算
+1. 标准模式使用 BigDecimal 计算，所以理论支持无限位数数字计算（除法和开平方除外，开方使用 16 位精度计算；除法使用 64 位精度计算）
 2. 程序员模式因为涉及到二进制计算，所以采用 64 位储存大小，故不支持无限位数计算
 3. 程序员模式不支持带小数运算，如果运算结果有小数，则会直接抛弃小数部分
 
-## 桌面端与手机端的差异部分
+## 功能差异部分
+
+所有功能以安卓端为基准，在桌面端和iOS端略有不同，具体不同如下：
+
+### 桌面端
 
 1. 桌面端不支持振动反馈
 2. 桌面端历史记录储存于运行内存中，因此关闭程序后历史记录将自动清除
 3. 桌面端的悬浮窗功能采用固定窗口为顶部模式实现
 4. 桌面端添加对硬件键盘输入的支持
+
+### iOS 端
+
+1. iOS 端暂不支持振动反馈
+2. iOS 端暂不支持悬浮窗功能
+3. iOS 端暂不支持旋转自动切换键盘
 
 ## 截图
 
@@ -100,3 +110,4 @@ ios 端：
 
 1. [使用 Jetpack Compose 实现一个计算器APP](http://www.likehide.com/blogs/android/using_compose_made_a_calculator_app/)
 2. [Kotlin & Compose Multiplatform 跨平台（Android端、桌面端）开发实践之使用 SQLDelight 将数据储存至数据库](http://www.likehide.com/blogs/kotlin/using_sqldelight_on_kotlinmultiplatform_with_android_and_desktop/)
+3. [Kotlin & Compose Multiplatform 跨平台开发实践之加入 iOS 支持](https://juejin.cn/post/7262707042211856443)
