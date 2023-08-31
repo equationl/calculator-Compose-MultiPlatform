@@ -1,28 +1,7 @@
 package com.equationl.common.viewModel
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import com.equationl.common.dataModel.HistoryData
-import com.equationl.common.dataModel.KeyIndex_0
-import com.equationl.common.dataModel.KeyIndex_9
-import com.equationl.common.dataModel.KeyIndex_Add
-import com.equationl.common.dataModel.KeyIndex_Back
-import com.equationl.common.dataModel.KeyIndex_CE
-import com.equationl.common.dataModel.KeyIndex_Clear
-import com.equationl.common.dataModel.KeyIndex_Divide
-import com.equationl.common.dataModel.KeyIndex_Equal
-import com.equationl.common.dataModel.KeyIndex_Minus
-import com.equationl.common.dataModel.KeyIndex_Multiply
-import com.equationl.common.dataModel.KeyIndex_NegativeNumber
-import com.equationl.common.dataModel.KeyIndex_Percentage
-import com.equationl.common.dataModel.KeyIndex_Point
-import com.equationl.common.dataModel.KeyIndex_Pow2
-import com.equationl.common.dataModel.KeyIndex_Reciprocal
-import com.equationl.common.dataModel.KeyIndex_Sqrt
-import com.equationl.common.dataModel.Operator
+import androidx.compose.runtime.*
+import com.equationl.common.dataModel.*
 import com.equationl.common.database.DataBase
 import com.equationl.common.platform.vibrateOnClear
 import com.equationl.common.platform.vibrateOnClick
@@ -350,7 +329,7 @@ private fun clickPow2(viewStates: MutableState<StandardState>) {
     val result = calculate(viewStates.value.inputValue, "0", Operator.POW2)
 
     val resultText = if (result.isSuccess) {
-        result.getOrNull().toString()
+        result.getOrNull()!!.toPlainString()
     } else {
         vibrateOnError()
         isErr = true
