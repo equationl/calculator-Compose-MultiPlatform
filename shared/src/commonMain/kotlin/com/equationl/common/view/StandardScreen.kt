@@ -155,6 +155,8 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                         .padding(end = 8.dp)
                         .horizontalScroll(inputScrollerState, reverseScrolling = true)
                     ) {
+                        // 在桌面端将无法正常滚动
+                        // https://github.com/JetBrains/compose-multiplatform/issues/1492
                         SelectionContainer {
                             Text(
                                 text = targetState.formatNumber(formatDecimal = state.isFinalResult),
