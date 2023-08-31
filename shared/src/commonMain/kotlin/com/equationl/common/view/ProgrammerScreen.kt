@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,16 +21,58 @@ import com.equationl.common.theme.InputLargeFontSize
 import com.equationl.common.theme.InputNormalFontSize
 import com.equationl.common.theme.InputTitleContentSize
 import com.equationl.common.theme.ShowNormalFontSize
+import com.equationl.common.utils.addLeadingZero
 import com.equationl.common.utils.formatNumber
 import com.equationl.common.view.widgets.AutoSizeText
 import com.equationl.common.viewModel.ProgrammerAction
+import com.equationl.common.viewModel.ProgrammerBitKeyBoard
+import com.equationl.common.viewModel.ProgrammerNumberKeyBoard
 import com.equationl.common.viewModel.ProgrammerState
 import kotlinx.coroutines.channels.Channel
 
 @Composable
 fun ProgrammerScreen(
     channel: Channel<ProgrammerAction>,
-    state: ProgrammerState
+    state: ProgrammerState,
+    keyType: Int
+) {
+    if (keyType == ProgrammerNumberKeyBoard) {
+        NumberKeyBoardContent(channel, state)
+    }
+    else if (keyType == ProgrammerBitKeyBoard) {
+        BitKeyBoardContent(channel, state)
+    }
+}
+
+@Composable
+private fun BitKeyBoardContent(
+    channel: Channel<ProgrammerAction>,
+    state: ProgrammerState,
+) {
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween) {
+
+        // 显示数据
+        Row(modifier = Modifier.weight(1f)) {
+            CenterScreen(state, channel)
+        }
+
+        Divider(modifier = Modifier
+            .fillMaxHeight()
+            .width(1.dp)
+            .padding(vertical = 16.dp, horizontal = 0.dp))
+
+        // 右侧键盘
+        Row(modifier = Modifier.weight(1f)) {
+            BitBoard(state, channel)
+        }
+    }
+}
+
+@Composable
+private fun NumberKeyBoardContent(
+    channel: Channel<ProgrammerAction>,
+    state: ProgrammerState,
 ) {
     Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween) {
@@ -59,6 +102,8 @@ fun ProgrammerScreen(
         }
     }
 }
+
+
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -260,6 +305,38 @@ private fun NumberBoard(state: ProgrammerState, channel: Channel<ProgrammerActio
 }
 
 @Composable
+private fun BitBoard(state: ProgrammerState, channel: Channel<ProgrammerAction>) {
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+
+        var pos = remember { 60 }
+
+        repeat(4) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.weight(1f).padding(8.dp)
+            ) {
+                repeat(4) {
+                    Column(
+                        modifier = Modifier.weight(1f).padding(8.dp)
+                    ) {
+                        KeyBoardBitButtonGroup(
+                            text = state.inputBinText.addLeadingZero().substring(60-pos until 64 - pos),
+                            pos = pos
+                        ) { groupIndex: Int, index: Int ->
+                            channel.trySend(ProgrammerAction.ClickBitBtn(63 - (groupIndex + index)))
+                        }
+
+                        pos -= 4
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun FunctionKeyBoard(state: ProgrammerState, channel: Channel<ProgrammerAction>) {
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -321,6 +398,43 @@ private fun KeyBoardButton(
                 } else {
                     if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
                 }
+            )
+        }
+    }
+}
+
+@Composable
+private fun KeyBoardBitButtonGroup(
+    text: String = "0000",
+    pos: Int = 0,
+    onClick: (groupIndex: Int, index: Int) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            text.forEachIndexed { index, c ->
+                Text(
+                    text = c.toString(),
+                    modifier = Modifier.clickable {
+                        onClick(pos, 3 - index)
+                    },
+                    color = if (c == '1') MaterialTheme.colors.primary else Color.Unspecified,
+                    fontSize = 24.sp
+                )
+            }
+        }
+        Row(
+            horizontalArrangement = Arrangement.End,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = pos.toString(),
+                fontSize = 12.sp
             )
         }
     }

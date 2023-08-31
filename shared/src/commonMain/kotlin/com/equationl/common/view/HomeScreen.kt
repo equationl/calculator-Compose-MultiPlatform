@@ -3,15 +3,19 @@ package com.equationl.common.view
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.ScreenRotation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +38,7 @@ fun HomeScreen(
 
         MenuTitle(
             keyBoardType = homeState.keyBoardType,
+            programmerKeyBoardType = homeState.programmerKeyBoardType,
             isFloat = homeState.isFloat,
             onClickMenu = {
                 homeChannel.trySend(
@@ -48,11 +53,14 @@ fun HomeScreen(
             },
             onClickOverlay = {
                 homeChannel.trySend(HomeAction.ClickOverlay)
+            },
+            onClickChangeKeyBoard = {
+                homeChannel.trySend(HomeAction.OnChangeProgrammerKeyBoardType(it))
             }
         )
 
         if (homeState.keyBoardType == KeyboardTypeProgrammer) {
-            ProgrammerScreen(programmerChannel, programmerState)
+            ProgrammerScreen(programmerChannel, programmerState, homeState.programmerKeyBoardType)
         }
         else {
             StandardScreen(standardChannel, standardState)
@@ -64,10 +72,12 @@ fun HomeScreen(
 @Composable
 private fun MenuTitle(
     keyBoardType: Int,
+    programmerKeyBoardType: Int,
     isFloat: Boolean,
     onClickMenu: () -> Unit,
     onClickHistory: () -> Unit,
-    onClickOverlay: () -> Unit
+    onClickOverlay: () -> Unit,
+    onClickChangeKeyBoard: (type: Int) -> Unit,
 ) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Row(
@@ -96,6 +106,24 @@ private fun MenuTitle(
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable { onClickOverlay() }
+                )
+            }
+        }
+        else if (keyBoardType == KeyboardTypeProgrammer) {
+            Row {
+                Icon(imageVector = Icons.Filled.Keyboard,
+                    contentDescription = "number keyboard",
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clickable { onClickChangeKeyBoard(ProgrammerNumberKeyBoard) },
+                    tint = if (programmerKeyBoardType == ProgrammerNumberKeyBoard) MaterialTheme.colors.primary else Color.Unspecified
+                )
+                Icon(imageVector = Icons.Outlined.Apps,
+                    contentDescription = "bit keyboard",
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clickable { onClickChangeKeyBoard(ProgrammerBitKeyBoard) },
+                    tint = if (programmerKeyBoardType == ProgrammerBitKeyBoard) MaterialTheme.colors.primary else Color.Unspecified
                 )
             }
         }

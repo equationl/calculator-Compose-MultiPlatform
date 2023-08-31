@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.Flow
 const val KeyboardTypeStandard = 1
 const val KeyboardTypeProgrammer = 2
 
+const val ProgrammerNumberKeyBoard = 3
+const val ProgrammerBitKeyBoard = 4
+
 @Composable
 fun homePresenter(
     homeActionFlow: Flow<HomeAction>
@@ -38,6 +41,10 @@ fun homePresenter(
                 is HomeAction.OnScreenOrientationChange -> {
                     homeState = homeState.copy(keyBoardType = action.changeToType)
                 }
+
+                is HomeAction.OnChangeProgrammerKeyBoardType -> {
+                    homeState = homeState.copy(programmerKeyBoardType = action.newType)
+                }
             }
         }
     }
@@ -55,11 +62,13 @@ private fun clickChangeKeyBoardType(changeToType: Int, isFromUser: Boolean) {
 
 data class HomeState(
     val keyBoardType: Int = KeyboardTypeStandard,
-    val isFloat: Boolean = false
+    val isFloat: Boolean = false,
+    val programmerKeyBoardType: Int = ProgrammerNumberKeyBoard
 )
 
 sealed class HomeAction {
     object ClickOverlay: HomeAction()
     data class ClickMenu(val changeToType: Int, val isFromUser: Boolean): HomeAction()
     data class OnScreenOrientationChange(val changeToType: Int): HomeAction()
+    data class OnChangeProgrammerKeyBoardType(val newType: Int): HomeAction()
 }

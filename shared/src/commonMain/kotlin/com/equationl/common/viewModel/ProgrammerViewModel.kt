@@ -7,7 +7,9 @@ import com.equationl.common.platform.vibrateOnClick
 import com.equationl.common.platform.vibrateOnEqual
 import com.equationl.common.platform.vibrateOnError
 import com.equationl.common.utils.LongUtil
+import com.equationl.common.utils.addLeadingZero
 import com.equationl.common.utils.calculate
+import com.equationl.common.utils.removeLeadingZero
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +24,7 @@ fun programmerPresenter(
             when (action) {
                 is ProgrammerAction.ChangeInputBase -> changeInputBase(action.inputBase, programmerState)
                 is ProgrammerAction.ClickBtn -> clickBtn(action.no, programmerState)
+                is ProgrammerAction.ClickBitBtn -> clickBitBtn(action.no, programmerState)
             }
         }
     }
@@ -37,6 +40,24 @@ private var isCalculated: Boolean = false
 private var isAdvancedCalculated: Boolean = false
 /**标记是否处于错误状态*/
 private var isErr: Boolean = false
+
+private fun clickBitBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
+    var binValue = viewStates.value.inputValue.baseConversion(InputBase.BIN, viewStates.value.inputBase).addLeadingZero()
+
+    val charArray = binValue.toCharArray()
+    charArray[no] = if (binValue[no] == '0') '1' else '0'
+
+    binValue = charArray.concatToString().removeLeadingZero()
+
+    viewStates.value = viewStates.value.copy(
+        inputValue = binValue.baseConversion(viewStates.value.inputBase, InputBase.BIN),
+        inputHexText = binValue.baseConversion(InputBase.HEX, InputBase.BIN),
+        inputDecText = binValue.baseConversion(InputBase.DEC, InputBase.BIN),
+        inputOctText = binValue.baseConversion(InputBase.OCT, InputBase.BIN),
+        inputBinText = binValue.baseConversion(InputBase.BIN, InputBase.BIN),
+        isFinalResult = false
+    )
+}
 
 private fun changeInputBase(inputBase: InputBase, viewStates: MutableState<ProgrammerState>) {
     vibrateOnClick()
@@ -530,4 +551,5 @@ data class ProgrammerState(
 sealed class ProgrammerAction {
     data class ChangeInputBase(val inputBase: InputBase): ProgrammerAction()
     data class ClickBtn(val no: Int): ProgrammerAction()
+    data class ClickBitBtn(val no: Int): ProgrammerAction()
 }

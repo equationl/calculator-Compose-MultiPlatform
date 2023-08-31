@@ -108,6 +108,34 @@ fun String.formatNumber(
     return integer.append(decimal).toString()
 }
 
+/**
+ * 添加指定前导 0 直至长度达到 [length]
+ * */
+fun String.addLeadingZero(length: Int = 64): String {
+    var result = this
+
+    if (result.length < length) {
+        repeat(length - result.length) {
+            result = "0$result"
+        }
+    }
+
+    return result
+}
+
+/**
+ * 移除所有前导 0
+ * */
+fun String.removeLeadingZero(): String {
+    var index = 0
+    for (c in this) {
+        if (c != '0') break
+        index++
+    }
+
+    return this.substring(index)
+}
+
 
 fun calculate(leftValue: String, rightValue: String, operator: Operator): Result<BigDecimal> {
     val left = leftValue.toBigDecimal()
