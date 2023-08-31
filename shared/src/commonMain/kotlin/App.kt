@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.equationl.common.theme.CalculatorComposeTheme
 import com.equationl.common.view.HomeScreen
 import com.equationl.common.viewModel.*
@@ -31,6 +32,7 @@ fun APP(
     standardChannelTop: Channel<StandardAction>? = null,
     programmerChannelTop: Channel<ProgrammerAction>? = null,
     homeChannelTop: Channel<HomeAction>? = null,
+    onStart: (@Composable (backgroundColor: Color, isLight: Boolean) -> Unit)? = null
 ) {
     val homeChannel = homeChannelTop ?: remember { Channel() }
     val homeFlow = remember(homeChannel) { homeChannel.consumeAsFlow() }
@@ -47,6 +49,8 @@ fun APP(
 
     CalculatorComposeTheme {
         val backgroundColor = MaterialTheme.colors.background
+
+        onStart?.invoke(backgroundColor, MaterialTheme.colors.isLight)
 
         Surface(
             modifier = Modifier.fillMaxSize(),

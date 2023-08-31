@@ -54,7 +54,7 @@ kotlin {
             dependencies {
                 api("androidx.appcompat:appcompat:1.6.1")
                 api("androidx.core:core-ktx:1.9.0")
-                api("com.google.accompanist:accompanist-systemuicontroller:0.25.1")
+                api("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
                 api("com.blankj:utilcode:1.30.7")
                 api("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
                 api("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
