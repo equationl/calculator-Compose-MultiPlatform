@@ -42,7 +42,7 @@ kotlin {
                 api(compose.materialIconsExtended)
                 // implementation("app.cash.sqldelight:runtime:2.0.0")
                 implementation("com.ionspin.kotlin:bignum:0.3.8")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
             }
         }
         val commonTest by getting {

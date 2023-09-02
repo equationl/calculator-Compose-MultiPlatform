@@ -1,1 +1,2 @@
 -keep class org.sqlite.** { *; }
+-dontwarn kotlinx.datetime.**
