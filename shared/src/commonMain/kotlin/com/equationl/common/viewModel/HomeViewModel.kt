@@ -3,6 +3,7 @@ package com.equationl.common.viewModel
 import androidx.compose.runtime.*
 import com.equationl.common.platform.changeKeyBoardType
 import com.equationl.common.platform.showFloatWindows
+import com.equationl.common.platform.vibrateOnClick
 import kotlinx.coroutines.flow.Flow
 
 const val KeyboardTypeStandard = 1
@@ -21,11 +22,15 @@ fun homePresenter(
         homeActionFlow.collect { action ->
             when (action) {
                 is HomeAction.ClickMenu -> {
+                    vibrateOnClick()
+
                     homeState = homeState.copy(keyBoardType = action.changeToType)
 
                     clickChangeKeyBoardType(action.changeToType, action.isFromUser)
                 }
                 is HomeAction.ClickOverlay -> {
+                    vibrateOnClick()
+
                     if (homeState.isFloat) {
                         homeState = homeState.copy(isFloat = false)
 
@@ -43,6 +48,8 @@ fun homePresenter(
                 }
 
                 is HomeAction.OnChangeProgrammerKeyBoardType -> {
+                    vibrateOnClick()
+
                     homeState = homeState.copy(programmerKeyBoardType = action.newType)
                 }
             }

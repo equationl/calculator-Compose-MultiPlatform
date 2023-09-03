@@ -42,6 +42,8 @@ private var isAdvancedCalculated: Boolean = false
 private var isErr: Boolean = false
 
 private fun clickBitBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
+    vibrateOnClick()
+
     var binValue = viewStates.value.inputValue.baseConversion(InputBase.BIN, viewStates.value.inputBase).addLeadingZero()
 
     val charArray = binValue.toCharArray()
