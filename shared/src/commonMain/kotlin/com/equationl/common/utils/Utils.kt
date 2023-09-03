@@ -165,9 +165,9 @@ fun calculate(leftValue: String, rightValue: String, operator: Operator): Result
         }
         Operator.POW2 -> {
             val result = left.pow(2)
-            if (result.toString().length > 5000) {
-                return Result.failure(NumberFormatException("Err: 数字过大，无法显示"))
-            }
+            //if (result.toString().length > 5000) {
+                //return Result.failure(NumberFormatException("Err: 数字过大，无法显示"))
+            //}
 
             return Result.success(result)
         }

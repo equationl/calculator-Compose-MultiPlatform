@@ -2,6 +2,7 @@ package com.equationl.common.view
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +30,7 @@ import com.equationl.common.view.widgets.scrollToLeftAnimation
 import com.equationl.common.viewModel.StandardAction
 import com.equationl.common.viewModel.StandardState
 import kotlinx.coroutines.channels.Channel
+import showDialog
 
 @Composable
 fun StandardScreen(
@@ -109,14 +111,15 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                             .padding(end = 8.dp)
                             .horizontalScroll(showTextScrollerState, reverseScrolling = true)
                     ) {
-                        SelectionContainer {
-                            Text(
-                                text = if (targetState.length > 5000) "数字过长" else targetState,
-                                fontSize = ShowNormalFontSize,
-                                fontWeight = FontWeight.Light,
-                                color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
-                            )
-                        }
+                        Text(
+                            text = if (targetState.length > 3000) "数字过大，无法显示，请点击查看" else targetState,
+                            fontSize = ShowNormalFontSize,
+                            fontWeight = FontWeight.Light,
+                            color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary,
+                            modifier = Modifier.clickable {
+                                showDialog(targetState)
+                            }
+                        )
                     }
 
                     if (isShowTextTipIcon) {
@@ -151,16 +154,15 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                         .padding(end = 8.dp)
                         .horizontalScroll(inputScrollerState, reverseScrolling = true)
                     ) {
-                        // 在桌面端将无法正常滚动
-                        // https://github.com/JetBrains/compose-multiplatform/issues/1492
-                        SelectionContainer {
-                            Text(
-                                text = targetState.formatNumber(formatDecimal = state.isFinalResult),
-                                fontSize = InputLargeFontSize,
-                                fontWeight = FontWeight.Bold,
-                                color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
-                            )
-                        }
+                        Text(
+                            text = if (targetState.length > 3000) "数字过大，无法显示，请点击查看" else targetState.formatNumber(formatDecimal = state.isFinalResult),
+                            fontSize = InputLargeFontSize,
+                            fontWeight = FontWeight.Bold,
+                            color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary,
+                            modifier = Modifier.clickable {
+                                showDialog(targetState)
+                            }
+                        )
                         LaunchedEffect(Unit) {
                             inputScrollerState.scrollTo(0)
                         }
