@@ -83,7 +83,7 @@ ios 端：
 
 
 ## 如何使用
-我在 [releases](https://github.com/equationl/calculator-Compose-MultiPlatform/releases) 提供了安卓 APK 安装包和 macOS 的 ARM 安装包，可以直接下载使用。
+我在 [releases](https://github.com/equationl/calculator-Compose-MultiPlatform/releases) 提供了安卓 APK 安装包、 macOS 的 ARM 安装包以及 Windows x64 的安装包，可以直接下载使用。
 
 其他平台（macOS x86、Windows、Linux）需要自己 clone 项目后编译。
 
