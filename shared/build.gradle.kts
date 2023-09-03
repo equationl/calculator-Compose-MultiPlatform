@@ -26,7 +26,7 @@ kotlin {
             baseName = "shared"
             isStatic = true
         }
-        extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
+        // extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
     }
 
     android()
@@ -53,7 +53,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 api("androidx.appcompat:appcompat:1.6.1")
-                api("androidx.core:core-ktx:1.9.0")
+                api("androidx.core:core-ktx:1.10.1")
                 api("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
                 api("com.blankj:utilcode:1.30.7")
                 api("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
@@ -95,11 +95,11 @@ kotlin {
 }
 
 android {
-    compileSdkVersion(33)
+    compileSdk = 34
     // sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
-        minSdkVersion(24)
-        targetSdkVersion(33)
+        minSdk = 24
+        targetSdk = 34
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
