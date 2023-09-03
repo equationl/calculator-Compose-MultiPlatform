@@ -9,11 +9,11 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowLeft
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,6 +70,8 @@ fun StandardScreen(
 private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit) {
     val inputScrollerState = rememberScrollState()
     val showTextScrollerState = rememberScrollState()
+    val isShowTextTipIcon by remember { derivedStateOf { showTextScrollerState.value != showTextScrollerState.maxValue } }
+    val isShowInputTipIcon by remember { derivedStateOf { inputScrollerState.value != inputScrollerState.maxValue } }
 
     Column(
         Modifier
@@ -100,14 +102,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
         Column(horizontalAlignment = Alignment.End) {
             // 计算公式
             AnimatedContent(targetState = state.showText) { targetState: String ->
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    if (showTextScrollerState.value != showTextScrollerState.maxValue) {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowLeft,
-                            contentDescription = "scroll left",
-                            modifier = Modifier.absoluteOffset(x = scrollToLeftAnimation(-10f).dp)
-                        )
-                    }
+                Box{
                     Row(
                         modifier = Modifier
                             .padding(vertical = 8.dp)
@@ -122,6 +117,15 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                                 color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
                             )
                         }
+                    }
+
+                    if (isShowTextTipIcon) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowLeft,
+                            contentDescription = "scroll left",
+                            modifier = Modifier.scale(1.5f).align(Alignment.CenterStart).absoluteOffset(x = scrollToLeftAnimation(-10f).dp),
+                            tint = MaterialTheme.colors.primary
+                        )
                     }
                 }
             }
@@ -141,15 +145,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                     )
                 }
             ) { targetState: String ->
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    if (inputScrollerState.value != inputScrollerState.maxValue) {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowLeft,
-                            contentDescription = "scroll left",
-                            modifier = Modifier.absoluteOffset(x = scrollToLeftAnimation(-10f).dp)
-                        )
-                    }
-
+                Box {
                     Row(modifier = Modifier
                         .padding(vertical = 8.dp)
                         .padding(end = 8.dp)
@@ -168,6 +164,15 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                         LaunchedEffect(Unit) {
                             inputScrollerState.scrollTo(0)
                         }
+                    }
+
+                    if (isShowInputTipIcon && state.inputValue.length > 1) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowLeft,
+                            contentDescription = "scroll left",
+                            modifier = Modifier.scale(2f).align(Alignment.CenterStart).absoluteOffset(x = scrollToLeftAnimation(-10f).dp),
+                            tint = MaterialTheme.colors.primary
+                        )
                     }
                 }
             }
