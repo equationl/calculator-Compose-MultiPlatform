@@ -24,8 +24,8 @@ import com.equationl.common.theme.InputLargeFontSize
 import com.equationl.common.theme.ShowNormalFontSize
 import com.equationl.common.theme.ShowSmallFontSize
 import com.equationl.common.utils.formatNumber
-import com.equationl.common.utils.noRippleClickable
 import com.equationl.common.view.widgets.AutoSizeText
+import com.equationl.common.view.widgets.noRippleClickable
 import com.equationl.common.view.widgets.scrollToLeftAnimation
 import com.equationl.common.viewModel.StandardAction
 import com.equationl.common.viewModel.StandardState
