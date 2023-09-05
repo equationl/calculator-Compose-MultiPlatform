@@ -107,6 +107,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                 Box{
                     Row(
                         modifier = Modifier
+                            .align(Alignment.CenterEnd)
                             .padding(vertical = 8.dp)
                             .padding(end = 8.dp)
                             .horizontalScroll(showTextScrollerState, reverseScrolling = true)
@@ -150,6 +151,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
             ) { targetState: String ->
                 Box {
                     Row(modifier = Modifier
+                        .align(Alignment.CenterEnd)
                         .padding(vertical = 8.dp)
                         .padding(end = 8.dp)
                         .horizontalScroll(inputScrollerState, reverseScrolling = true)
