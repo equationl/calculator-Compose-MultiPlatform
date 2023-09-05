@@ -1,14 +1,18 @@
 package com.equationl.common.overlay
 
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +35,8 @@ fun OverlayScreen(overLayChannel: Channel<OverlayAction>) {
     val standardChannel = remember { Channel<StandardAction>() }
     val standardFlow = remember(standardChannel) { standardChannel.consumeAsFlow() }
     val standardState = standardPresenter(standardFlow)
+
+    standardChannel.trySend(StandardAction.Init(rememberCoroutineScope()))
 
 
     Column(Modifier.fillMaxSize()) {
