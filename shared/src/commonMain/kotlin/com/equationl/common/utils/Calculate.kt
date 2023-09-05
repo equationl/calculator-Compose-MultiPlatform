@@ -1,13 +1,20 @@
 package com.equationl.common.utils
 
+import cancelSnack
+import com.equationl.common.constant.CalculateTimeout
 import com.equationl.common.dataModel.Operator
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import showSnackSuspend
 
 /** 计算精度 */
 const val DecimalPrecision = 64L
+
+private var isCalculate = false
 
 /**
  * BigDecimal 的开平方
@@ -75,4 +82,42 @@ fun calculate(leftValue: String, rightValue: String, operator: Operator): Result
             return Result.failure(NumberFormatException("Err: 错误的调用"))
         }
     }
+}
+
+suspend fun syncCalculate(
+    leftValue: String,
+    rightValue: String,
+    operator: Operator,
+    onFinish: (result: Result<BigDecimal>) -> Unit
+) {
+    syncCalculate(
+        calculate = {
+            calculate(leftValue, rightValue, operator)
+        },
+        onFinish = onFinish
+    )
+}
+
+suspend fun syncCalculate(
+    calculate: () -> Result<BigDecimal>,
+    onFinish: (result: Result<BigDecimal>) -> Unit
+) {
+    // 避免重复
+    if (isCalculate) return
+
+    runWithTimeTip(
+        timeOut = CalculateTimeout,
+        runTask = {
+            withContext(Dispatchers.Default) {
+                isCalculate = true
+                val result = calculate()
+                cancelSnack()
+                onFinish(result)
+                isCalculate = false
+            }
+        },
+        onTimeout = {
+            showSnackSuspend("正在计算中……请稍候", true)
+        }
+    )
 }

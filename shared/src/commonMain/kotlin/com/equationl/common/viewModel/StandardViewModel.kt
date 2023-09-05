@@ -9,6 +9,7 @@ import com.equationl.common.platform.vibrateOnEqual
 import com.equationl.common.platform.vibrateOnError
 import com.equationl.common.utils.calculate
 import com.equationl.common.utils.formatNumber
+import com.equationl.common.utils.syncCalculate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,7 @@ fun standardPresenter(
                 is StandardAction.ToggleHistory -> toggleHistory(action.forceClose, standardState)
                 is StandardAction.ReadFromHistory -> readFromHistory(action.item, standardState)
                 is StandardAction.DeleteHistory -> deleteHistory(action.item, standardState)
+                is StandardAction.Init -> init(action.coroutineScope, standardState)
             }
         }
     }
@@ -46,6 +48,10 @@ private var isAdvancedCalculated: Boolean = false
 private var isErr: Boolean = false
 
 private val dataBase = DataBase.instance
+
+private fun init(coroutineScope: CoroutineScope, viewStates: MutableState<StandardState>) {
+    viewStates.value = viewStates.value.copy(coroutineScope = coroutineScope)
+}
 
 private fun toggleHistory(forceClose: Boolean, viewStates: MutableState<StandardState>) {
     vibrateOnClick()
@@ -195,15 +201,24 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
         KeyIndex_Percentage -> { // "%"
             if (isInputSecondValue && viewStates.value.lastInputValue != "" && viewStates.value.inputOperator != Operator.NUll) {
                 vibrateOnClick()
-                var result: String = calculate(viewStates.value.inputValue, "100", Operator.Divide).getOrNull().toString()
-                result = calculate(viewStates.value.lastInputValue, result, Operator.MULTIPLY).getOrNull().toString()
 
-                viewStates.value = viewStates.value.copy(
-                    inputValue = result,
-                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}" +
-                            result.formatNumber(formatDecimal = true, formatInteger = false),
-                    isFinalResult = true
-                )
+                viewStates.value.coroutineScope?.launch {
+                    syncCalculate(
+                        calculate = {
+                            val temp: String = calculate(viewStates.value.inputValue, "100", Operator.Divide).getOrNull().toString()
+                            calculate(viewStates.value.lastInputValue, temp, Operator.MULTIPLY)
+                        },
+                        onFinish = { resultBigDecimal ->
+                            val result = resultBigDecimal.getOrNull().toString()
+                            viewStates.value = viewStates.value.copy(
+                                inputValue = result,
+                                showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}" +
+                                        result.formatNumber(formatDecimal = true, formatInteger = false),
+                                isFinalResult = true
+                            )
+                        }
+                    )
+                }
             }
             else {
                 vibrateOnClear()
@@ -251,116 +266,123 @@ private fun clickClear(viewStates: MutableState<StandardState>) {
 }
 
 private fun clickReciprocal(viewStates: MutableState<StandardState>) {
-    val result = calculate("1", viewStates.value.inputValue, Operator.Divide)
-    val resultText = if (result.isSuccess) {
-        result.getOrNull()?.toPlainString() ?: "Null"
-    } else {
-        vibrateOnError()
-        isErr = true
-        result.exceptionOrNull()?.message ?: "Err"
-    }
+    viewStates.value.coroutineScope?.launch {
+        syncCalculate("1", viewStates.value.inputValue, Operator.Divide) { result ->
+            val resultText = if (result.isSuccess) {
+                result.getOrNull()?.toPlainString() ?: "Null"
+            } else {
+                vibrateOnError()
+                isErr = true
+                result.exceptionOrNull()?.message ?: "Err"
+            }
 
-    val newState = viewStates.value.copy(
-        inputValue = resultText
-    )
+            val newState = viewStates.value.copy(
+                inputValue = resultText
+            )
 
-    if (isInputSecondValue) {
-        viewStates.value = newState.copy(
-            showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}1/(${viewStates.value.inputValue})",
-            isFinalResult = false,
-            lastShowText =
-            if (viewStates.value.showText.indexOf("=") != -1)
-                viewStates.value.showText+viewStates.value.inputValue
-            else viewStates.value.lastShowText
-        )
-    }
-    else {
-        viewStates.value = newState.copy(
-            inputOperator = Operator.NUll,
-            lastInputValue = viewStates.value.inputValue,
-            showText = "1/(${viewStates.value.inputValue})",
-            isFinalResult = false
-        )
-       // isInputSecondValue = true
-    }
+            if (isInputSecondValue) {
+                viewStates.value = newState.copy(
+                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}1/(${viewStates.value.inputValue})",
+                    isFinalResult = false,
+                    lastShowText =
+                    if (viewStates.value.showText.indexOf("=") != -1)
+                        viewStates.value.showText+viewStates.value.inputValue
+                    else viewStates.value.lastShowText
+                )
+            }
+            else {
+                viewStates.value = newState.copy(
+                    inputOperator = Operator.NUll,
+                    lastInputValue = viewStates.value.inputValue,
+                    showText = "1/(${viewStates.value.inputValue})",
+                    isFinalResult = false
+                )
+                // isInputSecondValue = true
+            }
 
-    isAdvancedCalculated = true
+            isAdvancedCalculated = true
+        }
+    }
 }
 
 private fun clickSqrt(viewStates: MutableState<StandardState>) {
-    val result = calculate(viewStates.value.inputValue, "0", Operator.SQRT)
+    viewStates.value.coroutineScope?.launch {
+        syncCalculate(viewStates.value.inputValue, "0", Operator.SQRT) { result ->
+            val resultText = if (result.isSuccess) {
+                result.getOrNull()?.toPlainString() ?: "Null"
+            } else {
+                vibrateOnError()
+                isErr = true
+                result.exceptionOrNull()?.message ?: "Err"
+            }
 
-    val resultText = if (result.isSuccess) {
-        result.getOrNull()?.toPlainString() ?: "Null"
-    } else {
-        vibrateOnError()
-        isErr = true
-        result.exceptionOrNull()?.message ?: "Err"
+            val newState = viewStates.value.copy(
+                inputValue = resultText
+            )
+
+            if (isInputSecondValue) {
+                viewStates.value = newState.copy(
+                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}${Operator.SQRT.showText}(${viewStates.value.inputValue})",
+                    isFinalResult = false,
+                    lastShowText =
+                    if (viewStates.value.showText.indexOf("=") != -1)
+                        viewStates.value.showText+viewStates.value.inputValue
+                    else viewStates.value.lastShowText
+                )
+            }
+            else {
+                viewStates.value = newState.copy(
+                    inputOperator = Operator.NUll,
+                    lastInputValue = resultText,
+                    showText = "${Operator.SQRT.showText}(${viewStates.value.inputValue})",
+                    isFinalResult = false
+                )
+                //isInputSecondValue = true
+            }
+
+            isAdvancedCalculated = true
+        }
     }
-
-    val newState = viewStates.value.copy(
-        inputValue = resultText
-    )
-
-    if (isInputSecondValue) {
-        viewStates.value = newState.copy(
-            showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}${Operator.SQRT.showText}(${viewStates.value.inputValue})",
-            isFinalResult = false,
-            lastShowText =
-            if (viewStates.value.showText.indexOf("=") != -1)
-                viewStates.value.showText+viewStates.value.inputValue
-            else viewStates.value.lastShowText
-        )
-    }
-    else {
-        viewStates.value = newState.copy(
-            inputOperator = Operator.NUll,
-            lastInputValue = resultText,
-            showText = "${Operator.SQRT.showText}(${viewStates.value.inputValue})",
-            isFinalResult = false
-        )
-        //isInputSecondValue = true
-    }
-
-    isAdvancedCalculated = true
 }
 
 private fun clickPow2(viewStates: MutableState<StandardState>) {
-    val result = calculate(viewStates.value.inputValue, "0", Operator.POW2)
+    viewStates.value.coroutineScope?.launch {
+        syncCalculate(viewStates.value.inputValue, "0", Operator.POW2) { result ->
+            val resultText = if (result.isSuccess) {
+                result.getOrNull()!!.toPlainString()
+            } else {
+                vibrateOnError()
+                isErr = true
+                result.exceptionOrNull()?.message ?: "Err"
+            }
 
-    val resultText = if (result.isSuccess) {
-        result.getOrNull()!!.toPlainString()
-    } else {
-        vibrateOnError()
-        isErr = true
-        result.exceptionOrNull()?.message ?: "Err"
+            val newState = viewStates.value.copy(
+                inputValue = resultText
+            )
+
+            if (isInputSecondValue) {
+                viewStates.value = newState.copy(
+                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}(${viewStates.value.inputValue})${Operator.POW2.showText}",
+                    isFinalResult = false,
+                    lastShowText =
+                    if (viewStates.value.showText.indexOf("=") != -1)
+                        viewStates.value.showText+viewStates.value.inputValue
+                    else viewStates.value.lastShowText
+                )
+            }
+            else {
+                viewStates.value = newState.copy(
+                    inputOperator = Operator.NUll,
+                    lastInputValue = result.getOrNull().toString(),
+                    showText = "(${viewStates.value.inputValue})${Operator.POW2.showText}",
+                    isFinalResult = false
+                )
+                //isInputSecondValue = true
+            }
+
+            isAdvancedCalculated = true
+        }
     }
-
-    val newState = viewStates.value.copy(
-        inputValue = resultText
-    )
-
-    if (isInputSecondValue) {
-        viewStates.value = newState.copy(
-            showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}(${viewStates.value.inputValue})${Operator.POW2.showText}",
-            isFinalResult = false,
-            lastShowText =
-                if (viewStates.value.showText.indexOf("=") != -1)
-                    viewStates.value.showText+viewStates.value.inputValue
-                else viewStates.value.lastShowText
-        )
-    }
-    else {
-        viewStates.value = newState.copy(
-            inputOperator = Operator.NUll,
-            lastInputValue = result.getOrNull().toString(),
-            showText = "(${viewStates.value.inputValue})${Operator.POW2.showText}",
-            isFinalResult = false
-        )
-        //isInputSecondValue = true
-    }
-
-    isAdvancedCalculated = true
 }
 
 private fun clickEqual(viewStates: MutableState<StandardState>) {
@@ -383,50 +405,58 @@ private fun clickEqual(viewStates: MutableState<StandardState>) {
         }
 
         isCalculated = true
+        onCalculateFinish(viewStates, inputValueCache)
     }
     else {
-        val result = calculate(viewStates.value.lastInputValue, viewStates.value.inputValue, viewStates.value.inputOperator)
-        if (result.isSuccess) {
-            vibrateOnEqual()
-            val resultText = result.getOrNull()?.toPlainString() ?: "Null"
-            val inputValue = if (viewStates.value.inputValue.substring(0, 1) == "-") "(${viewStates.value.inputValue})" else viewStates.value.inputValue
-            if (isAdvancedCalculated) {
-                val index = viewStates.value.showText.indexOf(viewStates.value.inputOperator.showText)
-                viewStates.value = if (index != -1 && index == viewStates.value.showText.lastIndex) {
-                    viewStates.value.copy(
-                        inputValue = resultText,
-                        showText = "${viewStates.value.showText}$inputValue=",
-                        isFinalResult = true
-                    )
-                } else {
-                    viewStates.value.copy(
-                        inputValue = resultText,
-                        showText = "${viewStates.value.showText}=",
-                        isFinalResult = true
-                    )
+        viewStates.value.coroutineScope?.launch {
+            syncCalculate(viewStates.value.lastInputValue, viewStates.value.inputValue, viewStates.value.inputOperator) { result ->
+                if (result.isSuccess) {
+                    vibrateOnEqual()
+                    val resultText = result.getOrNull()?.toPlainString() ?: "Null"
+                    val inputValue = if (viewStates.value.inputValue.substring(0, 1) == "-") "(${viewStates.value.inputValue})" else viewStates.value.inputValue
+                    if (isAdvancedCalculated) {
+                        val index = viewStates.value.showText.indexOf(viewStates.value.inputOperator.showText)
+                        viewStates.value = if (index != -1 && index == viewStates.value.showText.lastIndex) {
+                            viewStates.value.copy(
+                                inputValue = resultText,
+                                showText = "${viewStates.value.showText}$inputValue=",
+                                isFinalResult = true
+                            )
+                        } else {
+                            viewStates.value.copy(
+                                inputValue = resultText,
+                                showText = "${viewStates.value.showText}=",
+                                isFinalResult = true
+                            )
+                        }
+                    }
+                    else {
+                        viewStates.value = viewStates.value.copy(
+                            inputValue = resultText,
+                            showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}$inputValue=",
+                            isFinalResult = true
+                        )
+                    }
+                    isCalculated = true
                 }
+                else {
+                    vibrateOnError()
+                    viewStates.value = viewStates.value.copy(
+                        inputValue = result.exceptionOrNull()?.message ?: "Err",
+                        showText = "",
+                        isFinalResult = true
+                    )
+                    isCalculated = false
+                    isErr = true
+                }
+
+                onCalculateFinish(viewStates, inputValueCache)
             }
-            else {
-                viewStates.value = viewStates.value.copy(
-                    inputValue = resultText,
-                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}$inputValue=",
-                    isFinalResult = true
-                )
-            }
-            isCalculated = true
-        }
-        else {
-            vibrateOnError()
-            viewStates.value = viewStates.value.copy(
-                inputValue = result.exceptionOrNull()?.message ?: "Err",
-                showText = "",
-                isFinalResult = true
-            )
-            isCalculated = false
-            isErr = true
         }
     }
+}
 
+private fun onCalculateFinish(viewStates: MutableState<StandardState>, inputValueCache: String) {
     isAdvancedCalculated = false
 
     CoroutineScope(Dispatchers.Default).launch {
@@ -516,7 +546,8 @@ data class StandardState(
     val showText: String = "",
     val isFinalResult: Boolean = false,
     val historyList: List<HistoryData> = listOf(),
-    val lastShowText: String = ""
+    val lastShowText: String = "",
+    val coroutineScope: CoroutineScope? = null
 )
 
 sealed class StandardAction {
@@ -524,4 +555,5 @@ sealed class StandardAction {
     data class ClickBtn(val no: Int): StandardAction()
     data class ReadFromHistory(val item: HistoryData): StandardAction()
     data class DeleteHistory(val item: HistoryData?): StandardAction()
+    data class Init(val coroutineScope: CoroutineScope): StandardAction()
 }

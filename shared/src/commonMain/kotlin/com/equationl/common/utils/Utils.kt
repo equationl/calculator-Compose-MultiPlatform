@@ -1,5 +1,9 @@
 package com.equationl.common.utils
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
+
 /**
  * 格式化显示的数字
  *
@@ -100,4 +104,20 @@ fun String.removeLeadingZero(): String {
     }
 
     return this.substring(index)
+}
+
+suspend fun runWithTimeTip(
+    timeOut: Long,
+    runTask: suspend () -> Unit,
+    onTimeout: suspend () -> Unit
+) {
+    supervisorScope {
+        val tipJob = launch {
+            delay(timeOut)
+            onTimeout()
+        }
+
+        runTask()
+        tipJob.cancel()
+    }
 }
