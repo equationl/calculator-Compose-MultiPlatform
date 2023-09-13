@@ -24,10 +24,7 @@ import com.equationl.common.theme.ShowNormalFontSize
 import com.equationl.common.utils.addLeadingZero
 import com.equationl.common.utils.formatNumber
 import com.equationl.common.view.widgets.AutoSizeText
-import com.equationl.common.viewModel.ProgrammerAction
-import com.equationl.common.viewModel.ProgrammerBitKeyBoard
-import com.equationl.common.viewModel.ProgrammerNumberKeyBoard
-import com.equationl.common.viewModel.ProgrammerState
+import com.equationl.common.viewModel.*
 import kotlinx.coroutines.channels.Channel
 
 @Composable
@@ -323,7 +320,8 @@ private fun BitBoard(state: ProgrammerState, channel: Channel<ProgrammerAction>)
                     ) {
                         KeyBoardBitButtonGroup(
                             text = state.inputBinText.addLeadingZero().substring(60-pos until 64 - pos),
-                            pos = pos
+                            pos = pos,
+                            programmerLength = state.currentLength
                         ) { groupIndex: Int, index: Int ->
                             channel.trySend(ProgrammerAction.ClickBitBtn(63 - (groupIndex + index)))
                         }
@@ -407,23 +405,33 @@ private fun KeyBoardButton(
 private fun KeyBoardBitButtonGroup(
     text: String = "0000",
     pos: Int = 0,
+    programmerLength: ProgrammerLength,
     onClick: (groupIndex: Int, index: Int) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxSize()
     ) {
+        val isShow = isShowBitGroup(pos, programmerLength)
+
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth(),
         ) {
             text.forEachIndexed { index, c ->
+                val color = if (isShow) {
+                    if (c == '1') MaterialTheme.colors.primary else Color.Unspecified
+                }
+                else {
+                    if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
+                }
+
                 Text(
                     text = c.toString(),
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clickable(enabled = isShow) {
                         onClick(pos, 3 - index)
                     },
-                    color = if (c == '1') MaterialTheme.colors.primary else Color.Unspecified,
+                    color = color,
                     fontSize = 24.sp
                 )
             }
@@ -438,4 +446,27 @@ private fun KeyBoardBitButtonGroup(
             )
         }
     }
+}
+
+private fun isShowBitGroup(
+    pos: Int,
+    programmerLength: ProgrammerLength
+): Boolean {
+    val group1 = listOf(60, 56, 52, 48, 44, 40, 36, 32)
+    val group2 = listOf(28, 24, 20, 16)
+    val group3 = listOf(12, 8)
+
+    if (pos in group1) {
+        return programmerLength == ProgrammerLength.QWORD
+    }
+
+    if (pos in group2) {
+        return programmerLength == ProgrammerLength.QWORD || programmerLength == ProgrammerLength.DWORD
+    }
+
+    if (pos in group3) {
+        return programmerLength == ProgrammerLength.QWORD || programmerLength == ProgrammerLength.DWORD || programmerLength == ProgrammerLength.WORD
+    }
+
+    return true
 }

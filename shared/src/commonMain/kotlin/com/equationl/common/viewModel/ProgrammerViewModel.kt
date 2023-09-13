@@ -25,6 +25,7 @@ fun programmerPresenter(
                 is ProgrammerAction.ChangeInputBase -> changeInputBase(action.inputBase, programmerState)
                 is ProgrammerAction.ClickBtn -> clickBtn(action.no, programmerState)
                 is ProgrammerAction.ClickBitBtn -> clickBitBtn(action.no, programmerState)
+                is ProgrammerAction.ClickChangeLength -> clickChangeLength(programmerState)
             }
         }
     }
@@ -40,6 +41,21 @@ private var isCalculated: Boolean = false
 private var isAdvancedCalculated: Boolean = false
 /**标记是否处于错误状态*/
 private var isErr: Boolean = false
+
+private fun clickChangeLength(state: MutableState<ProgrammerState>) {
+    val newLength = when (state.value.currentLength) {
+        ProgrammerLength.QWORD -> ProgrammerLength.DWORD
+        ProgrammerLength.DWORD -> ProgrammerLength.WORD
+        ProgrammerLength.WORD -> ProgrammerLength.BYTE
+        ProgrammerLength.BYTE -> ProgrammerLength.QWORD
+    }
+
+    // TODO 这里应该是对数据做转换而不是直接清除数据
+    state.value = ProgrammerState(
+        currentLength = newLength,
+        inputBase = state.value.inputBase
+    )
+}
 
 private fun clickBitBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
     vibrateOnClick()
@@ -115,7 +131,10 @@ private fun changeInputBase(inputBase: InputBase, viewStates: MutableState<Progr
 
 private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
     if (isErr) {
-        viewStates.value = ProgrammerState(inputBase = viewStates.value.inputBase)
+        viewStates.value = ProgrammerState(
+            inputBase = viewStates.value.inputBase,
+            currentLength = viewStates.value.currentLength
+        )
         isErr = false
         isAdvancedCalculated = false
         isCalculated = false
@@ -160,7 +179,26 @@ private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
 
         // 溢出判断
         try {
-            newValue.toLong(viewStates.value.inputBase.number)
+            when (viewStates.value.currentLength) {
+                // 如果是十进制使用有符号来判断
+                // 否则使用无符号来判断
+                ProgrammerLength.QWORD -> {
+                    if (viewStates.value.inputBase != InputBase.DEC) newValue.toULong(viewStates.value.inputBase.number)
+                    else newValue.toLong(viewStates.value.inputBase.number)
+                }
+                ProgrammerLength.DWORD -> {
+                    if (viewStates.value.inputBase != InputBase.DEC) newValue.toUInt(viewStates.value.inputBase.number)
+                    else newValue.toInt(viewStates.value.inputBase.number)
+                }
+                ProgrammerLength.WORD -> {
+                    if (viewStates.value.inputBase != InputBase.DEC) newValue.toUShort(viewStates.value.inputBase.number)
+                    else newValue.toUShort(viewStates.value.inputBase.number)
+                }
+                ProgrammerLength.BYTE -> {
+                    if (viewStates.value.inputBase != InputBase.DEC) newValue.toUByte(viewStates.value.inputBase.number)
+                    else newValue.toByte(viewStates.value.inputBase.number)
+                }
+            }
         } catch (e: NumberFormatException) {
             return
         }
@@ -254,10 +292,16 @@ private fun clickClear(viewStates: MutableState<ProgrammerState>) {
     isCalculated = false
     isAdvancedCalculated = false
     isErr = false
-    viewStates.value = ProgrammerState(inputBase = viewStates.value.inputBase)
+    viewStates.value = ProgrammerState(
+        inputBase = viewStates.value.inputBase,
+        currentLength = viewStates.value.currentLength
+    )
 }
 
 private fun String.baseConversion(target: InputBase, current: InputBase): String {
+    //TODO 十进制应该显示为有符号数据
+    // 例如在 BYTE 长度时，255 应该显示为 -1
+
     if (current == target) return this
 
     // 如果直接转会出现无法直接转成有符号 long 的问题，所以这里使用 BigInteger 来转
@@ -397,8 +441,31 @@ private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
 
         if (result.isSuccess) {
             vibrateOnEqual()
-            val resultText : String = try {
-               result.getOrNull().toString().baseConversion(viewStates.value.inputBase, InputBase.DEC)
+
+            // 运算结果溢出判断
+            // TODO 这里不应该直接报错，应该溢出为符合长度的数值
+            // 溢出判断
+            try {
+                when (viewStates.value.currentLength) {
+                    // 如果是十进制使用有符号来判断
+                    // 否则使用无符号来判断
+                    ProgrammerLength.QWORD -> {
+                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toULong()
+                        else result.getOrNull().toString().toLong()
+                    }
+                    ProgrammerLength.DWORD -> {
+                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUInt()
+                        else result.getOrNull().toString().toInt()
+                    }
+                    ProgrammerLength.WORD -> {
+                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUShort()
+                        else result.getOrNull().toString().toUShort()
+                    }
+                    ProgrammerLength.BYTE -> {
+                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUByte()
+                        else result.getOrNull().toString().toByte()
+                    }
+                }
             } catch (e: NumberFormatException) {
                 viewStates.value = viewStates.value.copy(
                     inputValue = "Err: 溢出",
@@ -413,6 +480,8 @@ private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
                 isErr = true
                 return
             }
+
+            val resultText : String = result.getOrNull().toString().baseConversion(viewStates.value.inputBase, InputBase.DEC)
             val inputValue = if (viewStates.value.inputValue.substring(0, 1) == "-") "(${viewStates.value.inputValue})" else viewStates.value.inputValue
             if (isAdvancedCalculated) {
                 val index = viewStates.value.showText.indexOf(viewStates.value.inputOperator.showText)
@@ -547,11 +616,20 @@ data class ProgrammerState(
     val inputOctText: String = "0",
     val inputBinText: String = "0",
     val inputBase: InputBase = InputBase.DEC,
-    val isFinalResult: Boolean = false
+    val isFinalResult: Boolean = false,
+    val currentLength: ProgrammerLength = ProgrammerLength.QWORD
 )
 
 sealed class ProgrammerAction {
+    object ClickChangeLength: ProgrammerAction()
     data class ChangeInputBase(val inputBase: InputBase): ProgrammerAction()
     data class ClickBtn(val no: Int): ProgrammerAction()
     data class ClickBitBtn(val no: Int): ProgrammerAction()
+}
+
+enum class ProgrammerLength(val showText: String, val bitNum: Int) {
+    QWORD("QWORD", 64),
+    DWORD("DWORD", 32),
+    WORD("WORD", 16),
+    BYTE("BYTE", 8)
 }

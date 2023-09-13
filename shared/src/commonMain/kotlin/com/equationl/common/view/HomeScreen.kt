@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.equationl.common.viewModel.*
@@ -39,6 +40,7 @@ fun HomeScreen(
         MenuTitle(
             keyBoardType = homeState.keyBoardType,
             programmerKeyBoardType = homeState.programmerKeyBoardType,
+            programmerLength = programmerState.currentLength,
             isFloat = homeState.isFloat,
             onClickMenu = {
                 homeChannel.trySend(
@@ -56,6 +58,9 @@ fun HomeScreen(
             },
             onClickChangeKeyBoard = {
                 homeChannel.trySend(HomeAction.OnChangeProgrammerKeyBoardType(it))
+            },
+            onClickChangeProgrammerLength = {
+                programmerChannel.trySend(ProgrammerAction.ClickChangeLength)
             }
         )
 
@@ -73,11 +78,13 @@ fun HomeScreen(
 private fun MenuTitle(
     keyBoardType: Int,
     programmerKeyBoardType: Int,
+    programmerLength: ProgrammerLength,
     isFloat: Boolean,
     onClickMenu: () -> Unit,
     onClickHistory: () -> Unit,
     onClickOverlay: () -> Unit,
     onClickChangeKeyBoard: (type: Int) -> Unit,
+    onClickChangeProgrammerLength: () -> Unit
 ) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Row(
@@ -110,7 +117,9 @@ private fun MenuTitle(
             }
         }
         else if (keyBoardType == KeyboardTypeProgrammer) {
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(imageVector = Icons.Filled.Keyboard,
                     contentDescription = "number keyboard",
                     modifier = Modifier
@@ -124,6 +133,15 @@ private fun MenuTitle(
                         .padding(4.dp)
                         .clickable { onClickChangeKeyBoard(ProgrammerBitKeyBoard) },
                     tint = if (programmerKeyBoardType == ProgrammerBitKeyBoard) MaterialTheme.colors.primary else Color.Unspecified
+                )
+                Text(
+                    text = programmerLength.showText,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.widthIn(min = 100.dp).clickable {
+                        onClickChangeProgrammerLength()
+                    }
                 )
             }
         }
