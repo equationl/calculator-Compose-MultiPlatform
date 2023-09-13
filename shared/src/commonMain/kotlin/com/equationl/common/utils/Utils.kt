@@ -95,13 +95,19 @@ fun String.addLeadingZero(length: Int = 64): String {
 
 /**
  * 移除所有前导 0
+ *
+ * @param isKeepAllZero 是否在字符全部为 0 时直接返回原字符
  * */
-fun String.removeLeadingZero(): String {
+fun String.removeLeadingZero(
+    isKeepAllZero: Boolean = true
+): String {
     var index = 0
     for (c in this) {
         if (c != '0') break
         index++
     }
+
+    if (isKeepAllZero && index == this.length) return this
 
     return this.substring(index)
 }
