@@ -6,18 +6,19 @@ import com.equationl.common.platform.vibrateOnClear
 import com.equationl.common.platform.vibrateOnClick
 import com.equationl.common.platform.vibrateOnEqual
 import com.equationl.common.platform.vibrateOnError
-import com.equationl.common.utils.LongUtil
 import com.equationl.common.utils.addLeadingZero
 import com.equationl.common.utils.calculate
 import com.equationl.common.utils.removeLeadingZero
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import kotlinx.coroutines.flow.Flow
 
+private val programmerState = mutableStateOf(ProgrammerState())
+
 @Composable
 fun programmerPresenter(
     programmerActionFlow: Flow<ProgrammerAction>
 ): ProgrammerState {
-    val programmerState = remember { mutableStateOf(ProgrammerState()) }
+    val programmerState = remember { programmerState }
 
     LaunchedEffect(Unit) {
         programmerActionFlow.collect {action ->
@@ -212,6 +213,11 @@ private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
             isFinalResult = false)
     }
 
+    //FIXME 多次输入运算符有问题
+    // 例如：依次输入 1 、 << 、 1、=
+    // 再输入 <<
+    // 应该返回 “2 Lsh ”
+    // 而不是 “4 Lsh”
     when (no) {
         KeyIndex_Add -> { // "+"
             clickArithmetic(Operator.ADD, viewStates)
@@ -298,33 +304,58 @@ private fun clickClear(viewStates: MutableState<ProgrammerState>) {
     )
 }
 
+/**
+ *
+ * 进制转换，十进制数会被转换为有符号数据，其他进制使用无符号数据
+ *
+ * */
 private fun String.baseConversion(target: InputBase, current: InputBase): String {
-    //TODO 十进制应该显示为有符号数据
-    // 例如在 BYTE 长度时，255 应该显示为 -1
-
     if (current == target) return this
 
-    // 如果直接转会出现无法直接转成有符号 long 的问题，所以这里使用 BigInteger 来转
-    // 见： https://stackoverflow.com/questions/47452924/kotlin-numberformatexception
-    val long = BigInteger.parseString(this, current.number).longValue(false)
+    if (target == InputBase.DEC) {
+        return when (programmerState.value.currentLength) {
+            ProgrammerLength.QWORD -> {
+                // 如果直接转会出现无法直接转成有符号 long 的问题，所以这里使用 BigInteger 来转，以下同理
+                val value = BigInteger.parseString(this, current.number).longValue(false)
+                value.toString(target.number).uppercase()
+            }
 
-    if (target == InputBase.BIN) {
-        return LongUtil.toBinaryString(long)
+            ProgrammerLength.DWORD -> {
+                val value = BigInteger.parseString(this, current.number).intValue(false)
+                value.toString(target.number).uppercase()
+            }
+
+            ProgrammerLength.WORD -> {
+                val value = BigInteger.parseString(this, current.number).shortValue(false)
+                value.toString(target.number).uppercase()
+            }
+
+            ProgrammerLength.BYTE -> {
+                val value = BigInteger.parseString(this, current.number).byteValue(false)
+                value.toString(target.number).uppercase()
+            }
+        }
     }
 
-    if (target == InputBase.HEX) {
-        return LongUtil.toHexString(long).uppercase()
+    return when (programmerState.value.currentLength) {
+        ProgrammerLength.QWORD -> {
+            // 如果直接转会出现无法直接转成有符号 long 的问题，所以这里使用 BigInteger 来转
+            val value = BigInteger.parseString(this, current.number).longValue(false)
+            value.toULong().toString(target.number).uppercase()
+        }
+        ProgrammerLength.DWORD -> {
+            val value = BigInteger.parseString(this, current.number).intValue(false)
+            value.toUInt().toString(target.number).uppercase()
+        }
+        ProgrammerLength.WORD -> {
+            val value = BigInteger.parseString(this, current.number).shortValue(false)
+            value.toUShort().toString(target.number).uppercase()
+        }
+        ProgrammerLength.BYTE -> {
+            val value = BigInteger.parseString(this, current.number).byteValue(false)
+            value.toUByte().toString(target.number).uppercase()
+        }
     }
-
-    if (target == InputBase.OCT) {
-        return LongUtil.toOctalString(long)
-    }
-
-    // 如果直接使用 toString 会造成直接添加 - 号表示负数，例如十进制的 -10 转为二进制会变成 -1010
-    // 这里需要的是无符号的表示方式，即 -10 的二进制数应该用 1111111111111111111111111111111111111111111111111111111111110110 表示
-    return long.toString(target.number).uppercase()
-
-    //return this.toLong(current.number).toString(target.number).uppercase()
 }
 
 private fun clickNot(viewStates: MutableState<ProgrammerState>) {
@@ -459,7 +490,7 @@ private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
                     }
                     ProgrammerLength.WORD -> {
                         if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUShort()
-                        else result.getOrNull().toString().toUShort()
+                        else result.getOrNull().toString().toShort()
                     }
                     ProgrammerLength.BYTE -> {
                         if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUByte()
@@ -467,6 +498,7 @@ private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
                     }
                 }
             } catch (e: NumberFormatException) {
+                println(e.stackTraceToString())
                 viewStates.value = viewStates.value.copy(
                     inputValue = "Err: 溢出",
                     inputHexText = "溢出",
