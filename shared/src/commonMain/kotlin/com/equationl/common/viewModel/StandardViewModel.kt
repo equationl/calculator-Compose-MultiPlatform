@@ -46,6 +46,8 @@ private var isCalculated: Boolean = false
 private var isAdvancedCalculated: Boolean = false
 /**标记是否处于错误状态*/
 private var isErr: Boolean = false
+/** 标记输入新的数字时是否需要清除当前输入值 */
+private var isNeedClrInput: Boolean = false
 
 private val dataBase = DataBase.instance
 
@@ -151,6 +153,10 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
                 isCalculated = false
                 isInputSecondValue = false
                 viewStates.value = StandardState()
+                no.toString()
+            }
+            else if (!isCalculated && isInputSecondValue && isNeedClrInput) {
+                isNeedClrInput = false
                 no.toString()
             }
             else viewStates.value.inputValue + no.toString()
@@ -388,7 +394,7 @@ private fun clickPow2(viewStates: MutableState<StandardState>) {
 private fun clickEqual(viewStates: MutableState<StandardState>) {
     val inputValueCache = viewStates.value.inputValue
 
-    if (viewStates.value.inputOperator == Operator.NUll) {
+    if (viewStates.value.inputOperator == Operator.NUll) { // 没有添加操作符
         vibrateOnEqual()
         viewStates.value = if (isAdvancedCalculated) {
             viewStates.value.copy(
@@ -407,9 +413,20 @@ private fun clickEqual(viewStates: MutableState<StandardState>) {
         isCalculated = true
         onCalculateFinish(viewStates, inputValueCache)
     }
-    else {
+    else { // 添加了操作符
         viewStates.value.coroutineScope?.launch {
-            syncCalculate(viewStates.value.lastInputValue, viewStates.value.inputValue, viewStates.value.inputOperator) { result ->
+            val calValue1: String
+            val calValue2: String
+            if (isCalculated) {
+                calValue1 = viewStates.value.inputValue
+                calValue2 = viewStates.value.lastInputValue
+            }
+            else {
+                calValue1 = viewStates.value.lastInputValue
+                calValue2 = viewStates.value.inputValue
+            }
+
+            syncCalculate(calValue1, calValue2, viewStates.value.inputOperator) { result ->
                 if (result.isSuccess) {
                     vibrateOnEqual()
                     val resultText = result.getOrNull()?.toPlainString() ?: "Null"
@@ -431,11 +448,25 @@ private fun clickEqual(viewStates: MutableState<StandardState>) {
                         }
                     }
                     else {
-                        viewStates.value = viewStates.value.copy(
-                            inputValue = resultText,
-                            showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}$inputValue=",
-                            isFinalResult = true
-                        )
+                        if (isCalculated) { // 当前已经计算过结果
+                            viewStates.value = viewStates.value.copy(
+                                inputValue = resultText,
+                                showText = "$inputValue${viewStates.value.inputOperator.showText}${viewStates.value.lastInputValue}=",
+                                isFinalResult = true,
+                                lastShowText =
+                                if (!isAdvancedCalculated)
+                                    viewStates.value.showText+viewStates.value.inputValue
+                                else viewStates.value.lastShowText
+                            )
+                        }
+                        else { // 这是第一次计算
+                            viewStates.value = viewStates.value.copy(
+                                inputValue = resultText,
+                                showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}$inputValue=",
+                                isFinalResult = true,
+                                lastInputValue = viewStates.value.inputValue,
+                            )
+                        }
                     }
                     isCalculated = true
                 }
@@ -522,11 +553,10 @@ private fun clickArithmetic(operator: Operator, viewStates: MutableState<Standar
                 showText = "${viewStates.value.inputValue}${operator.showText}"
             )
         }
-        else { // 不是第一次添加操作符，则应该把结果算出来后放到左边
+        else { // 不是第一次添加操作符
             isCalculated = false
-            isInputSecondValue = false
-
-            clickEqual(viewStates)
+            isInputSecondValue = true
+            isNeedClrInput = true
 
             newState = newState.copy(
                 lastInputValue = viewStates.value.inputValue,
@@ -540,12 +570,17 @@ private fun clickArithmetic(operator: Operator, viewStates: MutableState<Standar
 }
 
 data class StandardState(
+    /** 当前输入的值 */
     val inputValue: String = "0",
+    /** 输入的操作符 */
     val inputOperator: Operator = Operator.NUll,
+    /** 上次输入的值 */
     val lastInputValue: String = "",
+    /** 结果区展示的字符 */
     val showText: String = "",
     val isFinalResult: Boolean = false,
     val historyList: List<HistoryData> = listOf(),
+    /** 计算历史展示的字符 */
     val lastShowText: String = "",
     val coroutineScope: CoroutineScope? = null
 )
