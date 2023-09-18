@@ -12,7 +12,7 @@ CREATE TABLE History (
 );
 
 getAllHistory:
-SELECT * FROM History ORDER BY create_time DESC;
+SELECT * FROM History ORDER BY id DESC;
 
 insertHistory:
 INSERT INTO History(show_text, left_number, right_number, operator, result, create_time)
