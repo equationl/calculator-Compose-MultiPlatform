@@ -42,6 +42,8 @@ private var isCalculated: Boolean = false
 private var isAdvancedCalculated: Boolean = false
 /**标记是否处于错误状态*/
 private var isErr: Boolean = false
+/** 标记输入新的数字时是否需要清除当前输入值 */
+private var isNeedClrInput: Boolean = false
 
 private fun clickChangeLength(state: MutableState<ProgrammerState>) {
     val newLength = when (state.value.currentLength) {
@@ -169,11 +171,15 @@ private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
                 viewStates.value = ProgrammerState(inputBase = viewStates.value.inputBase)
                 (48+no).toChar().toString()
             }
-            else if (isAdvancedCalculated&& viewStates.value.inputOperator == Operator.NUll) { // 如果在输入高级运算符后直接输入数字，则重置状态
+            else if (isAdvancedCalculated && viewStates.value.inputOperator == Operator.NUll) { // 如果在输入高级运算符后直接输入数字，则重置状态
                 isAdvancedCalculated = false
                 isCalculated = false
                 isInputSecondValue = false
                 viewStates.value = ProgrammerState(inputBase = viewStates.value.inputBase)
+                no.toString()
+            }
+            else if (!isCalculated && isInputSecondValue && isNeedClrInput) {
+                isNeedClrInput = false
                 no.toString()
             }
             else viewStates.value.inputValue + (48+no).toChar().toString()
@@ -213,11 +219,6 @@ private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
             isFinalResult = false)
     }
 
-    //FIXME 多次输入运算符有问题
-    // 例如：依次输入 1 、 << 、 1、=
-    // 再输入 <<
-    // 应该返回 “2 Lsh ”
-    // 而不是 “4 Lsh”
     when (no) {
         KeyIndex_Add -> { // "+"
             clickArithmetic(Operator.ADD, viewStates)
@@ -430,11 +431,10 @@ private fun clickArithmetic(operator: Operator, viewStates: MutableState<Program
                 showText = "${viewStates.value.inputValue}${operator.showText}"
             )
         }
-        else { // 不是第一次添加操作符，则应该把结果算出来后放到左边
+        else { // 不是第一次添加操作符
             isCalculated = false
-            isInputSecondValue = false
-
-            clickEqual(viewStates)
+            isInputSecondValue = true
+            isNeedClrInput = true
 
             newState = newState.copy(
                 lastInputValue = viewStates.value.inputValue,
@@ -540,15 +540,29 @@ private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
                 }
             }
             else {
-                viewStates.value = viewStates.value.copy(
-                    inputValue = resultText,
-                    inputHexText = resultText.baseConversion(InputBase.HEX, viewStates.value.inputBase),
-                    inputDecText = resultText.baseConversion(InputBase.DEC, viewStates.value.inputBase),
-                    inputOctText = resultText.baseConversion(InputBase.OCT, viewStates.value.inputBase),
-                    inputBinText = resultText.baseConversion(InputBase.BIN, viewStates.value.inputBase),
-                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}$inputValue=",
-                    isFinalResult = true
-                )
+                if (isCalculated) {
+                    viewStates.value = viewStates.value.copy(
+                        inputValue = resultText,
+                        inputHexText = resultText.baseConversion(InputBase.HEX, viewStates.value.inputBase),
+                        inputDecText = resultText.baseConversion(InputBase.DEC, viewStates.value.inputBase),
+                        inputOctText = resultText.baseConversion(InputBase.OCT, viewStates.value.inputBase),
+                        inputBinText = resultText.baseConversion(InputBase.BIN, viewStates.value.inputBase),
+                        showText = "$inputValue${viewStates.value.inputOperator.showText}${viewStates.value.lastInputValue}=",
+                        isFinalResult = true,
+                    )
+                }
+                else {
+                    viewStates.value = viewStates.value.copy(
+                        inputValue = resultText,
+                        inputHexText = resultText.baseConversion(InputBase.HEX, viewStates.value.inputBase),
+                        inputDecText = resultText.baseConversion(InputBase.DEC, viewStates.value.inputBase),
+                        inputOctText = resultText.baseConversion(InputBase.OCT, viewStates.value.inputBase),
+                        inputBinText = resultText.baseConversion(InputBase.BIN, viewStates.value.inputBase),
+                        showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}$inputValue=",
+                        isFinalResult = true,
+                        lastInputValue = viewStates.value.inputValue
+                    )
+                }
             }
             isCalculated = true
         }
@@ -575,8 +589,16 @@ private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
  * 该方法会将输入字符转换成十进制数字计算，并返回计算完成后的十进制数字的字符串形式
  * */
 private fun programmerCalculate(viewStates: MutableState<ProgrammerState>): Result<String> {
-    val leftNumber = viewStates.value.lastInputValue.baseConversion(InputBase.DEC, viewStates.value.inputBase)
-    val rightNumber = viewStates.value.inputValue.baseConversion(InputBase.DEC, viewStates.value.inputBase)
+    val leftNumber: String
+    val rightNumber: String
+    if (isCalculated) {
+        leftNumber = viewStates.value.inputValue.baseConversion(InputBase.DEC, viewStates.value.inputBase)
+        rightNumber = viewStates.value.lastInputValue.baseConversion(InputBase.DEC, viewStates.value.inputBase)
+    }
+    else {
+        leftNumber = viewStates.value.lastInputValue.baseConversion(InputBase.DEC, viewStates.value.inputBase)
+        rightNumber = viewStates.value.inputValue.baseConversion(InputBase.DEC, viewStates.value.inputBase)
+    }
 
     if (viewStates.value.inputOperator in BitOperationList) {
         when (viewStates.value.inputOperator) {
