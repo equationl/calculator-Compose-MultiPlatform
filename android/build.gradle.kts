@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.equationl"
-version = "1.1"
+version = "1.2"
 
 repositories {
     jcenter()
@@ -22,8 +22,8 @@ android {
         applicationId = "com.equationl.calculator_compose"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

@@ -501,10 +501,10 @@ private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
                 println(e.stackTraceToString())
                 viewStates.value = viewStates.value.copy(
                     inputValue = "Err: 溢出",
-                    inputHexText = "溢出",
-                    inputDecText = "溢出",
-                    inputOctText = "溢出",
-                    inputBinText = "溢出",
+                    inputHexText = "Err: 溢出",
+                    inputDecText = "Err: 溢出",
+                    inputOctText = "Err: 溢出",
+                    inputBinText = "Err: 溢出",
                     showText = "",
                     isFinalResult = true
                 )
