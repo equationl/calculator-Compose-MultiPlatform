@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.equationl"
-version = "1.2"
+version = "1.2.1"
 
 kotlin {
     android()

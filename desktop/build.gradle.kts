@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.equationl"
-version = "1.2"
+version = "1.2.1"
 
 
 kotlin {
@@ -32,7 +32,7 @@ compose.desktop {
             modules("java.sql")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "隐云计算器"
-            packageVersion = "1.2.0"
+            packageVersion = "1.2.1"
 
             macOS {
                 iconFile.set(project.file("icon.icns"))
