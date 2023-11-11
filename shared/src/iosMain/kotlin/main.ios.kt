@@ -1,6 +1,7 @@
 
 import androidx.compose.ui.window.ComposeUIViewController
 import com.equationl.common.platform.changeScreenOrientationFunc
+import com.equationl.common.platform.vibrateFunc
 import com.equationl.common.viewModel.HomeAction
 import com.equationl.common.viewModel.KeyboardTypeProgrammer
 import com.equationl.common.viewModel.KeyboardTypeStandard
@@ -37,4 +38,8 @@ fun onScreenChange(orientation: Int) {
 
 fun changeScreenOrientation(callBack: (to: Int) -> Unit) {
     changeScreenOrientationFunc = callBack
+}
+
+fun setVibrateCallback(callBack: (type: Int) -> Unit) {
+    vibrateFunc = callBack
 }

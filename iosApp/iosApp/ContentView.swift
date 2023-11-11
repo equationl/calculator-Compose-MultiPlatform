@@ -28,6 +28,10 @@ struct ContentView: View {
                     changeOrientation(to: UIInterfaceOrientation.landscapeLeft)
                 }
             }
+            
+            Main_iosKt.setVibrateCallback { KotlinInt in
+                vibrate(whitch: Int(truncating: KotlinInt) )
+            }
         }
     }
 }
@@ -75,5 +79,24 @@ func changeOrientation(to orientation: UIInterfaceOrientation) {
     }
     else {
         UIDevice.current.setValue(orientation.rawValue, forKey: "orientation")
+    }
+}
+
+func vibrate(whitch type: Int) {
+    switch type {
+    case 0:
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        break
+    case 1:
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        break
+    case 2:
+        UINotificationFeedbackGenerator().notificationOccurred(.error)
+        break
+    case 3:
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        break
+    default:
+        break
     }
 }
