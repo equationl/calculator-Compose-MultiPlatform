@@ -17,6 +17,7 @@ dependencies {
 }
 
 android {
+    namespace = "com.equationl.android"
     compileSdk = 34
     defaultConfig {
         applicationId = "com.equationl.calculator_compose"
@@ -26,8 +27,8 @@ android {
         versionName = "1.2.2"
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_18
+        targetCompatibility = JavaVersion.VERSION_18
     }
     buildTypes {
         getByName("release") {

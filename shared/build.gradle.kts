@@ -29,9 +29,8 @@ kotlin {
         // extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
     }
 
-    android()
     jvm("desktop") {
-        jvmToolchain(11)
+        jvmToolchain(18)
     }
     sourceSets {
         val commonMain by getting {
@@ -95,6 +94,8 @@ kotlin {
 }
 
 android {
+    namespace = "com.equationl.common"
+
     compileSdk = 34
     // sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
@@ -102,8 +103,8 @@ android {
         targetSdk = 34
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_18
+        targetCompatibility = JavaVersion.VERSION_18
     }
 }
 
