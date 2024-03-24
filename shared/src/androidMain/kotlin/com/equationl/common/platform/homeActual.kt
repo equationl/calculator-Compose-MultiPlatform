@@ -52,3 +52,5 @@ actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {
         else
             ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 }
+
+actual fun isNeedShowFloatBtn(): Boolean = true

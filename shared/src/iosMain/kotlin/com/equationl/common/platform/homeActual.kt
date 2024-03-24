@@ -18,3 +18,5 @@ actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {
         changeScreenOrientationFunc?.invoke(1)
     }
 }
+
+actual fun isNeedShowFloatBtn(): Boolean = false

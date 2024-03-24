@@ -9,3 +9,5 @@ actual fun showFloatWindows() {
 actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {
     Config.boardType.value = changeTo
 }
+
+actual fun isNeedShowFloatBtn(): Boolean = true

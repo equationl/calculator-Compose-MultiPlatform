@@ -1,7 +1,13 @@
 package com.equationl.common.view
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -20,7 +26,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.equationl.common.viewModel.*
+import com.equationl.common.platform.isNeedShowFloatBtn
+import com.equationl.common.viewModel.HomeAction
+import com.equationl.common.viewModel.HomeState
+import com.equationl.common.viewModel.KeyboardTypeProgrammer
+import com.equationl.common.viewModel.KeyboardTypeStandard
+import com.equationl.common.viewModel.ProgrammerAction
+import com.equationl.common.viewModel.ProgrammerBitKeyBoard
+import com.equationl.common.viewModel.ProgrammerLength
+import com.equationl.common.viewModel.ProgrammerNumberKeyBoard
+import com.equationl.common.viewModel.ProgrammerState
+import com.equationl.common.viewModel.StandardAction
+import com.equationl.common.viewModel.StandardState
 import kotlinx.coroutines.channels.Channel
 
 @Composable
@@ -108,12 +125,15 @@ private fun MenuTitle(
                         .padding(4.dp)
                         .clickable { onClickHistory() }
                 )
-                Icon(imageVector = if (isFloat) Icons.Filled.PushPin else Icons.Outlined.PushPin,
-                    contentDescription = "overlay View",
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .clickable { onClickOverlay() }
-                )
+
+                if (isNeedShowFloatBtn()) {
+                    Icon(imageVector = if (isFloat) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                        contentDescription = "overlay View",
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .clickable { onClickOverlay() }
+                    )
+                }
             }
         }
         else if (keyBoardType == KeyboardTypeProgrammer) {
