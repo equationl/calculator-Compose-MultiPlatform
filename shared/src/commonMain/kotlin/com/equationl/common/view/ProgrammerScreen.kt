@@ -1,13 +1,35 @@
 package com.equationl.common.view
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +43,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.equationl.common.dataModel.InputBase
@@ -31,10 +54,14 @@ import com.equationl.common.theme.InputNormalFontSize
 import com.equationl.common.theme.InputTitleContentSize
 import com.equationl.common.theme.ShowNormalFontSize
 import com.equationl.common.utils.addLeadingZero
-import com.equationl.common.utils.formatNumber
 import com.equationl.common.utils.formatHexToAscii
+import com.equationl.common.utils.formatNumber
 import com.equationl.common.view.widgets.AutoSizeText
-import com.equationl.common.viewModel.*
+import com.equationl.common.viewModel.ProgrammerAction
+import com.equationl.common.viewModel.ProgrammerBitKeyBoard
+import com.equationl.common.viewModel.ProgrammerLength
+import com.equationl.common.viewModel.ProgrammerNumberKeyBoard
+import com.equationl.common.viewModel.ProgrammerState
 import kotlinx.coroutines.channels.Channel
 
 @Composable
@@ -317,6 +344,9 @@ private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerActi
                     OutlinedTextField(
                         value = state.inputHexText.formatHexToAscii(),
                         singleLine = false,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Ascii,
+                        ),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             backgroundColor = MaterialTheme.colors.background,
                             focusedBorderColor = MaterialTheme.colors.background,
