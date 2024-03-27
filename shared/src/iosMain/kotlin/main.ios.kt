@@ -27,7 +27,7 @@ fun onScreenChange(orientation: Int) {
             )
         )
     }
-    else {
+    else if (orientation == 1) {
         homeChannel?.trySend(
             HomeAction.OnScreenOrientationChange(
                 changeToType = KeyboardTypeProgrammer

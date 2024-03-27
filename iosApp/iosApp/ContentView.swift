@@ -47,7 +47,7 @@ struct DetectOrientation: ViewModifier {
                 if (UIDevice.current.orientation.isLandscape) {
                     Main_iosKt.onScreenChange(orientation: 1)
                 }
-                else {
+                else if (UIDevice.current.orientation.isPortrait) {
                     Main_iosKt.onScreenChange(orientation: 0)
                 }
                 // orientation = UIDevice.current.orientation
