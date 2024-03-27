@@ -8,9 +8,12 @@ import com.equationl.common.platform.vibrateOnEqual
 import com.equationl.common.platform.vibrateOnError
 import com.equationl.common.utils.addLeadingZero
 import com.equationl.common.utils.calculate
+import com.equationl.common.utils.formatAsciiToHex
 import com.equationl.common.utils.removeLeadingZero
 import com.ionspin.kotlin.bignum.integer.BigInteger
+import hideKeyBoard
 import kotlinx.coroutines.flow.Flow
+import showSnack
 
 private val programmerState = mutableStateOf(ProgrammerState())
 
@@ -27,6 +30,8 @@ fun programmerPresenter(
                 is ProgrammerAction.ClickBtn -> clickBtn(action.no, programmerState)
                 is ProgrammerAction.ClickBitBtn -> clickBitBtn(action.no, programmerState)
                 is ProgrammerAction.ClickChangeLength -> clickChangeLength(programmerState)
+                is ProgrammerAction.ToggleShowAscii -> toggleShowAscii(programmerState)
+                is ProgrammerAction.ChangeAsciiValue -> changeAsciiValue(action.text, programmerState)
             }
         }
     }
@@ -45,6 +50,44 @@ private var isErr: Boolean = false
 /** 标记输入新的数字时是否需要清除当前输入值 */
 private var isNeedClrInput: Boolean = false
 
+
+private fun changeAsciiValue(text: String, viewStates: MutableState<ProgrammerState>) {
+    val newValue = text.formatAsciiToHex()
+
+    viewStates.value = viewStates.value.copy(
+        inputValue = newValue.baseConversion(InputBase.HEX, InputBase.HEX),
+        inputHexText = newValue.baseConversion(InputBase.HEX, InputBase.HEX),
+        inputDecText = newValue.baseConversion(InputBase.DEC, InputBase.HEX),
+        inputOctText = newValue.baseConversion(InputBase.OCT, InputBase.HEX),
+        inputBinText = newValue.baseConversion(InputBase.BIN, InputBase.HEX),
+        isFinalResult = false
+    )
+}
+
+private fun toggleShowAscii(state: MutableState<ProgrammerState>) {
+    hideKeyBoard()
+    changeInputBase(InputBase.HEX, state)
+
+    if (state.value.isShowAscii && lengthOverFlow(state, state.value.inputValue)) { // 切换回计算器模式，需要做溢出判断
+        showSnack("数据溢出4564")
+        // 当前数据溢出，清空数据
+        state.value = state.value.copy(
+            isShowAscii = !state.value.isShowAscii,
+            inputValue = "0",
+            inputHexText = "0",
+            inputDecText = "0",
+            inputOctText = "0",
+            inputBinText = "0",
+            isFinalResult = false
+        )
+        return
+    }
+
+    state.value = state.value.copy(
+        isShowAscii = !state.value.isShowAscii,
+    )
+}
+
 private fun clickChangeLength(state: MutableState<ProgrammerState>) {
     val newLength = when (state.value.currentLength) {
         ProgrammerLength.QWORD -> ProgrammerLength.DWORD
@@ -56,12 +99,15 @@ private fun clickChangeLength(state: MutableState<ProgrammerState>) {
     // TODO 这里应该是对数据做转换而不是直接清除数据
     state.value = ProgrammerState(
         currentLength = newLength,
-        inputBase = state.value.inputBase
+        inputBase = state.value.inputBase,
+        isShowAscii = state.value.isShowAscii,
     )
 }
 
 private fun clickBitBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
     vibrateOnClick()
+
+    hideKeyBoard()
 
     var binValue = viewStates.value.inputValue.baseConversion(InputBase.BIN, viewStates.value.inputBase).addLeadingZero()
 
@@ -82,6 +128,7 @@ private fun clickBitBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
 
 private fun changeInputBase(inputBase: InputBase, viewStates: MutableState<ProgrammerState>) {
     vibrateOnClick()
+    hideKeyBoard()
     viewStates.value = when (inputBase) {
         InputBase.HEX -> {
             if (viewStates.value.lastInputValue.isNotEmpty()) {
@@ -133,6 +180,8 @@ private fun changeInputBase(inputBase: InputBase, viewStates: MutableState<Progr
 }
 
 private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
+    hideKeyBoard()
+
     if (isErr) {
         viewStates.value = ProgrammerState(
             inputBase = viewStates.value.inputBase,
@@ -184,30 +233,9 @@ private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
             }
             else viewStates.value.inputValue + (48+no).toChar().toString()
 
-        // 溢出判断
-        try {
-            when (viewStates.value.currentLength) {
-                // 如果是十进制使用有符号来判断
-                // 否则使用无符号来判断
-                ProgrammerLength.QWORD -> {
-                    if (viewStates.value.inputBase != InputBase.DEC) newValue.toULong(viewStates.value.inputBase.number)
-                    else newValue.toLong(viewStates.value.inputBase.number)
-                }
-                ProgrammerLength.DWORD -> {
-                    if (viewStates.value.inputBase != InputBase.DEC) newValue.toUInt(viewStates.value.inputBase.number)
-                    else newValue.toInt(viewStates.value.inputBase.number)
-                }
-                ProgrammerLength.WORD -> {
-                    if (viewStates.value.inputBase != InputBase.DEC) newValue.toUShort(viewStates.value.inputBase.number)
-                    else newValue.toUShort(viewStates.value.inputBase.number)
-                }
-                ProgrammerLength.BYTE -> {
-                    if (viewStates.value.inputBase != InputBase.DEC) newValue.toUByte(viewStates.value.inputBase.number)
-                    else newValue.toByte(viewStates.value.inputBase.number)
-                }
-            }
-        } catch (e: NumberFormatException) {
-            return
+        if (!viewStates.value.isShowAscii) {
+            // 溢出判断
+            if (lengthOverFlow(viewStates, newValue)) return
         }
 
         viewStates.value = viewStates.value.copy(
@@ -284,6 +312,40 @@ private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
     }
 }
 
+private fun lengthOverFlow(
+    viewStates: MutableState<ProgrammerState>,
+    newValue: String
+): Boolean {
+    try {
+        when (viewStates.value.currentLength) {
+            // 如果是十进制使用有符号来判断
+            // 否则使用无符号来判断
+            ProgrammerLength.QWORD -> {
+                if (viewStates.value.inputBase != InputBase.DEC) newValue.toULong(viewStates.value.inputBase.number)
+                else newValue.toLong(viewStates.value.inputBase.number)
+            }
+
+            ProgrammerLength.DWORD -> {
+                if (viewStates.value.inputBase != InputBase.DEC) newValue.toUInt(viewStates.value.inputBase.number)
+                else newValue.toInt(viewStates.value.inputBase.number)
+            }
+
+            ProgrammerLength.WORD -> {
+                if (viewStates.value.inputBase != InputBase.DEC) newValue.toUShort(viewStates.value.inputBase.number)
+                else newValue.toUShort(viewStates.value.inputBase.number)
+            }
+
+            ProgrammerLength.BYTE -> {
+                if (viewStates.value.inputBase != InputBase.DEC) newValue.toUByte(viewStates.value.inputBase.number)
+                else newValue.toByte(viewStates.value.inputBase.number)
+            }
+        }
+    } catch (e: NumberFormatException) {
+        return true
+    }
+    return false
+}
+
 private fun clickCE(viewStates: MutableState<ProgrammerState>) {
     viewStates.value = viewStates.value.copy(
         inputValue = "0",
@@ -301,7 +363,8 @@ private fun clickClear(viewStates: MutableState<ProgrammerState>) {
     isErr = false
     viewStates.value = ProgrammerState(
         inputBase = viewStates.value.inputBase,
-        currentLength = viewStates.value.currentLength
+        currentLength = viewStates.value.currentLength,
+        isShowAscii = viewStates.value.isShowAscii,
     )
 }
 
@@ -310,7 +373,7 @@ private fun clickClear(viewStates: MutableState<ProgrammerState>) {
  * 进制转换，十进制数会被转换为有符号数据，其他进制使用无符号数据
  *
  * */
-private fun String.baseConversion(target: InputBase, current: InputBase): String {
+fun String.baseConversion(target: InputBase, current: InputBase): String {
     if (current == target) return this
 
     if (target == InputBase.DEC) {
@@ -671,14 +734,17 @@ data class ProgrammerState(
     val inputBinText: String = "0",
     val inputBase: InputBase = InputBase.DEC,
     val isFinalResult: Boolean = false,
-    val currentLength: ProgrammerLength = ProgrammerLength.QWORD
+    val currentLength: ProgrammerLength = ProgrammerLength.QWORD,
+    val isShowAscii: Boolean = false,
 )
 
 sealed class ProgrammerAction {
-    object ClickChangeLength: ProgrammerAction()
+    data object ClickChangeLength: ProgrammerAction()
+    data object ToggleShowAscii: ProgrammerAction()
     data class ChangeInputBase(val inputBase: InputBase): ProgrammerAction()
     data class ClickBtn(val no: Int): ProgrammerAction()
     data class ClickBitBtn(val no: Int): ProgrammerAction()
+    data class ChangeAsciiValue(val text: String): ProgrammerAction()
 }
 
 enum class ProgrammerLength(val showText: String, val bitNum: Int) {

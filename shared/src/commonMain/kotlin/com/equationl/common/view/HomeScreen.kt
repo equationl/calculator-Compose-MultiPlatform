@@ -4,16 +4,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Abc
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.outlined.Abc
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.PushPin
@@ -59,6 +65,7 @@ fun HomeScreen(
             programmerKeyBoardType = homeState.programmerKeyBoardType,
             programmerLength = programmerState.currentLength,
             isFloat = homeState.isFloat,
+            isShowAscii = programmerState.isShowAscii,
             onClickMenu = {
                 homeChannel.trySend(
                     HomeAction.ClickMenu(
@@ -72,6 +79,9 @@ fun HomeScreen(
             },
             onClickOverlay = {
                 homeChannel.trySend(HomeAction.ClickOverlay)
+            },
+            onClickToggleShowAscii = {
+                programmerChannel.trySend(ProgrammerAction.ToggleShowAscii)
             },
             onClickChangeKeyBoard = {
                 homeChannel.trySend(HomeAction.OnChangeProgrammerKeyBoardType(it))
@@ -97,9 +107,11 @@ private fun MenuTitle(
     programmerKeyBoardType: Int,
     programmerLength: ProgrammerLength,
     isFloat: Boolean,
+    isShowAscii: Boolean,
     onClickMenu: () -> Unit,
     onClickHistory: () -> Unit,
     onClickOverlay: () -> Unit,
+    onClickToggleShowAscii: () -> Unit,
     onClickChangeKeyBoard: (type: Int) -> Unit,
     onClickChangeProgrammerLength: () -> Unit
 ) {
@@ -159,10 +171,27 @@ private fun MenuTitle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.widthIn(min = 100.dp).clickable {
+                    modifier = Modifier.widthIn(min = 80.dp).clickable {
                         onClickChangeProgrammerLength()
                     }
                 )
+
+                Icon(imageVector = Icons.Filled.Abc,
+                    contentDescription = "show ascii",
+                    tint = if (isShowAscii) MaterialTheme.colors.primary else Color.Unspecified,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clickable { onClickToggleShowAscii() }
+                )
+
+                if (isNeedShowFloatBtn()) {
+                    Icon(imageVector = if (isFloat) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                        contentDescription = "overlay View",
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .clickable { onClickOverlay() }
+                    )
+                }
             }
         }
     }

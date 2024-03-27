@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.equationl.common.theme.CalculatorComposeTheme
@@ -24,6 +26,7 @@ private val snackbarHostState =  SnackbarHostState()
 
 private var isShowDialog by mutableStateOf(false)
 private var dialogMsg by mutableStateOf("")
+private var softwareKeyboardController: SoftwareKeyboardController? = null
 
 fun showSnack(msg: String, isIndefinite: Boolean = false) {
     CoroutineScope(Dispatchers.Default).launch {
@@ -53,6 +56,10 @@ fun dismissDialog() {
     isShowDialog = false
 }
 
+fun hideKeyBoard() {
+    softwareKeyboardController?.hide()
+}
+
 @Composable
 fun APP(
     standardChannelTop: Channel<StandardAction>? = null,
@@ -72,6 +79,8 @@ fun APP(
     val programmerChannel = programmerChannelTop ?: remember { Channel() }
     val programmerFlow = remember(programmerChannel) { programmerChannel.consumeAsFlow() }
     val programmerState = programmerPresenter(programmerFlow)
+
+    softwareKeyboardController = LocalSoftwareKeyboardController.current
 
     standardChannel.trySend(StandardAction.Init(rememberCoroutineScope()))
 

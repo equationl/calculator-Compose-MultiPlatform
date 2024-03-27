@@ -4,13 +4,22 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +32,7 @@ import com.equationl.common.theme.InputTitleContentSize
 import com.equationl.common.theme.ShowNormalFontSize
 import com.equationl.common.utils.addLeadingZero
 import com.equationl.common.utils.formatNumber
+import com.equationl.common.utils.formatHexToAscii
 import com.equationl.common.view.widgets.AutoSizeText
 import com.equationl.common.viewModel.*
 import kotlinx.coroutines.channels.Channel
@@ -46,18 +56,22 @@ private fun BitKeyBoardContent(
     channel: Channel<ProgrammerAction>,
     state: ProgrammerState,
 ) {
-    Row(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
 
         // 显示数据
         Row(modifier = Modifier.weight(1f)) {
             CenterScreen(state, channel)
         }
 
-        Divider(modifier = Modifier
-            .fillMaxHeight()
-            .width(1.dp)
-            .padding(vertical = 16.dp, horizontal = 0.dp))
+        Divider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(1.dp)
+                .padding(vertical = 16.dp, horizontal = 0.dp)
+        )
 
         // 右侧键盘
         Row(modifier = Modifier.weight(1f)) {
@@ -71,27 +85,33 @@ private fun NumberKeyBoardContent(
     channel: Channel<ProgrammerAction>,
     state: ProgrammerState,
 ) {
-    Row(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
         // 左侧键盘
         Row(modifier = Modifier.weight(1.3f)) {
             FunctionKeyBoard(state, channel)
         }
 
-        Divider(modifier = Modifier
-            .fillMaxHeight()
-            .width(1.dp)
-            .padding(vertical = 16.dp, horizontal = 0.dp))
+        Divider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(1.dp)
+                .padding(vertical = 16.dp, horizontal = 0.dp)
+        )
 
         // 显示数据
         Row(modifier = Modifier.weight(2f)) {
             CenterScreen(state, channel)
         }
 
-        Divider(modifier = Modifier
-            .fillMaxHeight()
-            .width(1.dp)
-            .padding(vertical = 16.dp, horizontal = 0.dp))
+        Divider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(1.dp)
+                .padding(vertical = 16.dp, horizontal = 0.dp)
+        )
 
         // 右侧键盘
         Row(modifier = Modifier.weight(1.5f)) {
@@ -101,10 +121,13 @@ private fun NumberKeyBoardContent(
 }
 
 
-
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerAction>) {
+    var isAsciiOnFocus by remember { mutableStateOf(false) }
+    val asciiTextFiledFocusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
     Column(
         Modifier
             .fillMaxSize(),
@@ -150,8 +173,7 @@ private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerActi
                                 splitLength = if (state.inputBase == InputBase.HEX || state.inputBase == InputBase.BIN) 4 else 3,
                                 isAddLeadingZero = false, // 即使是二进制，在输入时也不应该有前导0
                                 formatInteger = true
-                            )
-                            ,
+                            ),
                             fontSize = InputLargeFontSize,
                             fontWeight = FontWeight.Bold,
                             color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
@@ -163,105 +185,152 @@ private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerActi
 
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.Start
         ) {
             Row(verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(2.dp)
-                    .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.HEX)) }
+                    .clickable {
+                        channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.HEX))
+                        focusManager.clearFocus()
+                    }
             ) {
                 Text(
                     text = "HEX",
                     fontSize =
-                    if (state.inputBase == InputBase.HEX) InputTitleContentSize
+                    if (state.inputBase == InputBase.HEX && !isAsciiOnFocus) InputTitleContentSize
                     else InputNormalFontSize,
-                    fontWeight = if (state.inputBase == InputBase.HEX) FontWeight.Bold else null,
+                    fontWeight = if (state.inputBase == InputBase.HEX && !isAsciiOnFocus) FontWeight.Bold else null,
                     color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
                 )
 
                 SelectionContainer {
                     Text(
-                        text = state.inputHexText.formatNumber(addSplitChar = " ", splitLength = 4),
-                        fontSize = InputNormalFontSize,
-                        modifier = Modifier.padding(start = 8.dp),
-                        color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
-                    )
-                }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(2.dp)
-                    .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.DEC)) }
-            ) {
-                Text(
-                    text = "DEC",
-                    fontSize =
-                    if (state.inputBase == InputBase.DEC) InputTitleContentSize
-                    else InputNormalFontSize,
-                    fontWeight = if (state.inputBase == InputBase.DEC) FontWeight.Bold else null,
-                    color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
-                )
-
-                SelectionContainer {
-                    Text(
-                        text = state.inputDecText.formatNumber(),
-                        fontSize = InputNormalFontSize,
-                        modifier = Modifier.padding(start = 8.dp),
-                        color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
-                    )
-                }
-
-            }
-            Row(verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(2.dp)
-                    .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.OCT)) }
-            ) {
-                Text(
-                    text = "OCT",
-                    fontSize =
-                    if (state.inputBase == InputBase.OCT) InputTitleContentSize
-                    else InputNormalFontSize,
-                    fontWeight = if (state.inputBase == InputBase.OCT) FontWeight.Bold else null,
-                    color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
-                )
-
-                SelectionContainer {
-                    Text(
-                        text = state.inputOctText.formatNumber(addSplitChar = " "),
-                        fontSize = InputNormalFontSize,
-                        modifier = Modifier.padding(start = 8.dp),
-                        color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
-                    )
-                }
-
-            }
-            Row(verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(2.dp)
-                    .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.BIN)) }
-            ) {
-                Text(
-                    text = "BIN",
-                    fontSize =
-                    if (state.inputBase == InputBase.BIN) InputTitleContentSize
-                    else InputNormalFontSize,
-                    fontWeight = if (state.inputBase == InputBase.BIN) FontWeight.Bold else null,
-                    color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
-                )
-
-                SelectionContainer {
-                    Text(
-                        text = state.inputBinText.formatNumber(
+                        text = state.inputHexText.formatNumber(
                             addSplitChar = " ",
-                            splitLength = 4,
-                            isAddLeadingZero = state.inputBinText != "0"
+                            splitLength = if (state.isShowAscii) 2 else 4
                         ),
                         fontSize = InputNormalFontSize,
-                        modifier = Modifier
-                            .padding(start = 8.dp),
+                        modifier = Modifier.padding(start = 8.dp),
                         color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
+                    )
+                }
+            }
+
+            if (!state.isShowAscii) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.DEC)) }
+                ) {
+                    Text(
+                        text = "DEC",
+                        fontSize =
+                        if (state.inputBase == InputBase.DEC) InputTitleContentSize
+                        else InputNormalFontSize,
+                        fontWeight = if (state.inputBase == InputBase.DEC) FontWeight.Bold else null,
+                        color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
+                    )
+
+                    SelectionContainer {
+                        Text(
+                            text = state.inputDecText.formatNumber(),
+                            fontSize = InputNormalFontSize,
+                            modifier = Modifier.padding(start = 8.dp),
+                            color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
+                        )
+                    }
+
+                }
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.OCT)) }
+                ) {
+                    Text(
+                        text = "OCT",
+                        fontSize =
+                        if (state.inputBase == InputBase.OCT) InputTitleContentSize
+                        else InputNormalFontSize,
+                        fontWeight = if (state.inputBase == InputBase.OCT) FontWeight.Bold else null,
+                        color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
+                    )
+
+                    SelectionContainer {
+                        Text(
+                            text = state.inputOctText.formatNumber(addSplitChar = " "),
+                            fontSize = InputNormalFontSize,
+                            modifier = Modifier.padding(start = 8.dp),
+                            color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
+                        )
+                    }
+
+                }
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.BIN)) }
+                ) {
+                    Text(
+                        text = "BIN",
+                        fontSize =
+                        if (state.inputBase == InputBase.BIN) InputTitleContentSize
+                        else InputNormalFontSize,
+                        fontWeight = if (state.inputBase == InputBase.BIN) FontWeight.Bold else null,
+                        color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
+                    )
+
+                    SelectionContainer {
+                        Text(
+                            text = state.inputBinText.formatNumber(
+                                addSplitChar = " ",
+                                splitLength = 4,
+                                isAddLeadingZero = state.inputBinText != "0"
+                            ),
+                            fontSize = InputNormalFontSize,
+                            modifier = Modifier
+                                .padding(start = 8.dp),
+                            color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary
+                        )
+                    }
+                }
+            }
+            if (state.isShowAscii) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(2.dp)
+                ) {
+                    Text(
+                        text = "ASCII",
+                        fontSize =
+                        if (isAsciiOnFocus) InputTitleContentSize
+                        else InputNormalFontSize,
+                        fontWeight = if (isAsciiOnFocus) FontWeight.Bold else null,
+                        color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary,
+                        modifier = Modifier.clickable {
+                            asciiTextFiledFocusRequester.requestFocus()
+                        }
+                    )
+
+                    OutlinedTextField(
+                        value = state.inputHexText.formatHexToAscii(),
+                        singleLine = false,
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            backgroundColor = MaterialTheme.colors.background,
+                            focusedBorderColor = MaterialTheme.colors.background,
+                            unfocusedBorderColor = MaterialTheme.colors.background
+                        ),
+                        onValueChange = { value ->
+                            channel.trySend(ProgrammerAction.ChangeAsciiValue(value))
+                        },
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .focusRequester(asciiTextFiledFocusRequester)
+                            .onFocusChanged {
+                                isAsciiOnFocus = it.isFocused
+                            }
                     )
                 }
             }
@@ -274,14 +343,15 @@ private fun NumberBoard(state: ProgrammerState, channel: Channel<ProgrammerActio
 
     Column(modifier = Modifier.fillMaxSize()) {
         for (btnRow in programmerNumberKeyBoardBtn()) {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
                 for (btn in btnRow) {
                     val isAvailable = if (btn.isAvailable) {
                         btn.index !in state.inputBase.forbidBtn
-                    }
-                    else {
+                    } else {
                         false
                     }
 
@@ -319,7 +389,8 @@ private fun BitBoard(state: ProgrammerState, channel: Channel<ProgrammerAction>)
                         modifier = Modifier.weight(1f).padding(8.dp)
                     ) {
                         KeyBoardBitButtonGroup(
-                            text = state.inputBinText.addLeadingZero().substring(60-pos until 64 - pos),
+                            text = state.inputBinText.addLeadingZero()
+                                .substring(60 - pos until 64 - pos),
                             pos = pos,
                             programmerLength = state.currentLength
                         ) { groupIndex: Int, index: Int ->
@@ -339,14 +410,15 @@ private fun FunctionKeyBoard(state: ProgrammerState, channel: Channel<Programmer
 
     Column(modifier = Modifier.fillMaxSize()) {
         for (btnRow in programmerFunctionKeyBoardBtn()) {
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
                 for (btn in btnRow) {
                     val isAvailable = if (btn.isAvailable) {
                         btn.index !in state.inputBase.forbidBtn
-                    }
-                    else {
+                    } else {
                         false
                     }
 
@@ -387,7 +459,11 @@ private fun KeyBoardButton(
         border = BorderStroke(0.dp, Color.Transparent),
         enabled = isAvailable
     ) {
-        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text,
                 fontSize = 24.sp,
@@ -421,8 +497,7 @@ private fun KeyBoardBitButtonGroup(
             text.forEachIndexed { index, c ->
                 val color = if (isShow) {
                     if (c == '1') MaterialTheme.colors.primary else Color.Unspecified
-                }
-                else {
+                } else {
                     if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
                 }
 

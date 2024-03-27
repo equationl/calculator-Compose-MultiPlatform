@@ -1,6 +1,3 @@
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.runtime.remember
 import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.res.painterResource

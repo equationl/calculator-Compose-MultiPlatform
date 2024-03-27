@@ -1,5 +1,8 @@
 package com.equationl.common.utils
 
+import com.equationl.common.constant.Text
+import com.equationl.common.dataModel.InputBase
+import com.equationl.common.viewModel.baseConversion
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -112,6 +115,74 @@ fun String.removeLeadingZero(
     if (isKeepAllZero && index == this.length) return "0"
 
     return this.substring(index)
+}
+
+/**
+ * TODO 需要支持输入前导 0
+ *
+ * 将十六进制字符表示的整数代码转为 ASCII 字符
+ *
+ * NOTE：严格按照两位字符分割
+ * */
+fun String.formatHexToAscii(): String {
+    if (this.isEmpty()) return this
+
+    var result = ""
+    var current = ""
+
+    for (c in this) {
+        current += c
+
+        if (current.length < 2) {
+            continue
+        }
+
+        val intNumber = current.baseConversion(InputBase.DEC, InputBase.HEX).toIntOrNull() ?: 0
+        if (intNumber < 32) {
+            result += getNonDisplayAscii(intNumber)
+        }
+        else {
+            result += intNumber.toChar()
+        }
+        current = ""
+    }
+
+    return result
+}
+
+/**
+ *
+ * 将 ASCII 字符转为十六进制字符串
+ *
+ * NOTE：保证返回的十六进制字符串为两位一组
+ *
+ * */
+fun String.formatAsciiToHex(): String {
+    if (this.isEmpty()) return "0"
+
+    var result = ""
+    var currentText = this
+
+    // 替换非打印字符
+    Text.NonDisplayAscii.forEachIndexed { index, s ->
+        currentText = currentText.replace(s, index.toChar().toString())
+    }
+
+    for (c in currentText) {
+        if (c.code in 0..127) {
+            var charText = c.code.toString().baseConversion(InputBase.HEX, InputBase.DEC)
+            if (charText.length == 1) {
+                charText = "0$charText"
+            }
+            result += charText
+        }
+    }
+
+    return result.ifBlank { "0" }
+}
+
+fun getNonDisplayAscii(code: Int): String {
+    return Text.NonDisplayAscii.getOrNull(code) ?: ""
 }
 
 suspend fun runWithTimeTip(
