@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import com.blankj.utilcode.util.ActivityUtils
+import com.equationl.common.constant.PlatformType
 import com.equationl.common.overlay.OverlayService
 import com.equationl.common.viewModel.KeyboardTypeStandard
 
@@ -54,3 +55,5 @@ actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {
 }
 
 actual fun isNeedShowFloatBtn(): Boolean = true
+
+actual fun currentPlatform(): PlatformType = PlatformType.Android

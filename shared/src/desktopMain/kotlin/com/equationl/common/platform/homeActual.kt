@@ -1,5 +1,6 @@
 package com.equationl.common.platform
 
+import com.equationl.common.constant.PlatformType
 import com.equationl.common.value.Config
 
 actual fun showFloatWindows() {
@@ -11,3 +12,5 @@ actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {
 }
 
 actual fun isNeedShowFloatBtn(): Boolean = true
+
+actual fun currentPlatform(): PlatformType = PlatformType.Desktop

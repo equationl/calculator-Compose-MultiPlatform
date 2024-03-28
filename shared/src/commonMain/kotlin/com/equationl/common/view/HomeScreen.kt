@@ -4,14 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -19,9 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Abc
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.outlined.Abc
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.InvertColors
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.ScreenRotation
 import androidx.compose.runtime.Composable
@@ -32,6 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.equationl.common.constant.PlatformType
+import com.equationl.common.platform.currentPlatform
 import com.equationl.common.platform.isNeedShowFloatBtn
 import com.equationl.common.viewModel.HomeAction
 import com.equationl.common.viewModel.HomeState
@@ -88,6 +86,9 @@ fun HomeScreen(
             },
             onClickChangeProgrammerLength = {
                 programmerChannel.trySend(ProgrammerAction.ClickChangeLength)
+            },
+            onClickChangeTransparency = {
+                homeChannel.trySend(HomeAction.ChangeTransparency)
             }
         )
 
@@ -113,7 +114,8 @@ private fun MenuTitle(
     onClickOverlay: () -> Unit,
     onClickToggleShowAscii: () -> Unit,
     onClickChangeKeyBoard: (type: Int) -> Unit,
-    onClickChangeProgrammerLength: () -> Unit
+    onClickChangeProgrammerLength: () -> Unit,
+    onClickChangeTransparency: () -> Unit,
 ) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Row(
@@ -137,6 +139,15 @@ private fun MenuTitle(
                         .padding(4.dp)
                         .clickable { onClickHistory() }
                 )
+
+                if (isFloat && currentPlatform() == PlatformType.Desktop) {
+                    Icon(imageVector = Icons.Outlined.InvertColors,
+                        contentDescription = "change transparency",
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .clickable { onClickChangeTransparency() }
+                    )
+                }
 
                 if (isNeedShowFloatBtn()) {
                     Icon(imageVector = if (isFloat) Icons.Filled.PushPin else Icons.Outlined.PushPin,

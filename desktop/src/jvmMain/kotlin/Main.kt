@@ -25,34 +25,72 @@ fun main() = application {
         rememberWindowState(size = landWindowSize, position = defaultWindowPosition)
     }
 
-    val standardChannel = remember { Channel<StandardAction>() }
-    val programmerChannel = remember { Channel<ProgrammerAction>() }
 
+    if (Config.isFloat.value) {
+        val standardChannel = remember { Channel<StandardAction>() }
+        val programmerChannel = remember { Channel<ProgrammerAction>() }
 
-    Window(
-        onCloseRequest = ::exitApplication,
-        state = state,
-        title = Text.AppName,
-        icon = painterResource("icon.png"),
-        alwaysOnTop = Config.isFloat.value,
-        onKeyEvent = {
-            if (isKeyTyped(it)) {
-                val btnIndex = asciiCode2BtnIndex(it.utf16CodePoint)
-                if (btnIndex != -1) {
-                    if (Config.boardType.value == KeyboardTypeStandard) {
-                        standardChannel.trySend(StandardAction.ClickBtn(btnIndex))
-                    }
-                    else {
-                        programmerChannel.trySend(ProgrammerAction.ClickBtn(btnIndex))
+        Window(
+            onCloseRequest = ::exitApplication,
+            state = state,
+            title = Text.AppName,
+            icon = painterResource("icon.png"),
+            alwaysOnTop = true,
+            transparent = true,
+            undecorated = true,
+            onKeyEvent = {
+                if (isKeyTyped(it)) {
+                    val btnIndex = asciiCode2BtnIndex(it.utf16CodePoint)
+                    if (btnIndex != -1) {
+                        if (Config.boardType.value == KeyboardTypeStandard) {
+                            standardChannel.trySend(StandardAction.ClickBtn(btnIndex))
+                        }
+                        else {
+                            programmerChannel.trySend(ProgrammerAction.ClickBtn(btnIndex))
+                        }
                     }
                 }
+                true
             }
-            true
+        ) {
+            APP(
+                standardChannelTop = standardChannel,
+                programmerChannelTop = programmerChannel,
+                isFloat = Config.isFloat.value,
+                boardType = Config.boardType.value,
+            )
         }
-    ) {
-        APP(
-            standardChannelTop = standardChannel,
-            programmerChannelTop = programmerChannel
-        )
+    }
+    else {
+        val standardChannel = remember { Channel<StandardAction>() }
+        val programmerChannel = remember { Channel<ProgrammerAction>() }
+
+        Window(
+            onCloseRequest = ::exitApplication,
+            state = state,
+            title = Text.AppName,
+            icon = painterResource("icon.png"),
+            onKeyEvent = {
+                if (isKeyTyped(it)) {
+                    val btnIndex = asciiCode2BtnIndex(it.utf16CodePoint)
+                    if (btnIndex != -1) {
+                        if (Config.boardType.value == KeyboardTypeStandard) {
+                            standardChannel.trySend(StandardAction.ClickBtn(btnIndex))
+                        }
+                        else {
+                            programmerChannel.trySend(ProgrammerAction.ClickBtn(btnIndex))
+                        }
+                    }
+                }
+                true
+            }
+        ) {
+            APP(
+                standardChannelTop = standardChannel,
+                programmerChannelTop = programmerChannel,
+                isFloat = Config.isFloat.value,
+                boardType = Config.boardType.value,
+            )
+        }
     }
 }

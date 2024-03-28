@@ -1,5 +1,6 @@
 package com.equationl.common.platform
 
+import com.equationl.common.constant.PlatformType
 import com.equationl.common.viewModel.KeyboardTypeStandard
 import showSnack
 
@@ -20,3 +21,5 @@ actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {
 }
 
 actual fun isNeedShowFloatBtn(): Boolean = false
+
+actual fun currentPlatform(): PlatformType = PlatformType.Ios

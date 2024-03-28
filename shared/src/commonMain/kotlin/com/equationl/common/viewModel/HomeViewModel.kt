@@ -1,6 +1,11 @@
 package com.equationl.common.viewModel
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.equationl.common.platform.changeKeyBoardType
 import com.equationl.common.platform.showFloatWindows
 import com.equationl.common.platform.vibrateOnClick
@@ -52,6 +57,22 @@ fun homePresenter(
 
                     homeState = homeState.copy(programmerKeyBoardType = action.newType)
                 }
+
+                is HomeAction.InitState -> {
+                    homeState = homeState.copy(isFloat = action.isFloat, keyBoardType = action.boardType)
+                }
+
+                HomeAction.ChangeTransparency -> {
+                    var alpha = homeState.transparency
+
+                    alpha += 0.2f
+
+                    if (alpha > 1f) {
+                        alpha = 0.2f
+                    }
+
+                    homeState = homeState.copy(transparency = alpha)
+                }
             }
         }
     }
@@ -70,12 +91,15 @@ private fun clickChangeKeyBoardType(changeToType: Int, isFromUser: Boolean) {
 data class HomeState(
     val keyBoardType: Int = KeyboardTypeStandard,
     val isFloat: Boolean = false,
-    val programmerKeyBoardType: Int = ProgrammerNumberKeyBoard
+    val programmerKeyBoardType: Int = ProgrammerNumberKeyBoard,
+    val transparency: Float = 1f
 )
 
 sealed class HomeAction {
-    object ClickOverlay: HomeAction()
+    data object ClickOverlay: HomeAction()
+    data object ChangeTransparency: HomeAction()
     data class ClickMenu(val changeToType: Int, val isFromUser: Boolean): HomeAction()
     data class OnScreenOrientationChange(val changeToType: Int): HomeAction()
     data class OnChangeProgrammerKeyBoardType(val newType: Int): HomeAction()
+    data class InitState(val isFloat: Boolean, val boardType: Int): HomeAction()
 }
