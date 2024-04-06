@@ -23,7 +23,6 @@ import androidx.compose.material.icons.outlined.ScreenRotation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -168,14 +167,14 @@ private fun MenuTitle(
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable { onClickChangeKeyBoard(ProgrammerNumberKeyBoard) },
-                    tint = if (programmerKeyBoardType == ProgrammerNumberKeyBoard) MaterialTheme.colors.primary else Color.Unspecified
+                    tint = if (programmerKeyBoardType == ProgrammerNumberKeyBoard) MaterialTheme.colors.primary else MaterialTheme.colors.secondaryVariant
                 )
                 Icon(imageVector = Icons.Outlined.Apps,
                     contentDescription = "bit keyboard",
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable { onClickChangeKeyBoard(ProgrammerBitKeyBoard) },
-                    tint = if (programmerKeyBoardType == ProgrammerBitKeyBoard) MaterialTheme.colors.primary else Color.Unspecified
+                    tint = if (programmerKeyBoardType == ProgrammerBitKeyBoard) MaterialTheme.colors.primary else MaterialTheme.colors.secondaryVariant
                 )
                 Text(
                     text = programmerLength.showText,
@@ -189,7 +188,7 @@ private fun MenuTitle(
 
                 Icon(imageVector = Icons.Filled.Abc,
                     contentDescription = "show ascii",
-                    tint = if (isShowAscii) MaterialTheme.colors.primary else Color.Unspecified,
+                    tint = if (isShowAscii) MaterialTheme.colors.primary else MaterialTheme.colors.secondaryVariant,
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable { onClickToggleShowAscii() }
