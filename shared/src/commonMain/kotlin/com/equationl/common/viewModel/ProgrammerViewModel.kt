@@ -93,7 +93,7 @@ private fun toggleShowAscii(state: MutableState<ProgrammerState>) {
     changeInputBase(InputBase.HEX, state)
 
     if (state.value.isShowAscii && lengthOverFlow(state, state.value.inputValue)) { // 切换回计算器模式，需要做溢出判断
-        showSnack("数据溢出4564")
+        showSnack("数据溢出")
         // 当前数据溢出，清空数据
         state.value = state.value.copy(
             isShowAscii = !state.value.isShowAscii,
@@ -109,6 +109,8 @@ private fun toggleShowAscii(state: MutableState<ProgrammerState>) {
 
     state.value = state.value.copy(
         isShowAscii = !state.value.isShowAscii,
+        inputValue = if (!state.value.isShowAscii && state.value.inputValue == "0") "" else state.value.inputValue,
+        inputHexText = if (!state.value.isShowAscii && state.value.inputValue == "0") "" else state.value.inputValue,
     )
 }
 
@@ -222,16 +224,21 @@ private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
         vibrateOnClick()
         val newValue: String =
             if (viewStates.value.inputValue == "0") {
-                if (viewStates.value.inputOperator != Operator.NUll) isInputSecondValue = true
-                if (isAdvancedCalculated && viewStates.value.inputOperator == Operator.NUll) {  // 如果在输入高级运算符后直接输入数字，则重置状态
-                    isAdvancedCalculated = false
-                    isCalculated = false
-                    isInputSecondValue = false
-                    viewStates.value = ProgrammerState(inputBase = viewStates.value.inputBase)
-                    no.toString()
+                if (viewStates.value.isShowAscii) {
+                    viewStates.value.inputValue + (48+no).toChar().toString()
                 }
+                else {
+                    if (viewStates.value.inputOperator != Operator.NUll) isInputSecondValue = true
+                    if (isAdvancedCalculated && viewStates.value.inputOperator == Operator.NUll) {  // 如果在输入高级运算符后直接输入数字，则重置状态
+                        isAdvancedCalculated = false
+                        isCalculated = false
+                        isInputSecondValue = false
+                        viewStates.value = ProgrammerState(inputBase = viewStates.value.inputBase)
+                        no.toString()
+                    }
 
-                (48 + no).toChar().toString()
+                    (48 + no).toChar().toString()
+                }
             }
             else if (viewStates.value.inputOperator != Operator.NUll && !isInputSecondValue) {
                 isCalculated = false
@@ -318,9 +325,11 @@ private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
         }
         KeyIndex_Back -> { // "←"
             vibrateOnClick()
-            if (viewStates.value.inputValue != "0") {
+            if (viewStates.value.inputValue != "0" || viewStates.value.isShowAscii) {
+                if (viewStates.value.inputValue.isEmpty()) return
+
                 var newValue = viewStates.value.inputValue.substring(0, viewStates.value.inputValue.length - 1)
-                if (newValue.isEmpty() || newValue == "-") newValue = "0"
+                if (newValue.isEmpty() || newValue == "-") newValue = ""
                 viewStates.value = viewStates.value.copy(
                     inputValue = newValue,
                     inputHexText = newValue.baseConversion(InputBase.HEX, viewStates.value.inputBase),
@@ -372,8 +381,8 @@ private fun lengthOverFlow(
 
 private fun clickCE(viewStates: MutableState<ProgrammerState>) {
     viewStates.value = viewStates.value.copy(
-        inputValue = "0",
-        inputHexText = "0",
+        inputValue = if (viewStates.value.isShowAscii) "" else "0",
+        inputHexText = if (viewStates.value.isShowAscii) "" else "0",
         inputDecText = "0",
         inputOctText = "0",
         inputBinText = "0",
@@ -387,6 +396,8 @@ private fun clickClear(viewStates: MutableState<ProgrammerState>) {
     isErr = false
     viewStates.value = ProgrammerState(
         inputBase = viewStates.value.inputBase,
+        inputValue = if (viewStates.value.isShowAscii) "" else "0",
+        inputHexText = if (viewStates.value.isShowAscii) "" else "0",
         currentLength = viewStates.value.currentLength,
         isShowAscii = viewStates.value.isShowAscii,
     )
@@ -398,6 +409,7 @@ private fun clickClear(viewStates: MutableState<ProgrammerState>) {
  *
  * */
 fun String.baseConversion(target: InputBase, current: InputBase): String {
+    if (this.isEmpty()) return this
     if (current == target) return this
 
     if (target == InputBase.DEC) {
