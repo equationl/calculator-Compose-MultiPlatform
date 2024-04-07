@@ -15,13 +15,17 @@ import kotlinx.coroutines.supervisorScope
  * @param isAddLeadingZero 是否在不满足 [splitLength] 一组的数字前添加 0
  * @param formatDecimal 是否格式化小数部分（移除末尾多余的0）
  * @param formatInteger 是否格式化整数部分（添加分隔符或前导0）
+ * @param isReverseSplit 是否反转分割信息，正常情况下会将不满足分组的数据置于前面，
+ * 当该值设置为 true 时会反转分组，将不满足分组的数据置于尾部，
+ * 该参数为 true 时将忽略 [isAddLeadingZero] 和 [formatDecimal] 并且不会判断字符中的前导 '-'
  * */
 fun String.formatNumber(
     addSplitChar: String = ",",
     splitLength: Int = 3,
     isAddLeadingZero: Boolean = false,
     formatDecimal: Boolean = false,
-    formatInteger: Boolean = true
+    formatInteger: Boolean = true,
+    isReverseSplit: Boolean = false,
 ): String {
     // 如果是错误提示信息则不做处理
     if (this.length >= 3 && this.substring(0, 3) == "Err") return this
@@ -47,20 +51,31 @@ fun String.formatNumber(
     var addCharCount = 0
 
     if (formatInteger) {
-        // 给整数部分添加逗号分隔符
-        if (integer.length > splitLength) {
-            val end = if (integer[0] == '-') 2 else 1 // 判断是否有前导符号
-            for (i in integer.length-splitLength downTo end step splitLength) {
-                integer.insert(i, addSplitChar)
-                addCharCount++
+        if (isReverseSplit) {
+            // 给整数部分添加逗号分隔符
+            if (integer.length > splitLength) {
+                for (i in splitLength .. integer.length step splitLength) {
+                    integer.insert(i + addCharCount, addSplitChar)
+                    addCharCount++
+                }
             }
         }
+        else {
+            // 给整数部分添加逗号分隔符
+            if (integer.length > splitLength) {
+                val end = if (integer[0] == '-') 2 else 1 // 判断是否有前导符号
+                for (i in integer.length-splitLength downTo end step splitLength) {
+                    integer.insert(i, addSplitChar)
+                    addCharCount++
+                }
+            }
 
-        if (isAddLeadingZero) { // 添加前导 0 补满一组
-            val realLength = integer.length - addCharCount
-            if (realLength % splitLength != 0) {
-                repeat(4 - realLength % splitLength) {
-                    integer.insert(0, '0')
+            if (isAddLeadingZero) { // 添加前导 0 补满一组
+                val realLength = integer.length - addCharCount
+                if (realLength % splitLength != 0) {
+                    repeat(4 - realLength % splitLength) {
+                        integer.insert(0, '0')
+                    }
                 }
             }
         }

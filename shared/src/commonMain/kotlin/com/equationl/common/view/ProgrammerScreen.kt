@@ -237,7 +237,8 @@ private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerActi
                     Text(
                         text = state.inputHexText.formatNumber(
                             addSplitChar = " ",
-                            splitLength = if (state.isShowAscii) 2 else 4
+                            splitLength = if (state.isShowAscii) 2 else 4,
+                            isReverseSplit = state.isShowAscii,
                         ),
                         fontSize = InputNormalFontSize,
                         modifier = Modifier.padding(start = 8.dp),
