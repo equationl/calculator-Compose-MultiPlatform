@@ -40,7 +40,7 @@ kotlin {
                 api(compose.material)
                 api(compose.materialIconsExtended)
                 // implementation("app.cash.sqldelight:runtime:2.0.0")
-                implementation("com.ionspin.kotlin:bignum:0.3.8")
+                implementation("com.ionspin.kotlin:bignum:0.3.9")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
             }
         }

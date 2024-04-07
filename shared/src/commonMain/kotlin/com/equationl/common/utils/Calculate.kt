@@ -14,6 +14,8 @@ import showSnackSuspend
 /** 计算精度 */
 const val DecimalPrecision = 64L
 
+val defaultDecimalModel = DecimalMode(roundingMode = RoundingMode.ROUND_HALF_AWAY_FROM_ZERO, decimalPrecision = DecimalPrecision)
+
 private var isCalculate = false
 
 /**
@@ -36,7 +38,12 @@ fun BigDecimal.sqrt(decimalPrecision: Int = 16): BigDecimal {
     return x1
 }
 
-fun calculate(leftValue: String, rightValue: String, operator: Operator): Result<BigDecimal> {
+fun calculate(
+    leftValue: String,
+    rightValue: String,
+    operator: Operator,
+    decimalModel: DecimalMode = defaultDecimalModel
+): Result<BigDecimal> {
     val left = leftValue.toBigDecimal()
     val right = rightValue.toBigDecimal()
 
@@ -54,7 +61,7 @@ fun calculate(leftValue: String, rightValue: String, operator: Operator): Result
             if (right.signum() == 0) {
                 return Result.failure(ArithmeticException("Err: 除数不能为零"))
             }
-            return Result.success(left.divide(right, DecimalMode(roundingMode = RoundingMode.ROUND_HALF_AWAY_FROM_ZERO, decimalPrecision = DecimalPrecision)))
+            return Result.success(left.divide(right, decimalModel))
         }
         Operator.SQRT -> {
             if (left.signum() == -1) {

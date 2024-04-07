@@ -1,15 +1,39 @@
 package com.equationl.common.viewModel
 
-import androidx.compose.runtime.*
-import com.equationl.common.dataModel.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.equationl.common.dataModel.BitOperationList
+import com.equationl.common.dataModel.InputBase
+import com.equationl.common.dataModel.KeyIndex_0
+import com.equationl.common.dataModel.KeyIndex_Add
+import com.equationl.common.dataModel.KeyIndex_And
+import com.equationl.common.dataModel.KeyIndex_Back
+import com.equationl.common.dataModel.KeyIndex_CE
+import com.equationl.common.dataModel.KeyIndex_Clear
+import com.equationl.common.dataModel.KeyIndex_Divide
+import com.equationl.common.dataModel.KeyIndex_Equal
+import com.equationl.common.dataModel.KeyIndex_F
+import com.equationl.common.dataModel.KeyIndex_Lsh
+import com.equationl.common.dataModel.KeyIndex_Minus
+import com.equationl.common.dataModel.KeyIndex_Multiply
+import com.equationl.common.dataModel.KeyIndex_Not
+import com.equationl.common.dataModel.KeyIndex_Or
+import com.equationl.common.dataModel.KeyIndex_Rsh
+import com.equationl.common.dataModel.KeyIndex_XOr
+import com.equationl.common.dataModel.Operator
 import com.equationl.common.platform.vibrateOnClear
 import com.equationl.common.platform.vibrateOnClick
 import com.equationl.common.platform.vibrateOnEqual
 import com.equationl.common.platform.vibrateOnError
 import com.equationl.common.utils.addLeadingZero
 import com.equationl.common.utils.calculate
+import com.equationl.common.utils.defaultDecimalModel
 import com.equationl.common.utils.formatAsciiToHex
 import com.equationl.common.utils.removeLeadingZero
+import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import hideKeyBoard
 import kotlinx.coroutines.flow.Flow
@@ -708,7 +732,8 @@ private fun programmerCalculate(viewStates: MutableState<ProgrammerState>): Resu
         calculate(
             leftNumber,
             rightNumber,
-            viewStates.value.inputOperator
+            viewStates.value.inputOperator,
+            decimalModel = defaultDecimalModel.copy(scale = 0L, roundingMode = RoundingMode.TOWARDS_ZERO)
         ).fold({
             try {
                 it.toPlainString().toLong()
