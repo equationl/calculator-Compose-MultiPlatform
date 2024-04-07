@@ -201,6 +201,20 @@ val BitOperationList = listOf(
     Operator.RSH
 )
 
+val asciiForbidBtn = listOf(
+    KeyIndex_Add,
+    KeyIndex_Minus,
+    KeyIndex_Multiply,
+    KeyIndex_Divide,
+    KeyIndex_Lsh,
+    KeyIndex_Rsh,
+    KeyIndex_And,
+    KeyIndex_Or,
+    KeyIndex_Not,
+    KeyIndex_XOr,
+    KeyIndex_Equal,
+)
+
 data class KeyBoardData(
     val text: String,
     /**

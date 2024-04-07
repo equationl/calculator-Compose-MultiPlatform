@@ -118,7 +118,6 @@ fun String.removeLeadingZero(
 }
 
 /**
- * TODO 需要支持输入前导 0
  *
  * 将十六进制字符表示的整数代码转为 ASCII 字符
  *

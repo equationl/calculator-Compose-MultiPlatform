@@ -92,6 +92,20 @@ private fun toggleShowAscii(state: MutableState<ProgrammerState>) {
     hideKeyBoard()
     changeInputBase(InputBase.HEX, state)
 
+    if (state.value.isShowAscii && state.value.inputValue.isEmpty()) {
+        // 没有输入数据，重置为 0
+        state.value = state.value.copy(
+            isShowAscii = !state.value.isShowAscii,
+            inputValue = "0",
+            inputHexText = "0",
+            inputDecText = "0",
+            inputOctText = "0",
+            inputBinText = "0",
+            isFinalResult = false
+        )
+        return
+    }
+
     if (state.value.isShowAscii && lengthOverFlow(state, state.value.inputValue)) { // 切换回计算器模式，需要做溢出判断
         showSnack("数据溢出")
         // 当前数据溢出，清空数据
