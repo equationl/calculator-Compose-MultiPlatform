@@ -136,12 +136,53 @@ private fun clickChangeLength(state: MutableState<ProgrammerState>) {
         ProgrammerLength.BYTE -> ProgrammerLength.QWORD
     }
 
-    // TODO 这里应该是对数据做转换而不是直接清除数据
-    state.value = ProgrammerState(
-        currentLength = newLength,
-        inputBase = state.value.inputBase,
-        isShowAscii = state.value.isShowAscii,
-    )
+    val isFinalResult = state.value.isFinalResult
+
+    if (newLength == ProgrammerLength.QWORD) {
+        // 如果是从短切换到长，可能需要重新转换，所以用十进制数据为基准来转换
+        val decString = state.value.inputDecText
+
+        state.value = state.value.copy(
+            currentLength = newLength,
+
+            inputValue = decString.baseConversion(state.value.inputBase, InputBase.DEC, currentLength = newLength),
+            inputHexText = decString.baseConversion(InputBase.HEX, InputBase.DEC, currentLength = newLength),
+            inputDecText = decString,
+            inputOctText = decString.baseConversion(InputBase.OCT, InputBase.DEC, currentLength = newLength),
+            inputBinText = decString.baseConversion(InputBase.BIN, InputBase.DEC, currentLength = newLength),
+
+            isFinalResult = false,
+            lastInputValue = if (isFinalResult) "" else state.value.lastInputValue,
+            showText = if (isFinalResult) "" else state.value.showText,
+            inputOperator = state.value.inputOperator,
+            inputBase = state.value.inputBase,
+            isShowAscii = state.value.isShowAscii,
+        )
+    }
+    else {
+        // 从长切换到短，直接按长度切分即可
+        var hexString = state.value.inputHexText
+        if (hexString.length > newLength.hexLength) {
+            hexString = hexString.removeRange(0 until hexString.length - newLength.hexLength)
+        }
+
+        state.value = state.value.copy(
+            currentLength = newLength,
+
+            inputValue = hexString.baseConversion(state.value.inputBase, InputBase.HEX, currentLength = newLength),
+            inputHexText = hexString,
+            inputDecText = hexString.baseConversion(InputBase.DEC, InputBase.HEX, currentLength = newLength),
+            inputOctText = hexString.baseConversion(InputBase.OCT, InputBase.HEX, currentLength = newLength),
+            inputBinText = hexString.baseConversion(InputBase.BIN, InputBase.HEX, currentLength = newLength),
+
+            isFinalResult = false,
+            lastInputValue = if (isFinalResult) "" else state.value.lastInputValue,
+            showText = if (isFinalResult) "" else state.value.showText,
+            inputOperator = state.value.inputOperator,
+            inputBase = state.value.inputBase,
+            isShowAscii = state.value.isShowAscii,
+        )
+    }
 }
 
 private fun clickBitBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
@@ -422,12 +463,12 @@ private fun clickClear(viewStates: MutableState<ProgrammerState>) {
  * 进制转换，十进制数会被转换为有符号数据，其他进制使用无符号数据
  *
  * */
-fun String.baseConversion(target: InputBase, current: InputBase): String {
+fun String.baseConversion(target: InputBase, current: InputBase, currentLength: ProgrammerLength = programmerState.value.currentLength): String {
     if (this.isEmpty()) return this
     if (current == target) return this
 
     if (target == InputBase.DEC) {
-        return when (programmerState.value.currentLength) {
+        return when (currentLength) {
             ProgrammerLength.QWORD -> {
                 // 如果直接转会出现无法直接转成有符号 long 的问题，所以这里使用 BigInteger 来转，以下同理
                 val value = BigInteger.parseString(this, current.number).longValue(false)
@@ -451,7 +492,7 @@ fun String.baseConversion(target: InputBase, current: InputBase): String {
         }
     }
 
-    return when (programmerState.value.currentLength) {
+    return when (currentLength) {
         ProgrammerLength.QWORD -> {
             // 如果直接转会出现无法直接转成有符号 long 的问题，所以这里使用 BigInteger 来转
             val value = BigInteger.parseString(this, current.number).longValue(false)
@@ -796,9 +837,9 @@ sealed class ProgrammerAction {
     data class ChangeAsciiValue(val text: String): ProgrammerAction()
 }
 
-enum class ProgrammerLength(val showText: String, val bitNum: Int) {
-    QWORD("QWORD", 64),
-    DWORD("DWORD", 32),
-    WORD("WORD", 16),
-    BYTE("BYTE", 8)
+enum class ProgrammerLength(val showText: String, val bitNum: Int, val hexLength: Int) {
+    QWORD("QWORD", 64, 16),
+    DWORD("DWORD", 32, 8),
+    WORD("WORD", 16, 4),
+    BYTE("BYTE", 8, 2)
 }
