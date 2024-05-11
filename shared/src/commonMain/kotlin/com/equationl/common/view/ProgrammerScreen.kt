@@ -36,11 +36,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -396,6 +399,12 @@ private fun NumberBoard(state: ProgrammerState, channel: Channel<ProgrammerActio
                         KeyBoardButton(
                             text = btn.text,
                             onClick = { channel.trySend(ProgrammerAction.ClickBtn(btn.index)) },
+                            onHoldPress = {
+                                println("from callback = $it")
+                                // FIXME 这里发送 RELEASE 事件会失败
+                                val result = channel.trySend(ProgrammerAction.OnHoldPress(it, btn.index))
+                                println("send result = $result")
+                            },
                             isAvailable = isAvailable,
                             backGround = btn.background,
                             isFilled = btn.isFilled,
@@ -469,6 +478,9 @@ private fun FunctionKeyBoard(state: ProgrammerState, channel: Channel<Programmer
                             text = btn.text,
                             onClick = { channel.trySend(ProgrammerAction.ClickBtn(btn.index)) },
                             isAvailable = isAvailable,
+                            onHoldPress = {
+                                channel.trySend(ProgrammerAction.OnHoldPress(it, btn.index))
+                            },
                             backGround = btn.background,
                             isFilled = btn.isFilled,
                             paddingValues = PaddingValues(0.5.dp)
@@ -480,21 +492,36 @@ private fun FunctionKeyBoard(state: ProgrammerState, channel: Channel<Programmer
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun KeyBoardButton(
     text: String,
     onClick: () -> Unit,
+    onHoldPress: (isPress: Boolean) -> Unit,
     isAvailable: Boolean = true,
     backGround: Color = Color.White,
     isFilled: Boolean = false,
-    paddingValues: PaddingValues = PaddingValues(0.dp)
+    paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
     Card(
-        onClick = { onClick() },
+        onClick = {
+            onClick()
+        },
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues),
+            .padding(paddingValues)
+            .onPointerEvent(PointerEventType.Press) {
+                println("press from raw")
+                if (isAvailable) {
+                    onHoldPress(true)
+                }
+            }
+            .onPointerEvent(PointerEventType.Release) {
+                println("release from raw")
+                if (isAvailable) {
+                    onHoldPress(false)
+                }
+            },
         backgroundColor = if (isFilled) backGround else MaterialTheme.colors.surface,
         shape = MaterialTheme.shapes.large,
         elevation = 0.dp,

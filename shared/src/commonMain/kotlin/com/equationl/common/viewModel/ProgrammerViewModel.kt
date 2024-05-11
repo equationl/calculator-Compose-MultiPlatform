@@ -5,6 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.equationl.common.constant.HoldPressMinInterval
+import com.equationl.common.constant.HoldPressStartTime
 import com.equationl.common.dataModel.BitOperationList
 import com.equationl.common.dataModel.InputBase
 import com.equationl.common.dataModel.KeyIndex_0
@@ -36,10 +38,19 @@ import com.equationl.common.utils.removeLeadingZero
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import hideKeyBoard
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import showSnack
 
 private val programmerState = mutableStateOf(ProgrammerState())
+
+
+private var holdPressJob: Job? = null
 
 @Composable
 fun programmerPresenter(
@@ -49,6 +60,7 @@ fun programmerPresenter(
 
     LaunchedEffect(Unit) {
         programmerActionFlow.collect {action ->
+            println("action = $action")
             when (action) {
                 is ProgrammerAction.ChangeInputBase -> changeInputBase(action.inputBase, programmerState)
                 is ProgrammerAction.ClickBtn -> clickBtn(action.no, programmerState)
@@ -56,6 +68,7 @@ fun programmerPresenter(
                 is ProgrammerAction.ClickChangeLength -> clickChangeLength(programmerState)
                 is ProgrammerAction.ToggleShowAscii -> toggleShowAscii(programmerState)
                 is ProgrammerAction.ChangeAsciiValue -> changeAsciiValue(action.text, programmerState)
+                is ProgrammerAction.OnHoldPress -> {}//onHoldPress(action.isPress, action.no, programmerState)
             }
         }
     }
@@ -257,6 +270,29 @@ private fun changeInputBase(inputBase: InputBase, viewStates: MutableState<Progr
                 viewStates.value.copy(inputBase = inputBase, inputValue = viewStates.value.inputBinText)
             }
         }
+    }
+}
+
+private suspend fun onHoldPress(isPress: Boolean, no: Int, viewStates: MutableState<ProgrammerState>) {
+    println("isPress = $isPress")
+
+    if (isPress) {
+        withContext(Dispatchers.IO) {
+            holdPressJob = launch {
+                var interval = HoldPressStartTime
+                while (true) {
+                    delay(interval)
+                    if (interval > HoldPressMinInterval) {
+                        interval -= 100L
+                    }
+
+                    clickBtn(no, viewStates)
+                }
+            }
+        }
+    }
+    else {
+        holdPressJob?.cancel()
     }
 }
 
@@ -835,6 +871,7 @@ sealed class ProgrammerAction {
     data class ClickBtn(val no: Int): ProgrammerAction()
     data class ClickBitBtn(val no: Int): ProgrammerAction()
     data class ChangeAsciiValue(val text: String): ProgrammerAction()
+    data class OnHoldPress(val isPress: Boolean, val no: Int): ProgrammerAction()
 }
 
 enum class ProgrammerLength(val showText: String, val bitNum: Int, val hexLength: Int) {
