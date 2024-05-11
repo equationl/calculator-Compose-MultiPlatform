@@ -83,7 +83,18 @@ ios 端：
 
 
 ## 如何使用
+
+### [releases](https://github.com/equationl/calculator-Compose-MultiPlatform/releases) 下载
 我在 [releases](https://github.com/equationl/calculator-Compose-MultiPlatform/releases) 提供了安卓 APK 安装包、 macOS 的 ARM 安装包以及 Windows x64 的安装包，可以直接下载使用。
+
+### App store 或 Google Play 安装
+iOS 端可以在 App store 下载安装： [隐云计算器](https://apps.apple.com/cn/app/%E9%9A%90%E4%BA%91%E8%AE%A1%E7%AE%97%E5%99%A8/id6479956361)
+
+Android 端可以在 Google Play 下载安装：**敬请期待**
+
+注意：由于应用市场审核等原因，从应用市场安装的版本可能会略落后于当前最新版本。
+
+### 自行编译
 
 其他平台（macOS x86、Windows、Linux）需要自己 clone 项目后编译。
 
