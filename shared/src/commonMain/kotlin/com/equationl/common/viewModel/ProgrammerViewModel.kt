@@ -587,44 +587,42 @@ private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
             vibrateOnEqual()
 
             // 运算结果溢出判断
-            // TODO 这里不应该直接报错，应该溢出为符合长度的数值
-            // 溢出判断
-            try {
-                when (viewStates.value.currentLength) {
-                    // 如果是十进制使用有符号来判断
-                    // 否则使用无符号来判断
-                    ProgrammerLength.QWORD -> {
-                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toULong()
-                        else result.getOrNull().toString().toLong()
-                    }
-                    ProgrammerLength.DWORD -> {
-                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUInt()
-                        else result.getOrNull().toString().toInt()
-                    }
-                    ProgrammerLength.WORD -> {
-                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUShort()
-                        else result.getOrNull().toString().toShort()
-                    }
-                    ProgrammerLength.BYTE -> {
-                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUByte()
-                        else result.getOrNull().toString().toByte()
-                    }
-                }
-            } catch (e: NumberFormatException) {
-                println(e.stackTraceToString())
-                viewStates.value = viewStates.value.copy(
-                    inputValue = "Err: 溢出",
-                    inputHexText = "Err: 溢出",
-                    inputDecText = "Err: 溢出",
-                    inputOctText = "Err: 溢出",
-                    inputBinText = "Err: 溢出",
-                    showText = "",
-                    isFinalResult = true
-                )
-                isCalculated = false
-                isErr = true
-                return
-            }
+//            try {
+//                when (viewStates.value.currentLength) {
+//                    // 如果是十进制使用有符号来判断
+//                    // 否则使用无符号来判断
+//                    ProgrammerLength.QWORD -> {
+//                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toULong()
+//                        else result.getOrNull().toString().toLong()
+//                    }
+//                    ProgrammerLength.DWORD -> {
+//                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUInt()
+//                        else result.getOrNull().toString().toInt()
+//                    }
+//                    ProgrammerLength.WORD -> {
+//                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUShort()
+//                        else result.getOrNull().toString().toShort()
+//                    }
+//                    ProgrammerLength.BYTE -> {
+//                        if (viewStates.value.inputBase != InputBase.DEC) result.getOrNull().toString().toUByte()
+//                        else result.getOrNull().toString().toByte()
+//                    }
+//                }
+//            } catch (e: NumberFormatException) {
+//                println(e.stackTraceToString())
+//                viewStates.value = viewStates.value.copy(
+//                    inputValue = "Err: 溢出",
+//                    inputHexText = "Err: 溢出",
+//                    inputDecText = "Err: 溢出",
+//                    inputOctText = "Err: 溢出",
+//                    inputBinText = "Err: 溢出",
+//                    showText = "",
+//                    isFinalResult = true
+//                )
+//                isCalculated = false
+//                isErr = true
+//                return
+//            }
 
             val resultText : String = result.getOrNull().toString().baseConversion(viewStates.value.inputBase, InputBase.DEC)
             val inputValue = if (viewStates.value.inputValue.substring(0, 1) == "-") "(${viewStates.value.inputValue})" else viewStates.value.inputValue
@@ -761,12 +759,12 @@ private fun programmerCalculate(viewStates: MutableState<ProgrammerState>): Resu
             viewStates.value.inputOperator,
             decimalModel = defaultDecimalModel.copy(scale = 0L, roundingMode = RoundingMode.TOWARDS_ZERO)
         ).fold({
-            try {
-                it.toPlainString().toLong()
-            } catch (e: NumberFormatException) {
-                e.printStackTrace()
-                return Result.failure(NumberFormatException("Err: 结果溢出"))
-            }
+//            try {
+//                it.toPlainString().toLong()
+//            } catch (e: NumberFormatException) {
+//                e.printStackTrace()
+//                return Result.failure(NumberFormatException("Err: 结果溢出"))
+//            }
             return Result.success(it.toPlainString())
         }, {
             return Result.failure(it)
