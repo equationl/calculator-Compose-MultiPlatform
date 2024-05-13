@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.equationl"
-version = "1.2.2"
+version = "1.2.4"
 
 kotlin {
     android()
@@ -17,7 +17,7 @@ kotlin {
     iosSimulatorArm64()
 
     cocoapods {
-        version = "1.2.2"
+        version = "1.2.4"
         summary = "Some description for the Shared Module"
         homepage = "Link to the Shared Module homepage"
         ios.deploymentTarget = "14.1"

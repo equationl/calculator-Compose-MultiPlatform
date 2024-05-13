@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.equationl"
-version = "1.2.2"
+version = "1.2.4"
 
 
 kotlin {
@@ -31,8 +31,8 @@ compose.desktop {
         nativeDistributions {
             modules("java.sql")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "隐云计算器"
-            packageVersion = "1.2.2"
+            packageName = "calculator_compose" // 使用中文名称在某些版本会导致无法运行，所以改成英文名
+            packageVersion = "1.2.4"
 
             macOS {
                 iconFile.set(project.file("icon.icns"))
