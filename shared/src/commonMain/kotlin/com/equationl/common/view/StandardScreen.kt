@@ -1,21 +1,50 @@
 package com.equationl.common.view
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowLeft
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,9 +79,14 @@ fun StandardScreen(
     Box(Modifier.fillMaxSize()) {
         val isShowKeyBoard = state.historyList.isEmpty()
 
-        StandardKeyBoard {
-            channel.trySend(StandardAction.ClickBtn(it))
-        }
+        StandardKeyBoard(
+            onClick = {
+                channel.trySend(StandardAction.ClickBtn(it))
+            },
+            onHoldPress = { isPress, btnIndex ->
+                channel.trySend(StandardAction.OnHoldPress(isPress, btnIndex))
+            }
+        )
 
         AnimatedVisibility(
             visible = !isShowKeyBoard,
@@ -185,7 +219,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
 }
 
 @Composable
-private fun StandardKeyBoard(onClick: (index: Int) -> Unit) {
+private fun StandardKeyBoard(onClick: (index: Int) -> Unit, onHoldPress: (isPress: Boolean, btnIndex: Int) -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
         for (btnRow in standardKeyBoardBtn()) {
             Row(modifier = Modifier
@@ -195,7 +229,10 @@ private fun StandardKeyBoard(onClick: (index: Int) -> Unit) {
                     Row(modifier = Modifier.weight(1f)) {
                         KeyBoardButton(
                             text = btn.text,
-                            onClick = { onClick(btn.index) },
+                            onClick = {  },  // 这里不再单独处理，统一放到 onHoldPress 处理
+                            onHoldPress = {
+                                onHoldPress(it, btn.index)
+                            },
                             backGround = btn.background,
                             paddingValues = PaddingValues(0.5.dp),
                             isFilled = btn.isFilled
@@ -207,11 +244,12 @@ private fun StandardKeyBoard(onClick: (index: Int) -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun KeyBoardButton(
     text: String,
     onClick: () -> Unit,
+    onHoldPress: (isPress: Boolean) -> Unit,
     backGround: Color = Color.White,
     isFilled: Boolean = false,
     paddingValues: PaddingValues = PaddingValues(0.dp)
@@ -220,7 +258,13 @@ private fun KeyBoardButton(
         onClick = { onClick() },
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues),
+            .padding(paddingValues)
+            .onPointerEvent(PointerEventType.Press) {
+                onHoldPress(true)
+            }
+            .onPointerEvent(PointerEventType.Release) {
+                onHoldPress(false)
+            },
         backgroundColor = if (isFilled) backGround else MaterialTheme.colors.surface,
         shape = MaterialTheme.shapes.large,
         elevation = 0.dp,

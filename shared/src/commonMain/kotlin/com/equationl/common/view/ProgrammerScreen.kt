@@ -398,12 +398,9 @@ private fun NumberBoard(state: ProgrammerState, channel: Channel<ProgrammerActio
                     Row(modifier = Modifier.weight(1f)) {
                         KeyBoardButton(
                             text = btn.text,
-                            onClick = { channel.trySend(ProgrammerAction.ClickBtn(btn.index)) },
+                            onClick = {  }, // 这里不再单独处理，统一放到 onHoldPress 处理
                             onHoldPress = {
-                                println("from callback = $it")
-                                // FIXME 这里发送 RELEASE 事件会失败
-                                val result = channel.trySend(ProgrammerAction.OnHoldPress(it, btn.index))
-                                println("send result = $result")
+                                channel.trySend(ProgrammerAction.OnHoldPress(it, btn.index))
                             },
                             isAvailable = isAvailable,
                             backGround = btn.background,
@@ -476,7 +473,7 @@ private fun FunctionKeyBoard(state: ProgrammerState, channel: Channel<Programmer
                     Row(modifier = Modifier.weight(1f)) {
                         KeyBoardButton(
                             text = btn.text,
-                            onClick = { channel.trySend(ProgrammerAction.ClickBtn(btn.index)) },
+                            onClick = {  }, // 这里不再单独处理，统一放到 onHoldPress 处理
                             isAvailable = isAvailable,
                             onHoldPress = {
                                 channel.trySend(ProgrammerAction.OnHoldPress(it, btn.index))
@@ -511,13 +508,11 @@ private fun KeyBoardButton(
             .fillMaxSize()
             .padding(paddingValues)
             .onPointerEvent(PointerEventType.Press) {
-                println("press from raw")
                 if (isAvailable) {
                     onHoldPress(true)
                 }
             }
             .onPointerEvent(PointerEventType.Release) {
-                println("release from raw")
                 if (isAvailable) {
                     onHoldPress(false)
                 }

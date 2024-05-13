@@ -4,10 +4,10 @@ package com.equationl.common.constant
 const val CalculateTimeout = 100L
 
 /** 长按超过该时间后触发连续键入 */
-const val HoldPressStartTime = 1000L
+const val HoldPressStartTime = 800L
 
 /** 长按连续键入最小间隔时间 */
-const val HoldPressMinInterval = 100L
+const val HoldPressMinInterval = 50L
 
 enum class PlatformType {
     Desktop,

@@ -1,7 +1,30 @@
 package com.equationl.common.viewModel
 
-import androidx.compose.runtime.*
-import com.equationl.common.dataModel.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.equationl.common.constant.HoldPressMinInterval
+import com.equationl.common.constant.HoldPressStartTime
+import com.equationl.common.dataModel.HistoryData
+import com.equationl.common.dataModel.KeyIndex_0
+import com.equationl.common.dataModel.KeyIndex_9
+import com.equationl.common.dataModel.KeyIndex_Add
+import com.equationl.common.dataModel.KeyIndex_Back
+import com.equationl.common.dataModel.KeyIndex_CE
+import com.equationl.common.dataModel.KeyIndex_Clear
+import com.equationl.common.dataModel.KeyIndex_Divide
+import com.equationl.common.dataModel.KeyIndex_Equal
+import com.equationl.common.dataModel.KeyIndex_Minus
+import com.equationl.common.dataModel.KeyIndex_Multiply
+import com.equationl.common.dataModel.KeyIndex_NegativeNumber
+import com.equationl.common.dataModel.KeyIndex_Percentage
+import com.equationl.common.dataModel.KeyIndex_Point
+import com.equationl.common.dataModel.KeyIndex_Pow2
+import com.equationl.common.dataModel.KeyIndex_Reciprocal
+import com.equationl.common.dataModel.KeyIndex_Sqrt
+import com.equationl.common.dataModel.Operator
 import com.equationl.common.database.DataBase
 import com.equationl.common.platform.vibrateOnClear
 import com.equationl.common.platform.vibrateOnClick
@@ -12,9 +35,14 @@ import com.equationl.common.utils.formatNumber
 import com.equationl.common.utils.syncCalculate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+private var holdPressJob: Job? = null
 
 @Composable
 fun standardPresenter(
@@ -30,6 +58,9 @@ fun standardPresenter(
                 is StandardAction.ReadFromHistory -> readFromHistory(action.item, standardState)
                 is StandardAction.DeleteHistory -> deleteHistory(action.item, standardState)
                 is StandardAction.Init -> init(action.coroutineScope, standardState)
+                is StandardAction.OnHoldPress -> launch {
+                    onHoldPress(action.isPress, action.no, standardState)
+                }
             }
         }
     }
@@ -108,6 +139,31 @@ private fun deleteHistory(item: HistoryData?, viewStates: MutableState<StandardS
         }
     }
 }
+
+private suspend fun onHoldPress(isPress: Boolean, no: Int, viewStates: MutableState<StandardState>) {
+    if (isPress) {
+        // 如果是按下，则先触发一次点击事件
+        clickBtn(no, viewStates)
+
+        withContext(Dispatchers.IO) {
+            holdPressJob = launch {
+                var interval = HoldPressStartTime
+                while (true) {
+                    delay(interval.coerceAtLeast(HoldPressMinInterval))
+                    if (interval > HoldPressMinInterval) {
+                        interval -= 150L
+                    }
+
+                    clickBtn(no, viewStates)
+                }
+            }
+        }
+    }
+    else {
+        holdPressJob?.cancel()
+    }
+}
+
 
 private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
     if (isErr) {
@@ -591,4 +647,5 @@ sealed class StandardAction {
     data class ReadFromHistory(val item: HistoryData): StandardAction()
     data class DeleteHistory(val item: HistoryData?): StandardAction()
     data class Init(val coroutineScope: CoroutineScope): StandardAction()
+    data class OnHoldPress(val isPress: Boolean, val no: Int): StandardAction()
 }

@@ -68,7 +68,9 @@ fun programmerPresenter(
                 is ProgrammerAction.ClickChangeLength -> clickChangeLength(programmerState)
                 is ProgrammerAction.ToggleShowAscii -> toggleShowAscii(programmerState)
                 is ProgrammerAction.ChangeAsciiValue -> changeAsciiValue(action.text, programmerState)
-                is ProgrammerAction.OnHoldPress -> {}//onHoldPress(action.isPress, action.no, programmerState)
+                is ProgrammerAction.OnHoldPress -> launch {
+                    onHoldPress(action.isPress, action.no, programmerState)
+                }
             }
         }
     }
@@ -274,16 +276,17 @@ private fun changeInputBase(inputBase: InputBase, viewStates: MutableState<Progr
 }
 
 private suspend fun onHoldPress(isPress: Boolean, no: Int, viewStates: MutableState<ProgrammerState>) {
-    println("isPress = $isPress")
-
     if (isPress) {
+        // 如果是按下，则先触发一次点击事件
+        clickBtn(no, viewStates)
+
         withContext(Dispatchers.IO) {
             holdPressJob = launch {
                 var interval = HoldPressStartTime
                 while (true) {
-                    delay(interval)
+                    delay(interval.coerceAtLeast(HoldPressMinInterval))
                     if (interval > HoldPressMinInterval) {
-                        interval -= 100L
+                        interval -= 150L
                     }
 
                     clickBtn(no, viewStates)
