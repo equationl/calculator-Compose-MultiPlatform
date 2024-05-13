@@ -44,7 +44,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +52,7 @@ import com.equationl.common.theme.InputLargeFontSize
 import com.equationl.common.theme.ShowNormalFontSize
 import com.equationl.common.theme.ShowSmallFontSize
 import com.equationl.common.utils.formatNumber
+import com.equationl.common.utils.onPointerEvent
 import com.equationl.common.view.widgets.AutoSizeText
 import com.equationl.common.view.widgets.noRippleClickable
 import com.equationl.common.view.widgets.scrollToLeftAnimation

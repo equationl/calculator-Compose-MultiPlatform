@@ -60,7 +60,6 @@ fun programmerPresenter(
 
     LaunchedEffect(Unit) {
         programmerActionFlow.collect {action ->
-            println("action = $action")
             when (action) {
                 is ProgrammerAction.ChangeInputBase -> changeInputBase(action.inputBase, programmerState)
                 is ProgrammerAction.ClickBtn -> clickBtn(action.no, programmerState)
