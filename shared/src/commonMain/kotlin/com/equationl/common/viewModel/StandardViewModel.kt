@@ -58,8 +58,11 @@ fun standardPresenter(
                 is StandardAction.ReadFromHistory -> readFromHistory(action.item, standardState)
                 is StandardAction.DeleteHistory -> deleteHistory(action.item, standardState)
                 is StandardAction.Init -> init(action.coroutineScope, standardState)
-                is StandardAction.OnHoldPress -> launch {
-                    onHoldPress(action.isPress, action.no, standardState)
+                is StandardAction.OnHoldPress -> {
+                    holdPressJob?.cancel()
+                    holdPressJob = launch {
+                        onHoldPress(action.isPress, action.no, standardState)
+                    }
                 }
             }
         }
@@ -142,25 +145,20 @@ private fun deleteHistory(item: HistoryData?, viewStates: MutableState<StandardS
 
 private suspend fun onHoldPress(isPress: Boolean, no: Int, viewStates: MutableState<StandardState>) {
     if (isPress) {
-        // 如果是按下，则先触发一次点击事件
+        // 先触发一次点击事件
         clickBtn(no, viewStates)
 
         withContext(Dispatchers.IO) {
-            holdPressJob = launch {
-                var interval = HoldPressStartTime
-                while (true) {
-                    delay(interval.coerceAtLeast(HoldPressMinInterval))
-                    if (interval > HoldPressMinInterval) {
-                        interval -= 150L
-                    }
-
-                    clickBtn(no, viewStates)
+            var interval = HoldPressStartTime
+            while (true) {
+                delay(interval.coerceAtLeast(HoldPressMinInterval))
+                if (interval > HoldPressMinInterval) {
+                    interval -= 150L
                 }
+
+                clickBtn(no, viewStates)
             }
         }
-    }
-    else {
-        holdPressJob?.cancel()
     }
 }
 
