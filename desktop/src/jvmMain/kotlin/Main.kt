@@ -27,8 +27,8 @@ fun main() = application {
 
 
     if (Config.isFloat.value) {
-        val standardChannel = remember { Channel<StandardAction>() }
-        val programmerChannel = remember { Channel<ProgrammerAction>() }
+        val standardChannel = remember { Channel<StandardAction>(capacity = Channel.UNLIMITED) }
+        val programmerChannel = remember { Channel<ProgrammerAction>(capacity = Channel.UNLIMITED) }
 
         Window(
             onCloseRequest = ::exitApplication,
@@ -62,8 +62,8 @@ fun main() = application {
         }
     }
     else {
-        val standardChannel = remember { Channel<StandardAction>() }
-        val programmerChannel = remember { Channel<ProgrammerAction>() }
+        val standardChannel = remember { Channel<StandardAction>(capacity = Channel.UNLIMITED) }
+        val programmerChannel = remember { Channel<ProgrammerAction>(capacity = Channel.UNLIMITED) }
 
         Window(
             onCloseRequest = ::exitApplication,

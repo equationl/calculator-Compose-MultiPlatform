@@ -7,7 +7,7 @@ import com.equationl.common.viewModel.KeyboardTypeProgrammer
 import com.equationl.common.viewModel.KeyboardTypeStandard
 import kotlinx.coroutines.channels.Channel
 
-private var homeChannel: Channel<HomeAction>? = Channel()
+private var homeChannel: Channel<HomeAction>? = Channel(capacity = Channel.UNLIMITED)
 
 fun MainViewController() = ComposeUIViewController {
     APP(

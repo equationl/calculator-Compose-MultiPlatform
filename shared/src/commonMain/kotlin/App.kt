@@ -97,16 +97,16 @@ fun APP(
     boardType: Int? = null,
     onStart: (@Composable (backgroundColor: Color, isLight: Boolean) -> Unit)? = null
 ) {
-    val homeChannel = homeChannelTop ?: remember { Channel() }
+    val homeChannel = homeChannelTop ?: remember { Channel(capacity = Channel.UNLIMITED) }
     val homeFlow = remember(homeChannel) { homeChannel.consumeAsFlow() }
     val homeState = homePresenter(homeFlow)
 
 
-    val standardChannel = standardChannelTop ?: remember { Channel() }
+    val standardChannel = standardChannelTop ?: remember { Channel(capacity = Channel.UNLIMITED) }
     val standardFlow = remember(standardChannel) { standardChannel.consumeAsFlow() }
     val standardState = standardPresenter(standardFlow)
 
-    val programmerChannel = programmerChannelTop ?: remember { Channel() }
+    val programmerChannel = programmerChannelTop ?: remember { Channel(capacity = Channel.UNLIMITED) }
     val programmerFlow = remember(programmerChannel) { programmerChannel.consumeAsFlow() }
     val programmerState = programmerPresenter(programmerFlow)
 

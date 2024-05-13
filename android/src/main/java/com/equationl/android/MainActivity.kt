@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            homeChannel = remember { Channel() }
+            homeChannel = remember { Channel(capacity = Channel.UNLIMITED) }
 
             val systemUiController = rememberSystemUiController()
 
