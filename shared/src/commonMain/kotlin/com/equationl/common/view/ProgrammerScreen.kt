@@ -66,7 +66,15 @@ import com.equationl.common.viewModel.ProgrammerBitKeyBoard
 import com.equationl.common.viewModel.ProgrammerLength
 import com.equationl.common.viewModel.ProgrammerNumberKeyBoard
 import com.equationl.common.viewModel.ProgrammerState
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.ascii
+import com.equationl.shared.generated.resources.bin
+import com.equationl.shared.generated.resources.dec
+import com.equationl.shared.generated.resources.hex
+import com.equationl.shared.generated.resources.oct
 import kotlinx.coroutines.channels.Channel
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ProgrammerScreen(
@@ -152,7 +160,7 @@ private fun NumberKeyBoardContent(
 }
 
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalResourceApi::class)
 @Composable
 private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerAction>) {
     var isAsciiOnFocus by remember { mutableStateOf(false) }
@@ -228,7 +236,7 @@ private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerActi
                     }
             ) {
                 Text(
-                    text = "HEX",
+                    text = stringResource(Res.string.hex),
                     fontSize =
                     if (state.inputBase == InputBase.HEX && !isAsciiOnFocus) InputTitleContentSize
                     else InputNormalFontSize,
@@ -257,7 +265,7 @@ private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerActi
                         .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.DEC)) }
                 ) {
                     Text(
-                        text = "DEC",
+                        text = stringResource(Res.string.dec),
                         fontSize =
                         if (state.inputBase == InputBase.DEC) InputTitleContentSize
                         else InputNormalFontSize,
@@ -281,7 +289,7 @@ private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerActi
                         .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.OCT)) }
                 ) {
                     Text(
-                        text = "OCT",
+                        text = stringResource(Res.string.oct),
                         fontSize =
                         if (state.inputBase == InputBase.OCT) InputTitleContentSize
                         else InputNormalFontSize,
@@ -305,7 +313,7 @@ private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerActi
                         .clickable { channel.trySend(ProgrammerAction.ChangeInputBase(InputBase.BIN)) }
                 ) {
                     Text(
-                        text = "BIN",
+                        text = stringResource(Res.string.bin),
                         fontSize =
                         if (state.inputBase == InputBase.BIN) InputTitleContentSize
                         else InputNormalFontSize,
@@ -335,7 +343,7 @@ private fun CenterScreen(state: ProgrammerState, channel: Channel<ProgrammerActi
                         .padding(2.dp)
                 ) {
                     Text(
-                        text = "ASCII",
+                        text = stringResource(Res.string.ascii),
                         fontSize =
                         if (isAsciiOnFocus) InputTitleContentSize
                         else InputNormalFontSize,

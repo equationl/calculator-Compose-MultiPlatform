@@ -4,11 +4,27 @@ package com.equationl.common.overlay
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.ArrowLeft
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.FormatSize
+import androidx.compose.material.icons.outlined.Fullscreen
+import androidx.compose.material.icons.outlined.InvertColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -27,8 +43,16 @@ import com.equationl.common.view.widgets.scrollToLeftAnimation
 import com.equationl.common.viewModel.StandardAction
 import com.equationl.common.viewModel.StandardState
 import com.equationl.common.viewModel.standardPresenter
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.back_app_home
+import com.equationl.shared.generated.resources.change_size
+import com.equationl.shared.generated.resources.change_transparency
+import com.equationl.shared.generated.resources.close
+import com.equationl.shared.generated.resources.scroll_left
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun OverlayScreen(overLayChannel: Channel<OverlayAction>) {
@@ -55,6 +79,7 @@ fun OverlayScreen(overLayChannel: Channel<OverlayAction>) {
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun TopMenu(overLayChannel: Channel<OverlayAction>) {
     val context = LocalContext.current
@@ -67,7 +92,7 @@ private fun TopMenu(overLayChannel: Channel<OverlayAction>) {
         Row {
             Icon(
                 imageVector = Icons.Outlined.FormatSize,
-                contentDescription = "adjust size",
+                contentDescription = stringResource(Res.string.change_size),
                 Modifier.clickable {
                     overLayChannel.trySend(OverlayAction.ClickAdjustSize)
                 }
@@ -75,7 +100,7 @@ private fun TopMenu(overLayChannel: Channel<OverlayAction>) {
 
             Icon(
                 imageVector = Icons.Outlined.InvertColors,
-                contentDescription = "adjust transparent",
+                contentDescription = stringResource(Res.string.change_transparency),
                 Modifier.clickable {
                     overLayChannel.trySend(OverlayAction.ClickAdjustAlpha)
                 }
@@ -85,7 +110,7 @@ private fun TopMenu(overLayChannel: Channel<OverlayAction>) {
         Row {
             Icon(
                 imageVector = Icons.Outlined.Fullscreen,
-                contentDescription = "Back Full Screen",
+                contentDescription = stringResource(Res.string.back_app_home),
                 Modifier.clickable {
                     overLayChannel.trySend(OverlayAction.ClickBackFullScreen(context))
                 }
@@ -93,7 +118,7 @@ private fun TopMenu(overLayChannel: Channel<OverlayAction>) {
 
             Icon(
                 imageVector = Icons.Outlined.Close,
-                contentDescription = "close",
+                contentDescription = stringResource(Res.string.close),
                 Modifier.clickable {
                     overLayChannel.trySend(OverlayAction.ClickClose(context))
                 }
@@ -102,6 +127,7 @@ private fun TopMenu(overLayChannel: Channel<OverlayAction>) {
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun ShowScreen(viewState: StandardState) {
     val inputScrollerState = rememberScrollState()
@@ -116,7 +142,7 @@ private fun ShowScreen(viewState: StandardState) {
             if (showTextScrollerState.value != showTextScrollerState.maxValue) {
                 Icon(
                     imageVector = Icons.Outlined.ArrowLeft,
-                    contentDescription = "scroll left",
+                    contentDescription = stringResource(Res.string.scroll_left),
                     modifier = Modifier.absoluteOffset(x = scrollToLeftAnimation(-10f).dp)
                 )
             }
@@ -139,7 +165,7 @@ private fun ShowScreen(viewState: StandardState) {
             if (inputScrollerState.value != inputScrollerState.maxValue) {
                 Icon(
                     imageVector = Icons.Outlined.ArrowLeft,
-                    contentDescription = "scroll left",
+                    contentDescription = stringResource(Res.string.scroll_left),
                     modifier = Modifier.absoluteOffset(x = scrollToLeftAnimation(-10f).dp)
                 )
             }

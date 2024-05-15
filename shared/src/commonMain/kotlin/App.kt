@@ -42,12 +42,16 @@ import com.equationl.common.viewModel.StandardAction
 import com.equationl.common.viewModel.homePresenter
 import com.equationl.common.viewModel.programmerPresenter
 import com.equationl.common.viewModel.standardPresenter
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.long_press_select_copy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
 
 
 private val snackbarHostState =  SnackbarHostState()
@@ -88,6 +92,7 @@ fun hideKeyBoard() {
     softwareKeyboardController?.hide()
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun APP(
     standardChannelTop: Channel<StandardAction>? = null,
@@ -162,7 +167,7 @@ fun APP(
                             verticalArrangement = Arrangement.SpaceBetween,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text("长按选择可复制", style = MaterialTheme.typography.h6)
+                            Text(stringResource(Res.string.long_press_select_copy), style = MaterialTheme.typography.h6)
 
                             Divider(modifier = Modifier.padding(8.dp))
 

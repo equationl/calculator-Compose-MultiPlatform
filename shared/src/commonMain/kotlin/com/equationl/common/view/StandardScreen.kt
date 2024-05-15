@@ -58,7 +58,12 @@ import com.equationl.common.view.widgets.noRippleClickable
 import com.equationl.common.view.widgets.scrollToLeftAnimation
 import com.equationl.common.viewModel.StandardAction
 import com.equationl.common.viewModel.StandardState
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.scroll_left
+import com.equationl.shared.generated.resources.text_is_too_long
 import kotlinx.coroutines.channels.Channel
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
 import showDialog
 
 @Composable
@@ -101,7 +106,7 @@ fun StandardScreen(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalResourceApi::class)
 @Composable
 private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit) {
     val inputScrollerState = rememberScrollState()
@@ -147,7 +152,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                             .horizontalScroll(showTextScrollerState, reverseScrolling = true)
                     ) {
                         Text(
-                            text = if (targetState.length > 3000) "数字过大，无法显示，请点击查看" else targetState,
+                            text = if (targetState.length > 3000) stringResource(Res.string.text_is_too_long) else targetState,
                             fontSize = ShowNormalFontSize,
                             fontWeight = FontWeight.Light,
                             color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary,
@@ -160,7 +165,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                     if (isShowTextTipIcon) {
                         Icon(
                             imageVector = Icons.Outlined.ArrowLeft,
-                            contentDescription = "scroll left",
+                            contentDescription = stringResource(Res.string.scroll_left),
                             modifier = Modifier.scale(1.5f).align(Alignment.CenterStart).absoluteOffset(x = scrollToLeftAnimation(-10f).dp),
                             tint = MaterialTheme.colors.primary
                         )
@@ -191,7 +196,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                         .horizontalScroll(inputScrollerState, reverseScrolling = true)
                     ) {
                         Text(
-                            text = if (targetState.length > 3000) "数字过大，无法显示，请点击查看" else targetState.formatNumber(formatDecimal = state.isFinalResult),
+                            text = if (targetState.length > 3000) stringResource(Res.string.text_is_too_long) else targetState.formatNumber(formatDecimal = state.isFinalResult),
                             fontSize = InputLargeFontSize,
                             fontWeight = FontWeight.Bold,
                             color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary,
@@ -207,7 +212,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
                     if (isShowInputTipIcon && state.inputValue.length > 1) {
                         Icon(
                             imageVector = Icons.Outlined.ArrowLeft,
-                            contentDescription = "scroll left",
+                            contentDescription = stringResource(Res.string.scroll_left),
                             modifier = Modifier.scale(2f).align(Alignment.CenterStart).absoluteOffset(x = scrollToLeftAnimation(-10f).dp),
                             tint = MaterialTheme.colors.primary
                         )

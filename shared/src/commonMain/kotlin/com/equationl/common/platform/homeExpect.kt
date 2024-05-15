@@ -2,7 +2,7 @@ package com.equationl.common.platform
 
 import com.equationl.common.constant.PlatformType
 
-expect fun showFloatWindows()
+expect suspend fun showFloatWindows()
 
 expect fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean)
 

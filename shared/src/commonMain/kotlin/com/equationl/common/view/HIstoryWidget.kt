@@ -4,7 +4,13 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
@@ -19,14 +25,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.equationl.common.dataModel.HistoryData
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.delete
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * @param onDelete 如果 item 为 null 则表示删除所有历史记录，否则删除指定的 item
  * */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalResourceApi::class)
 @Composable
 fun HistoryWidget(
     historyList: List<HistoryData>,
@@ -76,7 +86,7 @@ fun HistoryWidget(
         ) {
             Icon(
                 imageVector = Icons.Outlined.Delete,
-                contentDescription = "delete",
+                contentDescription = stringResource(Res.string.delete),
                 Modifier
                     .fillMaxHeight()
                     .clickable {

@@ -11,8 +11,14 @@ import com.blankj.utilcode.util.ActivityUtils
 import com.equationl.common.constant.PlatformType
 import com.equationl.common.overlay.OverlayService
 import com.equationl.common.viewModel.KeyboardTypeStandard
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.tip_need_float_permission
+import com.equationl.shared.generated.resources.tip_not_support_float_cause_android_version
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.getString
 
-actual fun showFloatWindows() {
+@OptIn(ExperimentalResourceApi::class)
+actual suspend fun showFloatWindows() {
     val context = ActivityUtils.getTopActivity()
 
     if (context == null) {
@@ -30,7 +36,7 @@ actual fun showFloatWindows() {
             }.let { context.startActivity(it) }
         }
         else {
-            Toast.makeText(context, "请授予“显示在其他应用上层”权限后重试", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, getString(Res.string.tip_need_float_permission), Toast.LENGTH_LONG).show()
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:${context.packageName}")
@@ -39,7 +45,7 @@ actual fun showFloatWindows() {
         }
     }
     else {
-        Toast.makeText(context, "当前安卓系统版本过低不支持该功能", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, getString(Res.string.tip_not_support_float_cause_android_version), Toast.LENGTH_LONG).show()
     }
 }
 

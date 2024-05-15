@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="app_name">隐云计算器</string>
+
+    <string name="delete">删除</string>
+    <string name="screen_rotation">旋转屏幕</string>
+    <string name="history">历史记录</string>
+    <string name="change_transparency">切换透明度</string>
+    <string name="change_size">切换尺寸</string>
+    <string name="float_show">悬浮显示</string>
+    <string name="number_keyBoard">数字键盘</string>
+    <string name="bit_keyBoard">比特键盘</string>
+    <string name="show_ascii">显示 ASCII</string>
+    <string name="hex">HEX</string>
+    <string name="dec">DEC</string>
+    <string name="oct">OCT</string>
+    <string name="bin">BIN</string>
+    <string name="ascii">ASCII</string>
+    <string name="scroll_left">向左滑动</string>
+    <string name="loading">加载中……</string>
+    <string name="please_wait">请稍候</string>
+    <string name="back_app_home">返回 APP 首页</string>
+    <string name="close">关闭</string>
+
+    <string name="long_press_select_copy">长按后可以选择并复制</string>
+    <string name="text_is_too_long">数字过大，无法显示，请点击查看</string>
+
+    <string name="calculate_error_divide_by_zero">Err: 除数不能为零</string>
+    <string name="calculate_error_invalid_input">Err: 无效输入</string>
+    <string name="calculate_error_invalid_call">Err: 错误的调用</string>
+    <string name="calculate_error_result_undefined">Err: 结果未定义</string>
+
+    <string name="tip_calculating">正在计算中……请稍候</string>
+    <string name="tip_data_overflow">数据溢出</string>
+    <string name="history_is_empty">没有历史记录</string>
+    <string name="tip_need_float_permission">请授予“显示在其他应用上层”权限后重试</string>
+    <string name="tip_not_support_float_cause_android_version">当前安卓系统版本过低不支持该功能</string>
+    <string name="tip_ios_not_support">iOS 暂不支持该功能</string>
+
+    <string name="keyBoard_title_standard">标准</string>
+    <string name="keyBoard_title_programmer">程序员</string>
+</resources>

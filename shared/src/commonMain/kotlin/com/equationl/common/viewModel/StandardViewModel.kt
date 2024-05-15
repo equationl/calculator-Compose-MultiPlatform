@@ -33,6 +33,10 @@ import com.equationl.common.platform.vibrateOnError
 import com.equationl.common.utils.calculate
 import com.equationl.common.utils.formatNumber
 import com.equationl.common.utils.syncCalculate
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.history_is_empty
+import com.equationl.shared.generated.resources.loading
+import com.equationl.shared.generated.resources.please_wait
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -41,6 +45,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.getString
 
 private var holdPressJob: Job? = null
 
@@ -89,7 +95,8 @@ private fun init(coroutineScope: CoroutineScope, viewStates: MutableState<Standa
     viewStates.value = viewStates.value.copy(coroutineScope = coroutineScope)
 }
 
-private fun toggleHistory(forceClose: Boolean, viewStates: MutableState<StandardState>) {
+@OptIn(ExperimentalResourceApi::class)
+private suspend fun toggleHistory(forceClose: Boolean, viewStates: MutableState<StandardState>) {
     vibrateOnClick()
 
     if (viewStates.value.historyList.isNotEmpty() || forceClose) {
@@ -97,14 +104,14 @@ private fun toggleHistory(forceClose: Boolean, viewStates: MutableState<Standard
     }
     else {
         viewStates.value = viewStates.value.copy(historyList = listOf(
-            HistoryData(-1, showText = "加载中……", "null", "null", Operator.NUll, "请稍候")
+            HistoryData(-1, showText = getString(Res.string.loading), "null", "null", Operator.NUll, getString(Res.string.please_wait))
         ))
 
         CoroutineScope(Dispatchers.Default).launch {
             var list = dataBase.getAll()
             if (list.isEmpty()) {
                 list = listOf(
-                    HistoryData(-1, showText = "", "null", "null", Operator.NUll, "没有历史记录")
+                    HistoryData(-1, showText = "", "null", "null", Operator.NUll, getString(Res.string.history_is_empty))
                 )
             }
             viewStates.value = viewStates.value.copy(historyList = list)

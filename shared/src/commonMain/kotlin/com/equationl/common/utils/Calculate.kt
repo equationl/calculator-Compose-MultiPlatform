@@ -3,12 +3,19 @@ package com.equationl.common.utils
 import cancelSnack
 import com.equationl.common.constant.CalculateTimeout
 import com.equationl.common.dataModel.Operator
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.calculate_error_divide_by_zero
+import com.equationl.shared.generated.resources.calculate_error_invalid_call
+import com.equationl.shared.generated.resources.calculate_error_invalid_input
+import com.equationl.shared.generated.resources.tip_calculating
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.getString
 import showSnackSuspend
 
 /** 计算精度 */
@@ -38,7 +45,8 @@ fun BigDecimal.sqrt(decimalPrecision: Int = 16): BigDecimal {
     return x1
 }
 
-fun calculate(
+@OptIn(ExperimentalResourceApi::class)
+suspend fun calculate(
     leftValue: String,
     rightValue: String,
     operator: Operator,
@@ -59,13 +67,13 @@ fun calculate(
         }
         Operator.Divide -> {
             if (right.signum() == 0) {
-                return Result.failure(ArithmeticException("Err: 除数不能为零"))
+                return Result.failure(ArithmeticException(getString(Res.string.calculate_error_divide_by_zero)))
             }
             return Result.success(left.divide(right, decimalModel))
         }
         Operator.SQRT -> {
             if (left.signum() == -1) {
-                return Result.failure(ArithmeticException("Err: 无效输入"))
+                return Result.failure(ArithmeticException(getString(Res.string.calculate_error_invalid_input)))
             }
             return Result.success(left.sqrt())
         }
@@ -86,7 +94,7 @@ fun calculate(
         Operator.XOR,
         Operator.LSH,
         Operator.RSH -> {  // 这些值不会调用这个方法计算，所以直接返回错误
-            return Result.failure(NumberFormatException("Err: 错误的调用"))
+            return Result.failure(NumberFormatException(getString(Res.string.calculate_error_invalid_call)))
         }
     }
 }
@@ -105,8 +113,9 @@ suspend fun syncCalculate(
     )
 }
 
+@OptIn(ExperimentalResourceApi::class)
 suspend fun syncCalculate(
-    calculate: () -> Result<BigDecimal>,
+    calculate: suspend () -> Result<BigDecimal>,
     onFinish: (result: Result<BigDecimal>) -> Unit
 ) {
     // 避免重复
@@ -124,7 +133,7 @@ suspend fun syncCalculate(
             }
         },
         onTimeout = {
-            showSnackSuspend("正在计算中……请稍候", true)
+            showSnackSuspend(getString(Res.string.tip_calculating), true)
         }
     )
 }

@@ -41,7 +41,19 @@ import com.equationl.common.viewModel.ProgrammerNumberKeyBoard
 import com.equationl.common.viewModel.ProgrammerState
 import com.equationl.common.viewModel.StandardAction
 import com.equationl.common.viewModel.StandardState
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.bit_keyBoard
+import com.equationl.shared.generated.resources.change_transparency
+import com.equationl.shared.generated.resources.float_show
+import com.equationl.shared.generated.resources.history
+import com.equationl.shared.generated.resources.keyBoard_title_programmer
+import com.equationl.shared.generated.resources.keyBoard_title_standard
+import com.equationl.shared.generated.resources.number_keyBoard
+import com.equationl.shared.generated.resources.screen_rotation
+import com.equationl.shared.generated.resources.show_ascii
 import kotlinx.coroutines.channels.Channel
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeScreen(
@@ -101,6 +113,7 @@ fun HomeScreen(
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun MenuTitle(
     keyBoardType: Int,
@@ -122,10 +135,10 @@ private fun MenuTitle(
             modifier = Modifier.clickable { onClickMenu() }
         ) {
             Icon(imageVector = Icons.Outlined.ScreenRotation,
-                contentDescription = "ScreenRotation",
+                contentDescription = stringResource(Res.string.screen_rotation),
                 modifier = Modifier.padding(4.dp))
             Text(
-                text = if (keyBoardType == KeyboardTypeProgrammer) "程序员" else "标准",
+                text = if (keyBoardType == KeyboardTypeProgrammer) stringResource(Res.string.keyBoard_title_programmer) else stringResource(Res.string.keyBoard_title_standard),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -133,7 +146,7 @@ private fun MenuTitle(
         if (keyBoardType == KeyboardTypeStandard) {
             Row {
                 Icon(imageVector = Icons.Outlined.History,
-                    contentDescription = "history",
+                    contentDescription = stringResource(Res.string.history),
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable { onClickHistory() }
@@ -141,7 +154,7 @@ private fun MenuTitle(
 
                 if (isFloat && currentPlatform() == PlatformType.Desktop) {
                     Icon(imageVector = Icons.Outlined.InvertColors,
-                        contentDescription = "change transparency",
+                        contentDescription = stringResource(Res.string.change_transparency),
                         modifier = Modifier
                             .padding(4.dp)
                             .clickable { onClickChangeTransparency() }
@@ -150,7 +163,7 @@ private fun MenuTitle(
 
                 if (isNeedShowFloatBtn()) {
                     Icon(imageVector = if (isFloat) Icons.Filled.PushPin else Icons.Outlined.PushPin,
-                        contentDescription = "overlay View",
+                        contentDescription = stringResource(Res.string.float_show),
                         modifier = Modifier
                             .padding(4.dp)
                             .clickable { onClickOverlay() }
@@ -163,14 +176,14 @@ private fun MenuTitle(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(imageVector = Icons.Filled.Keyboard,
-                    contentDescription = "number keyboard",
+                    contentDescription = stringResource(Res.string.number_keyBoard),
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable { onClickChangeKeyBoard(ProgrammerNumberKeyBoard) },
                     tint = if (programmerKeyBoardType == ProgrammerNumberKeyBoard) MaterialTheme.colors.primary else MaterialTheme.colors.secondaryVariant
                 )
                 Icon(imageVector = Icons.Outlined.Apps,
-                    contentDescription = "bit keyboard",
+                    contentDescription = stringResource(Res.string.bit_keyBoard),
                     modifier = Modifier
                         .padding(4.dp)
                         .clickable { onClickChangeKeyBoard(ProgrammerBitKeyBoard) },
@@ -187,7 +200,7 @@ private fun MenuTitle(
                 )
 
                 Icon(imageVector = Icons.Filled.Abc,
-                    contentDescription = "show ascii",
+                    contentDescription = stringResource(Res.string.show_ascii),
                     tint = if (isShowAscii) MaterialTheme.colors.primary else MaterialTheme.colors.secondaryVariant,
                     modifier = Modifier
                         .padding(4.dp)
@@ -196,7 +209,7 @@ private fun MenuTitle(
 
                 if (isNeedShowFloatBtn()) {
                     Icon(imageVector = if (isFloat) Icons.Filled.PushPin else Icons.Outlined.PushPin,
-                        contentDescription = "overlay View",
+                        contentDescription = stringResource(Res.string.float_show),
                         modifier = Modifier
                             .padding(4.dp)
                             .clickable { onClickOverlay() }

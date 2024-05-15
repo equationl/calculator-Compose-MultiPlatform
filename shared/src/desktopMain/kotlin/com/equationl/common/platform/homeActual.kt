@@ -3,7 +3,7 @@ package com.equationl.common.platform
 import com.equationl.common.constant.PlatformType
 import com.equationl.common.value.Config
 
-actual fun showFloatWindows() {
+actual suspend fun showFloatWindows() {
     Config.isFloat.value = !Config.isFloat.value
 }
 

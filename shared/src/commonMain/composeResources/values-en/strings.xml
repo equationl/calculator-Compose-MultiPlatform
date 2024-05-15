@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="app_name">Calculator</string>
+
+    <string name="delete">delete</string>
+    <string name="screen_rotation">Rotate screen</string>
+    <string name="history">History</string>
+    <string name="change_transparency">Switch transparency</string>
+    <string name="change_size">Switch size</string>
+    <string name="float_show">Float display</string>
+    <string name="number_keyBoard">Numeric keyboard</string>
+    <string name="bit_keyBoard">Bit keyboard</string>
+    <string name="show_ascii">Show ASCII</string>
+    <string name="hex">HEX</string>
+    <string name="dec">DEC</string>
+    <string name="oct">OCT</string>
+    <string name="bin">BIN</string>
+    <string name="ascii">ASCII</string>
+    <string name="scroll_left">Swipe left</string>
+    <string name="loading">Loading……</string>
+    <string name="please_wait">Please wait</string>
+    <string name="back_app_home">Return to APP</string>
+    <string name="close">Close</string>
+
+    <string name="long_press_select_copy">Long press to select and copy</string>
+    <string name="text_is_too_long">The number is too large to be displayed, please click to view</string>
+
+    <string name="calculate_error_divide_by_zero">Err: Divisor cannot be zero</string>
+    <string name="calculate_error_invalid_input">Err: Invalid input</string>
+    <string name="calculate_error_invalid_call">Err: Wrong call</string>
+    <string name="calculate_error_result_undefined">Err: Result undefined</string>
+
+    <string name="tip_calculating">Calculating... please wait</string>
+    <string name="tip_data_overflow">Data overflow</string>
+    <string name="history_is_empty">No history</string>
+    <string name="tip_need_float_permission">Please grant the "Show on top of other apps" permission and try again.</string>
+    <string name="tip_not_support_float_cause_android_version">The current Android system version is too low to support this function.</string>
+    <string name="tip_ios_not_support">iOS does not support this feature yet</string>
+
+    <string name="keyBoard_title_standard">Standard</string>
+    <string name="keyBoard_title_programmer">Programmer</string>
+</resources>

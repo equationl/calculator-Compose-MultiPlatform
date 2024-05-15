@@ -35,6 +35,10 @@ import com.equationl.common.utils.calculate
 import com.equationl.common.utils.defaultDecimalModel
 import com.equationl.common.utils.formatAsciiToHex
 import com.equationl.common.utils.removeLeadingZero
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.calculate_error_invalid_call
+import com.equationl.shared.generated.resources.calculate_error_result_undefined
+import com.equationl.shared.generated.resources.tip_data_overflow
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import hideKeyBoard
@@ -45,6 +49,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.getString
 import showSnack
 
 private val programmerState = mutableStateOf(ProgrammerState())
@@ -105,7 +111,8 @@ private fun changeAsciiValue(text: String, viewStates: MutableState<ProgrammerSt
     )
 }
 
-private fun toggleShowAscii(state: MutableState<ProgrammerState>) {
+@OptIn(ExperimentalResourceApi::class)
+private suspend fun toggleShowAscii(state: MutableState<ProgrammerState>) {
     hideKeyBoard()
     changeInputBase(InputBase.HEX, state)
 
@@ -124,7 +131,7 @@ private fun toggleShowAscii(state: MutableState<ProgrammerState>) {
     }
 
     if (state.value.isShowAscii && lengthOverFlow(state, state.value.inputValue)) { // 切换回计算器模式，需要做溢出判断
-        showSnack("数据溢出")
+        showSnack(getString(Res.string.tip_data_overflow))
         // 当前数据溢出，清空数据
         state.value = state.value.copy(
             isShowAscii = !state.value.isShowAscii,
@@ -296,7 +303,7 @@ private suspend fun onHoldPress(isPress: Boolean, no: Int, viewStates: MutableSt
     }
 }
 
-private fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
+private suspend fun clickBtn(no: Int, viewStates: MutableState<ProgrammerState>) {
     hideKeyBoard()
 
     if (isErr) {
@@ -582,7 +589,7 @@ private fun clickNot(viewStates: MutableState<ProgrammerState>) {
     isAdvancedCalculated = true
 }
 
-private fun clickArithmetic(operator: Operator, viewStates: MutableState<ProgrammerState>) {
+private suspend fun clickArithmetic(operator: Operator, viewStates: MutableState<ProgrammerState>) {
     vibrateOnClick()
     var newState = viewStates.value.copy(
         inputOperator = operator,
@@ -638,7 +645,7 @@ private fun clickArithmetic(operator: Operator, viewStates: MutableState<Program
 }
 
 
-private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
+private suspend fun clickEqual(viewStates: MutableState<ProgrammerState>) {
     if (viewStates.value.inputOperator == Operator.NUll) {
         vibrateOnEqual()
         viewStates.value = if (isAdvancedCalculated) {
@@ -776,7 +783,8 @@ private fun clickEqual(viewStates: MutableState<ProgrammerState>) {
 /**
  * 该方法会将输入字符转换成十进制数字计算，并返回计算完成后的十进制数字的字符串形式
  * */
-private fun programmerCalculate(viewStates: MutableState<ProgrammerState>): Result<String> {
+@OptIn(ExperimentalResourceApi::class)
+private suspend fun programmerCalculate(viewStates: MutableState<ProgrammerState>): Result<String> {
     val leftNumber: String
     val rightNumber: String
     if (isCalculated) {
@@ -811,7 +819,7 @@ private fun programmerCalculate(viewStates: MutableState<ProgrammerState>): Resu
                         (leftNumber.toLong() shl rightNumber.toInt()).toString()
                     )
                 } catch (e: NumberFormatException) {
-                    Result.failure(NumberFormatException("Err: 结果未定义"))
+                    Result.failure(NumberFormatException(getString(Res.string.calculate_error_result_undefined)))
                 }
             }
             Operator.RSH -> {
@@ -820,12 +828,12 @@ private fun programmerCalculate(viewStates: MutableState<ProgrammerState>): Resu
                         (leftNumber.toLong() shr rightNumber.toInt()).toString()
                     )
                 } catch (e: NumberFormatException) {
-                    Result.failure(NumberFormatException("Err: 结果未定义"))
+                    Result.failure(NumberFormatException(getString(Res.string.calculate_error_result_undefined)))
                 }
             }
             else -> {
                 // 剩下的操作不应该由此处计算，所以直接返回错误
-                return Result.failure(NumberFormatException("Err: 错误的调用2"))
+                return Result.failure(NumberFormatException(getString(Res.string.calculate_error_invalid_call)))
             }
         }
     }

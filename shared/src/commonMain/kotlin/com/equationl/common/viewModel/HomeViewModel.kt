@@ -80,7 +80,7 @@ fun homePresenter(
     return homeState
 }
 
-private fun clickOverlay() {
+private suspend fun clickOverlay() {
     showFloatWindows()
 }
 

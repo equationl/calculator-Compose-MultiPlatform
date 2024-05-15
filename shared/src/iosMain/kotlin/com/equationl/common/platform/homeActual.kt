@@ -2,13 +2,18 @@ package com.equationl.common.platform
 
 import com.equationl.common.constant.PlatformType
 import com.equationl.common.viewModel.KeyboardTypeStandard
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.tip_ios_not_support
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.getString
 import showSnack
 
 var changeScreenOrientationFunc: ((to: Int) -> Unit)? = null
 
 
-actual fun showFloatWindows() {
-    showSnack("iOS暂不支持该功能")
+@OptIn(ExperimentalResourceApi::class)
+actual suspend fun showFloatWindows() {
+    showSnack(getString(Res.string.tip_ios_not_support))
 }
 
 actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {

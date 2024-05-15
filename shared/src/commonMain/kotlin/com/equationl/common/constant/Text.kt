@@ -1,8 +1,19 @@
 package com.equationl.common.constant
 
-object Text {
-    const val AppName = "隐云计算器"
+import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.app_name
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.getString
 
+object Text {
+    @OptIn(ExperimentalResourceApi::class)
+    val AppName: String
+        get() {
+            return runBlocking {
+                getString(Res.string.app_name)
+            }
+        }
     /**
      * ASCII 非打印字符列表，这里按照索引转为名称缩写来显示
      * */
