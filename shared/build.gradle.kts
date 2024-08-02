@@ -3,7 +3,8 @@ plugins {
     kotlin("native.cocoapods")
     id("org.jetbrains.compose")
     id("com.android.library")
-    id("app.cash.sqldelight")
+    id("com.google.devtools.ksp")
+    id("androidx.room")
 }
 
 group = "com.equationl"
@@ -25,6 +26,7 @@ kotlin {
         framework {
             baseName = "shared"
             isStatic = true
+            linkerOpts.add("-lsqlite3") // add sqlite
         }
         // extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
     }
@@ -40,9 +42,10 @@ kotlin {
                 api(compose.material)
                 api(compose.materialIconsExtended)
                 implementation(compose.components.resources)
-                // implementation("app.cash.sqldelight:runtime:2.0.0")
-                implementation("com.ionspin.kotlin:bignum:0.3.9")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+                implementation("com.ionspin.kotlin:bignum:0.3.10")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+                implementation("androidx.room:room-runtime:2.7.0-alpha05")
+                implementation("androidx.sqlite:sqlite-bundled:2.5.0-alpha05")
             }
         }
         val commonTest by getting {
@@ -61,8 +64,6 @@ kotlin {
                 api("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
                 api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
                 api("androidx.lifecycle:lifecycle-service:2.6.1")
-
-                implementation("app.cash.sqldelight:android-driver:2.0.0")
             }
         }
         /*val androidTest by getting {
@@ -73,7 +74,6 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 api(compose.preview)
-                implementation("app.cash.sqldelight:sqlite-driver:2.0.0")
             }
         }
         val desktopTest by getting
@@ -88,7 +88,7 @@ kotlin {
             iosSimulatorArm64Main.dependsOn(this)
 
             dependencies {
-                implementation("app.cash.sqldelight:native-driver:2.0.0")
+
             }
         }
     }
@@ -109,10 +109,14 @@ android {
     }
 }
 
-sqldelight {
-    databases {
-        create("HistoryDatabase") {
-            packageName.set("com.equationl.common.database")
-        }
-    }
+dependencies {
+    ksp("androidx.room:room-compiler:2.7.0-alpha05")
+//    add("kspAndroid", "androidx.room:room-compiler:2.7.0-alpha05")
+//    add("kspIosSimulatorArm64", "androidx.room:room-compiler:2.7.0-alpha05")
+//    add("kspIosX64", "androidx.room:room-compiler:2.7.0-alpha05")
+//    add("kspIosArm64", "androidx.room:room-compiler:2.7.0-alpha05")
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }

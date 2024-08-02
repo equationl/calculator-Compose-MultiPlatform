@@ -25,7 +25,7 @@ import com.equationl.common.dataModel.KeyIndex_Pow2
 import com.equationl.common.dataModel.KeyIndex_Reciprocal
 import com.equationl.common.dataModel.KeyIndex_Sqrt
 import com.equationl.common.dataModel.Operator
-import com.equationl.common.database.DataBase
+import com.equationl.common.database.HistoryDb
 import com.equationl.common.platform.vibrateOnClear
 import com.equationl.common.platform.vibrateOnClick
 import com.equationl.common.platform.vibrateOnEqual
@@ -89,7 +89,7 @@ private var isErr: Boolean = false
 /** 标记输入新的数字时是否需要清除当前输入值 */
 private var isNeedClrInput: Boolean = false
 
-private val dataBase = DataBase.instance
+private val historyDao = HistoryDb.instance.history()
 
 private fun init(coroutineScope: CoroutineScope, viewStates: MutableState<StandardState>) {
     viewStates.value = viewStates.value.copy(coroutineScope = coroutineScope)
@@ -108,7 +108,7 @@ private suspend fun toggleHistory(forceClose: Boolean, viewStates: MutableState<
         ))
 
         CoroutineScope(Dispatchers.Default).launch {
-            var list = dataBase.getAll()
+            var list = historyDao.getAll()
             if (list.isEmpty()) {
                 list = listOf(
                     HistoryData(-1, showText = "", "null", "null", Operator.NUll, getString(Res.string.history_is_empty))
@@ -136,11 +136,11 @@ private fun deleteHistory(item: HistoryData?, viewStates: MutableState<StandardS
     CoroutineScope(Dispatchers.Default).launch {
         vibrateOnError()
         viewStates.value = if (item == null) {
-            dataBase.delete(null)
+            historyDao.deleteAll()
             viewStates.value.copy(historyList = listOf())
         } else {
             vibrateOnClick()
-            dataBase.delete(item)
+            historyDao.delete(item)
             val newList = mutableListOf<HistoryData>()
             newList.addAll(viewStates.value.historyList)
             newList.remove(item)
@@ -554,7 +554,7 @@ private fun onCalculateFinish(viewStates: MutableState<StandardState>, inputValu
     CoroutineScope(Dispatchers.Default).launch {
         withContext(Dispatchers.Default) {
             if (!isErr) {  // 不保存错误结果
-                dataBase.insert(
+                historyDao.insert(
                     HistoryData(
                         showText = viewStates.value.showText,
                         lastInputText = viewStates.value.lastInputValue,

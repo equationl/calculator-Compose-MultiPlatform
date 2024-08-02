@@ -1,9 +1,18 @@
 package com.equationl.common.platform
 
-import app.cash.sqldelight.db.SqlDriver
-import app.cash.sqldelight.driver.native.NativeSqliteDriver
-import com.equationl.common.database.HistoryDatabase
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.equationl.common.database.HistoryDb
 
-actual fun createDriver(): SqlDriver {
-    return NativeSqliteDriver(HistoryDatabase.Schema, "history.db")
+// TODO 需要测试
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+actual class RoomBuilder {
+    actual fun builder(): RoomDatabase.Builder<HistoryDb> {
+        val dbFilePath = NSHomeDirectory() + "/${DATABASE_NAME}"
+        return Room.databaseBuilder<HistoryDb>(
+            name = dbFilePath,
+            factory = { HistoryDb::class.instantiateImpl() }
+        ).setDriver(BundledSQLiteDriver())
+    }
 }

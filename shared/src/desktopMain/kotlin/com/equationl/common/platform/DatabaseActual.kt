@@ -1,13 +1,26 @@
 package com.equationl.common.platform
 
-import app.cash.sqldelight.db.SqlDriver
-import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import com.equationl.common.database.HistoryDatabase
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.equationl.common.database.HistoryDb
+import com.equationl.common.database.instantiateImpl
+import java.io.File
 
-// 如果想保存到本地可以参考 https://www.reddit.com/r/Kotlin/comments/10q8xfd/comment/j6qdixf/
 
-actual fun createDriver(): SqlDriver {
-    val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
-    HistoryDatabase.Schema.create(driver)
-    return driver
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+actual class RoomBuilder {
+    //TODO 运行 ReleaseDistributable 无法链接到数据库，但是单独运行 Release 或 Distributable 却可以……
+    // 这应该是 ROOM 的 BUG ，运行官方 sample 有同样的问题
+    actual fun builder(): RoomDatabase.Builder<HistoryDb> {
+        // 这里获取到的是临时目录，似乎 Desktop 没有一个统一应用数据目录，所以暂时沿用这个目录
+        val dbFilePath = File(System.getProperty("java.io.tmpdir"), DATABASE_NAME).absolutePath
+
+        println("save data path = $dbFilePath")
+
+        return Room.databaseBuilder<HistoryDb>(
+            name = dbFilePath,
+            factory = { HistoryDb::class.instantiateImpl() }
+        ).setDriver(BundledSQLiteDriver())
+    }
 }

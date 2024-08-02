@@ -41,7 +41,8 @@ compose.desktop {
 
 
         buildTypes.release.proguard {
-            obfuscate.set(true)
+            // fixme test obfuscate.set(true)
+            obfuscate.set(false)
             configurationFiles.from(project.file("compose-desktop.pro"))
         }
     }
