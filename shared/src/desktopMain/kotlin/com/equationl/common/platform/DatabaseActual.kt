@@ -3,8 +3,8 @@ package com.equationl.common.platform
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.equationl.common.database.HistoryDatabaseCtor
 import com.equationl.common.database.HistoryDb
-import com.equationl.common.database.instantiateImpl
 import java.io.File
 
 
@@ -20,7 +20,7 @@ actual class RoomBuilder {
 
         return Room.databaseBuilder<HistoryDb>(
             name = dbFilePath,
-            factory = { HistoryDb::class.instantiateImpl() }
+            factory = HistoryDatabaseCtor::initialize
         ).setDriver(BundledSQLiteDriver())
     }
 }

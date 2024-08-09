@@ -44,8 +44,8 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation("com.ionspin.kotlin:bignum:0.3.10")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-                implementation("androidx.room:room-runtime:2.7.0-alpha05")
-                implementation("androidx.sqlite:sqlite-bundled:2.5.0-alpha05")
+                implementation("androidx.room:room-runtime:2.7.0-alpha06")
+                implementation("androidx.sqlite:sqlite-bundled:2.5.0-alpha06")
             }
         }
         val commonTest by getting {
@@ -110,7 +110,7 @@ android {
 }
 
 dependencies {
-    ksp("androidx.room:room-compiler:2.7.0-alpha05")
+    ksp("androidx.room:room-compiler:2.7.0-alpha06")
 //    add("kspAndroid", "androidx.room:room-compiler:2.7.0-alpha05")
 //    add("kspIosSimulatorArm64", "androidx.room:room-compiler:2.7.0-alpha05")
 //    add("kspIosX64", "androidx.room:room-compiler:2.7.0-alpha05")
