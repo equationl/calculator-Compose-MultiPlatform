@@ -16,6 +16,12 @@ import com.equationl.common.dataModel.KeyIndex_CE
 import com.equationl.common.dataModel.KeyIndex_Clear
 import com.equationl.common.dataModel.KeyIndex_Divide
 import com.equationl.common.dataModel.KeyIndex_Equal
+import com.equationl.common.dataModel.KeyIndex_MemoryClear
+import com.equationl.common.dataModel.KeyIndex_MemoryList
+import com.equationl.common.dataModel.KeyIndex_MemoryMinus
+import com.equationl.common.dataModel.KeyIndex_MemoryPlus
+import com.equationl.common.dataModel.KeyIndex_MemoryRead
+import com.equationl.common.dataModel.KeyIndex_MemorySave
 import com.equationl.common.dataModel.KeyIndex_Minus
 import com.equationl.common.dataModel.KeyIndex_Multiply
 import com.equationl.common.dataModel.KeyIndex_NegativeNumber
@@ -24,6 +30,7 @@ import com.equationl.common.dataModel.KeyIndex_Point
 import com.equationl.common.dataModel.KeyIndex_Pow2
 import com.equationl.common.dataModel.KeyIndex_Reciprocal
 import com.equationl.common.dataModel.KeyIndex_Sqrt
+import com.equationl.common.dataModel.MemoryData
 import com.equationl.common.dataModel.Operator
 import com.equationl.common.database.HistoryDb
 import com.equationl.common.platform.vibrateOnClear
@@ -61,8 +68,10 @@ fun standardPresenter(
             when (action) {
                 is StandardAction.ClickBtn -> clickBtn(action.no, standardState)
                 is StandardAction.ToggleHistory -> toggleHistory(action.forceClose, standardState)
+                is StandardAction.ToggleMemoryScreen -> toggleMemoryList(action.forceClose, standardState)
                 is StandardAction.ReadFromHistory -> readFromHistory(action.item, standardState)
                 is StandardAction.DeleteHistory -> deleteHistory(action.item, standardState)
+                is StandardAction.DeleteMemoryItem -> deleteMemoryItem(action.item, standardState)
                 is StandardAction.Init -> init(action.coroutineScope, standardState)
                 is StandardAction.OnHoldPress -> {
                     holdPressJob?.cancel()
@@ -92,7 +101,10 @@ private var isNeedClrInput: Boolean = false
 private val historyDao = HistoryDb.instance.history()
 
 private fun init(coroutineScope: CoroutineScope, viewStates: MutableState<StandardState>) {
-    viewStates.value = viewStates.value.copy(coroutineScope = coroutineScope)
+    CoroutineScope(Dispatchers.Default).launch {
+        val memoryData = historyDao.getAllMemory()
+        viewStates.value = viewStates.value.copy(coroutineScope = coroutineScope, memoryData = memoryData)
+    }
 }
 
 @OptIn(ExperimentalResourceApi::class)
@@ -147,6 +159,14 @@ private fun deleteHistory(item: HistoryData?, viewStates: MutableState<StandardS
 
             viewStates.value.copy(historyList = newList)
         }
+    }
+}
+
+private fun deleteMemoryItem(item: MemoryData, viewStates: MutableState<StandardState>) {
+    CoroutineScope(Dispatchers.Default).launch {
+        historyDao.deleteMemory(item)
+        val newList = viewStates.value.memoryData - item
+        viewStates.value = viewStates.value.copy(memoryData = newList, isShowMemoryScreen = newList.isNotEmpty())
     }
 }
 
@@ -321,6 +341,68 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
                 viewStates.value = viewStates.value.copy(inputValue = newValue)
             }
         }
+
+        KeyIndex_MemoryClear -> { // "MC"
+            vibrateOnClick()
+            CoroutineScope(Dispatchers.Default).launch {
+                historyDao.deleteAllMemory()
+                viewStates.value = viewStates.value.copy(memoryData = listOf(), isShowMemoryScreen = false)
+            }
+        }
+        KeyIndex_MemoryRead -> { // "MR"
+            vibrateOnClick()
+            val firstValue = viewStates.value.memoryData.firstOrNull()
+            if (firstValue != null) {
+                viewStates.value = viewStates.value.copy(inputValue = firstValue.inputValue, isFinalResult = false)
+            }
+        }
+        KeyIndex_MemoryPlus -> { // "M+"
+            vibrateOnClick()
+            CoroutineScope(Dispatchers.Default).launch {
+                var newValue: String? = viewStates.value.inputValue
+                val firstValue = viewStates.value.memoryData.firstOrNull()
+                if (firstValue != null) {
+                    newValue = calculate(firstValue.inputValue, newValue ?: "0", Operator.ADD).getOrNull()?.toPlainString()
+                }
+                if (newValue != null) {
+                    historyDao.insertMemory(MemoryData(inputValue = newValue!!))
+                    val memoryDataList = historyDao.getAllMemory()
+                    viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
+                }
+            }
+        }
+        KeyIndex_MemoryMinus -> { // "M-"
+            vibrateOnClick()
+            CoroutineScope(Dispatchers.Default).launch {
+                var newValue: String? = viewStates.value.inputValue
+                val firstValue = viewStates.value.memoryData.firstOrNull()
+                if (firstValue != null) {
+                    newValue = calculate(firstValue.inputValue, newValue ?: "0", Operator.MINUS).getOrNull()?.toPlainString()
+                }
+                if (newValue != null) {
+                    historyDao.insertMemory(MemoryData(inputValue = newValue!!))
+                    val memoryDataList = historyDao.getAllMemory()
+                    viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
+                }
+            }
+        }
+        KeyIndex_MemorySave -> { // "MS"
+            vibrateOnClick()
+            CoroutineScope(Dispatchers.Default).launch {
+                historyDao.insertMemory(MemoryData(inputValue = viewStates.value.inputValue))
+                val memoryDataList = historyDao.getAllMemory()
+                viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
+            }
+        }
+        KeyIndex_MemoryList -> { // "M∨"
+            vibrateOnClick()
+
+            toggleMemoryList(false, viewStates)
+
+        }
+        else -> {
+
+        }
     }
 }
 
@@ -329,7 +411,7 @@ private fun clickClear(viewStates: MutableState<StandardState>) {
     isCalculated = false
     isAdvancedCalculated = false
     isErr = false
-    viewStates.value = StandardState()
+    viewStates.value = StandardState(memoryData = viewStates.value.memoryData)
 }
 
 private fun clickReciprocal(viewStates: MutableState<StandardState>) {
@@ -630,6 +712,15 @@ private fun clickArithmetic(operator: Operator, viewStates: MutableState<Standar
     viewStates.value = newState
 }
 
+private fun toggleMemoryList(forceClose: Boolean, viewStates: MutableState<StandardState>) {
+    if (forceClose) {
+        viewStates.value = viewStates.value.copy(isShowMemoryScreen = false)
+    }
+    else {
+        viewStates.value = viewStates.value.copy(isShowMemoryScreen = !viewStates.value.isShowMemoryScreen)
+    }
+}
+
 data class StandardState(
     /** 当前输入的值 */
     val inputValue: String = "0",
@@ -643,14 +734,20 @@ data class StandardState(
     val historyList: List<HistoryData> = listOf(),
     /** 计算历史展示的字符 */
     val lastShowText: String = "",
-    val coroutineScope: CoroutineScope? = null
+    /** 当前记忆数据 */
+    val memoryData: List<MemoryData> = listOf(),
+    /** 是否显示记忆数据 */
+    val isShowMemoryScreen: Boolean = false,
+    val coroutineScope: CoroutineScope? = null,
 )
 
 sealed class StandardAction {
     data class ToggleHistory(val forceClose: Boolean = false): StandardAction()
+    data class ToggleMemoryScreen(val forceClose: Boolean = false): StandardAction()
     data class ClickBtn(val no: Int): StandardAction()
     data class ReadFromHistory(val item: HistoryData): StandardAction()
     data class DeleteHistory(val item: HistoryData?): StandardAction()
+    data class DeleteMemoryItem(val item: MemoryData): StandardAction()
     data class Init(val coroutineScope: CoroutineScope): StandardAction()
     data class OnHoldPress(val isPress: Boolean, val no: Int): StandardAction()
 }

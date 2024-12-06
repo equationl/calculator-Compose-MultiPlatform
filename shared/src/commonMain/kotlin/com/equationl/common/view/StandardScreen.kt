@@ -47,6 +47,12 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.equationl.common.dataModel.KeyIndex_MemoryClear
+import com.equationl.common.dataModel.KeyIndex_MemoryMinus
+import com.equationl.common.dataModel.KeyIndex_MemoryPlus
+import com.equationl.common.dataModel.KeyIndex_MemoryRead
+import com.equationl.common.dataModel.memoryForbidBtnOnNoData
+import com.equationl.common.dataModel.memoryFunctionKeyBoardBtn
 import com.equationl.common.dataModel.standardKeyBoardBtn
 import com.equationl.common.theme.InputLargeFontSize
 import com.equationl.common.theme.ShowNormalFontSize
@@ -74,7 +80,19 @@ fun StandardScreen(
     // 显示数据
     ShowScreen(state) {
         channel.trySend(StandardAction.ToggleHistory(it))
+        channel.trySend(StandardAction.ToggleMemoryScreen(it))
     }
+
+    // 记忆按钮
+    MemoryKeyBoard(
+        isDataEmpty = state.memoryData.isEmpty(),
+        onClick = {
+            channel.trySend(StandardAction.ClickBtn(it))
+        },
+        onHoldPress = { isPress, btnIndex ->
+            channel.trySend(StandardAction.OnHoldPress(isPress, btnIndex))
+        }
+    )
 
     Divider(modifier = Modifier
         .fillMaxWidth()
@@ -84,6 +102,7 @@ fun StandardScreen(
     Box(Modifier.fillMaxSize()) {
         val isShowKeyBoard = state.historyList.isEmpty()
 
+        // 键盘
         StandardKeyBoard(
             onClick = {
                 channel.trySend(StandardAction.ClickBtn(it))
@@ -93,6 +112,7 @@ fun StandardScreen(
             }
         )
 
+        // 历史记录列表
         AnimatedVisibility(
             visible = !isShowKeyBoard,
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -103,12 +123,34 @@ fun StandardScreen(
                 onClick = { channel.trySend(StandardAction.ReadFromHistory(it)) },
                 onDelete = { channel.trySend(StandardAction.DeleteHistory(it)) })
         }
+
+        // 记忆数据列表
+        AnimatedVisibility(
+            visible = state.isShowMemoryScreen,
+            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+        ) {
+            MemoryDataWidget(
+                dataList = state.memoryData,
+                onClick = { channel.trySend(StandardAction.ClickBtn(KeyIndex_MemoryRead)) },
+                onDelete = {
+                    if (it == null) {
+                        channel.trySend(StandardAction.ClickBtn(KeyIndex_MemoryClear))
+                    }
+                    else {
+                        channel.trySend(StandardAction.DeleteMemoryItem(it))
+                    }
+                },
+                onAdd = { channel.trySend(StandardAction.ClickBtn(KeyIndex_MemoryPlus)) },
+                onMinus = { channel.trySend(StandardAction.ClickBtn(KeyIndex_MemoryMinus)) }
+            )
+        }
     }
 }
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalResourceApi::class)
 @Composable
-private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit) {
+private fun ShowScreen(state: StandardState, onToggleFloatScreen: (Boolean) -> Unit) {
     val inputScrollerState = rememberScrollState()
     val showTextScrollerState = rememberScrollState()
     val isShowTextTipIcon by remember { derivedStateOf { showTextScrollerState.value != showTextScrollerState.maxValue } }
@@ -118,7 +160,7 @@ private fun ShowScreen(state: StandardState, onToggleHistory: (Boolean) -> Unit)
         Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.4f)
-            .noRippleClickable { onToggleHistory(true) }
+            .noRippleClickable { onToggleFloatScreen(true) }
         ,
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.SpaceAround
@@ -249,6 +291,28 @@ private fun StandardKeyBoard(onClick: (index: Int) -> Unit, onHoldPress: (isPres
     }
 }
 
+@Composable
+private fun MemoryKeyBoard(isDataEmpty: Boolean, onClick: (index: Int) -> Unit, onHoldPress: (isPress: Boolean, btnIndex: Int) -> Unit) {
+    Column(modifier = Modifier.fillMaxHeight(0.1f)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            for (btn in memoryFunctionKeyBoardBtn()) {
+                TextKeyBoardButton(
+                    text = btn.text,
+                    onHoldPress = {
+                        onHoldPress(it, btn.index)
+                    },
+                    isAvailable = if (isDataEmpty) btn.index !in memoryForbidBtnOnNoData else true,
+                    textColor = btn.background,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun KeyBoardButton(
@@ -277,6 +341,50 @@ private fun KeyBoardButton(
     ) {
         Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
             Text(text, fontSize = 32.sp, color = if (isFilled) Color.Unspecified else backGround)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
+@Composable
+private fun TextKeyBoardButton(
+    text: String,
+    onHoldPress: (isPress: Boolean) -> Unit,
+    textColor: Color = Color.White,
+    isAvailable: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = {  },
+        modifier = modifier
+            .fillMaxSize()
+            //.padding(paddingValues)
+            .onPointerEvent(PointerEventType.Press) {
+                if (isAvailable) {
+                    onHoldPress(true)
+                }
+            }
+            .onPointerEvent(PointerEventType.Release) {
+                if (isAvailable) {
+                    onHoldPress(false)
+                }
+            },
+        backgroundColor = MaterialTheme.colors.surface,
+        shape = MaterialTheme.shapes.large,
+        elevation = 0.dp,
+        border = BorderStroke(0.dp, Color.Transparent),
+        enabled = isAvailable
+    ) {
+        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text,
+                fontSize = 14.sp,
+                color = if (isAvailable) {
+                    textColor
+                } else {
+                    if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
+                }
+            )
         }
     }
 }

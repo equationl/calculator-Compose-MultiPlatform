@@ -40,11 +40,19 @@ const val KeyIndex_Or = 113
 const val KeyIndex_Not = 114
 const val KeyIndex_XOr = 117
 
-// 功能按键
+// 操作按键
 const val KeyIndex_Equal = 1000
 const val KeyIndex_CE = 1001
 const val KeyIndex_Clear = 1002
 const val KeyIndex_Back = 1003
+
+// 记忆按键
+const val KeyIndex_MemoryClear = 1004
+const val KeyIndex_MemoryRead = 1005
+const val KeyIndex_MemoryPlus = 1006
+const val KeyIndex_MemoryMinus = 1007
+const val KeyIndex_MemorySave = 1008
+const val KeyIndex_MemoryList = 1009
 
 
 @Composable
@@ -192,6 +200,16 @@ fun overlayKeyBoardBtn(): List<List<KeyBoardData>> = listOf(
     )
 )
 
+@Composable
+fun memoryFunctionKeyBoardBtn(): List<KeyBoardData> = listOf(
+    KeyBoardData("MC", numberColor(),  KeyIndex_MemoryClear),
+    KeyBoardData("MR", numberColor(),  KeyIndex_MemoryRead),
+    KeyBoardData("M+", numberColor(),  KeyIndex_MemoryPlus),
+    KeyBoardData("M-", numberColor(),  KeyIndex_MemoryMinus),
+    KeyBoardData("MS", numberColor(),  KeyIndex_MemorySave),
+    KeyBoardData("ML", numberColor(),  KeyIndex_MemoryList)
+)
+
 val BitOperationList = listOf(
     Operator.NOT,
     Operator.AND,
@@ -213,6 +231,12 @@ val asciiForbidBtn = listOf(
     KeyIndex_Not,
     KeyIndex_XOr,
     KeyIndex_Equal,
+)
+
+val memoryForbidBtnOnNoData = listOf(
+    KeyIndex_MemoryClear,
+    KeyIndex_MemoryRead,
+    KeyIndex_MemoryList
 )
 
 data class KeyBoardData(
