@@ -48,9 +48,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.equationl.common.dataModel.KeyIndex_MemoryClear
-import com.equationl.common.dataModel.KeyIndex_MemoryMinus
-import com.equationl.common.dataModel.KeyIndex_MemoryPlus
 import com.equationl.common.dataModel.KeyIndex_MemoryRead
+import com.equationl.common.dataModel.Operator
 import com.equationl.common.dataModel.memoryForbidBtnOnNoData
 import com.equationl.common.dataModel.memoryFunctionKeyBoardBtn
 import com.equationl.common.dataModel.standardKeyBoardBtn
@@ -141,8 +140,8 @@ fun StandardScreen(
                         channel.trySend(StandardAction.DeleteMemoryItem(it))
                     }
                 },
-                onAdd = { channel.trySend(StandardAction.ClickBtn(KeyIndex_MemoryPlus)) },
-                onMinus = { channel.trySend(StandardAction.ClickBtn(KeyIndex_MemoryMinus)) }
+                onAdd = { channel.trySend(StandardAction.MemoryOperation(Operator.ADD, it)) },
+                onMinus = { channel.trySend(StandardAction.MemoryOperation(Operator.MINUS, it)) }
             )
         }
     }

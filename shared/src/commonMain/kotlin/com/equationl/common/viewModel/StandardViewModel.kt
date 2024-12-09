@@ -72,6 +72,7 @@ fun standardPresenter(
                 is StandardAction.ReadFromHistory -> readFromHistory(action.item, standardState)
                 is StandardAction.DeleteHistory -> deleteHistory(action.item, standardState)
                 is StandardAction.DeleteMemoryItem -> deleteMemoryItem(action.item, standardState)
+                is StandardAction.MemoryOperation -> memoryOperation(standardState, action.operator, action.value)
                 is StandardAction.Init -> init(action.coroutineScope, standardState)
                 is StandardAction.OnHoldPress -> {
                     holdPressJob?.cancel()
@@ -358,33 +359,11 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
         }
         KeyIndex_MemoryPlus -> { // "M+"
             vibrateOnClick()
-            CoroutineScope(Dispatchers.Default).launch {
-                var newValue: String? = viewStates.value.inputValue
-                val firstValue = viewStates.value.memoryData.firstOrNull()
-                if (firstValue != null) {
-                    newValue = calculate(firstValue.inputValue, newValue ?: "0", Operator.ADD).getOrNull()?.toPlainString()
-                }
-                if (newValue != null) {
-                    historyDao.insertMemory(MemoryData(inputValue = newValue!!))
-                    val memoryDataList = historyDao.getAllMemory()
-                    viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
-                }
-            }
+            memoryOperation(viewStates, Operator.ADD)
         }
         KeyIndex_MemoryMinus -> { // "M-"
             vibrateOnClick()
-            CoroutineScope(Dispatchers.Default).launch {
-                var newValue: String? = viewStates.value.inputValue
-                val firstValue = viewStates.value.memoryData.firstOrNull()
-                if (firstValue != null) {
-                    newValue = calculate(firstValue.inputValue, newValue ?: "0", Operator.MINUS).getOrNull()?.toPlainString()
-                }
-                if (newValue != null) {
-                    historyDao.insertMemory(MemoryData(inputValue = newValue!!))
-                    val memoryDataList = historyDao.getAllMemory()
-                    viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
-                }
-            }
+            memoryOperation(viewStates, Operator.MINUS)
         }
         KeyIndex_MemorySave -> { // "MS"
             vibrateOnClick()
@@ -403,6 +382,29 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
         else -> {
 
         }
+    }
+}
+
+/**
+ * 内存数据运算（M+、M-），如果 [value] 为  null 且当前储存的数据为空 则会新建一条数据，否则会更新传入的 [value]
+ *
+ * @param value 计算使用的数据，如果为 NUll 则使用当前储存的第一条数据，否则使用传入的数据
+ * */
+private fun memoryOperation(viewStates: MutableState<StandardState>, operator: Operator, value: MemoryData? = null) {
+    CoroutineScope(Dispatchers.Default).launch {
+        var inputValue: String? = viewStates.value.inputValue
+        val memoryValue = value ?: viewStates.value.memoryData.firstOrNull()
+
+        if (memoryValue == null) {
+            historyDao.insertMemory(MemoryData(inputValue = inputValue!!))
+        }
+        else {
+            inputValue = calculate(memoryValue.inputValue, inputValue ?: "0", operator).getOrNull()?.toPlainString()
+            historyDao.updateMemory(memoryValue.copy(inputValue = inputValue!!))
+        }
+
+        val memoryDataList = historyDao.getAllMemory()
+        viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
     }
 }
 
@@ -748,6 +750,7 @@ sealed class StandardAction {
     data class ReadFromHistory(val item: HistoryData): StandardAction()
     data class DeleteHistory(val item: HistoryData?): StandardAction()
     data class DeleteMemoryItem(val item: MemoryData): StandardAction()
+    data class MemoryOperation(val operator: Operator, val value: MemoryData? = null): StandardAction()
     data class Init(val coroutineScope: CoroutineScope): StandardAction()
     data class OnHoldPress(val isPress: Boolean, val no: Int): StandardAction()
 }

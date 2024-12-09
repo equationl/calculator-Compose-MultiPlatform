@@ -46,7 +46,6 @@ fun MemoryDataWidget(
     onMinus: (item: MemoryData) -> Unit,
     onDelete: (item: MemoryData?) -> Unit,
 ) {
-    // FIXME M+ 和 M- 的逻辑有问题
     Column(
         Modifier
             .fillMaxSize()
