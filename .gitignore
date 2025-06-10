@@ -54,3 +54,4 @@ shared/shared.podspec
 /.idea/.name
 /.idea/artifacts/*
 /.idea/other.xml
+/.kotlin/metadata/*

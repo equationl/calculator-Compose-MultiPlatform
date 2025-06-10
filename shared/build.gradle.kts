@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.android.library")
     id("com.google.devtools.ksp")
     id("androidx.room")
@@ -11,11 +12,13 @@ group = "com.equationl"
 version = "1.2.4"
 
 kotlin {
-    android()
+    androidTarget()
 
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+
+    jvmToolchain(18)
 
     cocoapods {
         version = "1.2.4"
@@ -32,7 +35,6 @@ kotlin {
     }
 
     jvm("desktop") {
-        jvmToolchain(18)
     }
     sourceSets {
         val commonMain by getting {
@@ -44,8 +46,8 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation("com.ionspin.kotlin:bignum:0.3.10")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-                implementation("androidx.room:room-runtime:2.7.0-alpha06")
-                implementation("androidx.sqlite:sqlite-bundled:2.5.0-alpha06")
+                implementation("androidx.room:room-runtime:2.7.1")
+                implementation("androidx.sqlite:sqlite-bundled:2.5.1")
             }
         }
         val commonTest by getting {
@@ -55,8 +57,8 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                api("androidx.appcompat:appcompat:1.6.1")
-                api("androidx.core:core-ktx:1.10.1")
+                api("androidx.appcompat:appcompat:1.7.1")
+                api("androidx.core:core-ktx:1.16.0")
                 api("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
                 api("com.blankj:utilcode:1.30.7")
                 api("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
@@ -110,7 +112,7 @@ android {
 }
 
 dependencies {
-    ksp("androidx.room:room-compiler:2.7.0-alpha06")
+    ksp("androidx.room:room-compiler:2.7.1")
 //    add("kspAndroid", "androidx.room:room-compiler:2.7.0-alpha05")
 //    add("kspIosSimulatorArm64", "androidx.room:room-compiler:2.7.0-alpha05")
 //    add("kspIosX64", "androidx.room:room-compiler:2.7.0-alpha05")

@@ -1,5 +1,6 @@
 plugins {
     id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.android.application")
     kotlin("android")
 }

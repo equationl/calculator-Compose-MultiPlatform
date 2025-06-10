@@ -57,7 +57,7 @@ fun HistoryWidget(
                     horizontalAlignment = Alignment.End,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .animateItemPlacement()
+                        .animateItem()
                         .padding(8.dp)
                         .combinedClickable(
                             onClick = { onClick(it) },

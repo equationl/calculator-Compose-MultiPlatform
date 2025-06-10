@@ -15,6 +15,7 @@ plugins {
     id("com.android.application") apply false
     id("com.android.library") apply false
     id("org.jetbrains.compose") apply false
-    id("com.google.devtools.ksp") version "1.9.23-1.0.20" apply false
-    id("androidx.room") version "2.7.0-alpha05" apply false
+    id("org.jetbrains.kotlin.plugin.compose") apply false
+    id("com.google.devtools.ksp") version "2.1.21-2.0.1" apply false
+    id("androidx.room") version "2.7.1" apply false
 }

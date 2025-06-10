@@ -3,6 +3,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 group = "com.equationl"
@@ -10,8 +11,9 @@ version = "1.2.4"
 
 
 kotlin {
+    jvmToolchain(11)
+
     jvm {
-        jvmToolchain(11)
         withJava()
     }
     sourceSets {
