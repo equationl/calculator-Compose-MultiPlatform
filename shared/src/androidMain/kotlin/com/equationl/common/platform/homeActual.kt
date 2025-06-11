@@ -8,9 +8,9 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import com.blankj.utilcode.util.ActivityUtils
+import com.equationl.common.constant.KeyBoardTypeEnum
 import com.equationl.common.constant.PlatformType
 import com.equationl.common.overlay.OverlayService
-import com.equationl.common.viewModel.KeyboardTypeStandard
 import com.equationl.shared.generated.resources.Res
 import com.equationl.shared.generated.resources.tip_need_float_permission
 import com.equationl.shared.generated.resources.tip_not_support_float_cause_android_version
@@ -49,15 +49,15 @@ actual suspend fun showFloatWindows() {
     }
 }
 
-actual fun changeKeyBoardType(changeTo: Int, isFromUser: Boolean) {
+actual fun changeKeyBoardType(changeTo: KeyBoardTypeEnum, isFromUser: Boolean) {
     if (!isFromUser) return
     vibrateOnClick()
     val activity = ActivityUtils.getTopActivity()
     activity?.requestedOrientation =
-        if (changeTo == KeyboardTypeStandard)
-            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        else
+        if (changeTo == KeyBoardTypeEnum.Programmer)
             ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        else
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 }
 
 actual fun isNeedShowFloatBtn(): Boolean = true

@@ -39,20 +39,47 @@ const val KeyIndex_And = 112
 const val KeyIndex_Or = 113
 const val KeyIndex_Not = 114
 const val KeyIndex_XOr = 117
+const val KeyIndex_Pow3 = 118
+const val KeyIndex_Sqrt3 = 119
+const val KeyIndex_Abs = 120
+const val KeyIndex_Exp = 121
+const val KeyIndex_Mod = 122
+const val KeyIndex_LeftBrackets = 123
+const val KeyIndex_RightBrackets = 124
+const val KeyIndex_Factorial = 125
+const val KeyIndex_XPowY = 126
+const val KeyIndex_XSqrtY = 127
+const val KeyIndex_10PowX = 128
+const val KeyIndex_2PowX = 129
+const val KeyIndex_Log = 130
+const val KeyIndex_LogYX = 131
+const val KeyIndex_Ln = 132
+const val KeyIndex_EPowX = 133
+
+// 常量
+const val KeyIndex_Constant_PI = 200
+const val KeyIndex_Constant_E = 201
 
 // 操作按键
 const val KeyIndex_Equal = 1000
 const val KeyIndex_CE = 1001
 const val KeyIndex_Clear = 1002
 const val KeyIndex_Back = 1003
+const val KeyIndex_CE_Clear = 1004
 
 // 记忆按键
-const val KeyIndex_MemoryClear = 1004
-const val KeyIndex_MemoryRead = 1005
-const val KeyIndex_MemoryPlus = 1006
-const val KeyIndex_MemoryMinus = 1007
-const val KeyIndex_MemorySave = 1008
-const val KeyIndex_MemoryList = 1009
+const val KeyIndex_MemoryClear = 1104
+const val KeyIndex_MemoryRead = 1105
+const val KeyIndex_MemoryPlus = 1106
+const val KeyIndex_MemoryMinus = 1107
+const val KeyIndex_MemorySave = 1108
+const val KeyIndex_MemoryList = 1109
+
+// 其他按键
+/** 切换角度、弧度、梯度*/
+const val KeyIndex_ToggleAngle = 2000
+/** 切换数字显示方式，科学计数法*/
+const val KeyIndex_ToggleResultType = 2001
 
 
 @Composable
@@ -103,6 +130,66 @@ fun standardKeyBoardBtn(): List<List<KeyBoardData>> = listOf(
             KeyBoardData("=", equalColor(), KeyIndex_Equal, isFilled = true),
         )
     )
+
+@Composable
+fun scienceKeyBoardBtn(): List<List<KeyBoardData>> = listOf(
+    listOf(
+        KeyBoardData("DEG", functionColor(),  KeyIndex_ToggleAngle),
+        KeyBoardData("F-E", functionColor(), KeyIndex_ToggleResultType),
+        KeyBoardData("π", functionColor(),  KeyIndex_Constant_PI),
+        KeyBoardData("e", functionColor(),  KeyIndex_Constant_E),
+        KeyBoardData("C", functionColor(),  KeyIndex_CE_Clear),
+        KeyBoardData("⇦", functionColor(),  KeyIndex_Back),
+    ),
+    listOf(
+        KeyBoardData("x²", functionColor(), KeyIndex_Pow2),
+        KeyBoardData("x³", functionColor(), KeyIndex_Pow3),
+        KeyBoardData("1/x", functionColor(), KeyIndex_Reciprocal),
+        KeyBoardData("|x|", functionColor(), KeyIndex_Abs),
+        KeyBoardData("exp", functionColor(), KeyIndex_Exp),
+        KeyBoardData("mod", functionColor(), KeyIndex_Mod),
+    ),
+    listOf(
+        KeyBoardData("²√x", functionColor(), KeyIndex_Sqrt),
+        KeyBoardData("³√x", functionColor(), KeyIndex_Sqrt3),
+        KeyBoardData("(", functionColor(), KeyIndex_LeftBrackets),
+        KeyBoardData(")", functionColor(), KeyIndex_RightBrackets),
+        KeyBoardData("n!", functionColor(), KeyIndex_Factorial),
+        KeyBoardData(Operator.Divide.showText, functionColor(), KeyIndex_Divide),
+    ),
+    listOf(
+        KeyBoardData("xʸ", functionColor(), KeyIndex_XPowY),
+        KeyBoardData("ʸ√x", functionColor(), KeyIndex_XSqrtY),
+        KeyBoardData("7", numberColor(), KeyIndex_7),
+        KeyBoardData("8", numberColor(), KeyIndex_8),
+        KeyBoardData("9", numberColor(), KeyIndex_9),
+        KeyBoardData(Operator.MULTIPLY.showText, functionColor(), KeyIndex_Multiply),
+    ),
+    listOf(
+        KeyBoardData("10ˣ", functionColor(), KeyIndex_10PowX),
+        KeyBoardData("2ˣ", functionColor(), KeyIndex_2PowX),
+        KeyBoardData("4", numberColor(), KeyIndex_4),
+        KeyBoardData("5", numberColor(), KeyIndex_5),
+        KeyBoardData("6", numberColor(), KeyIndex_6),
+        KeyBoardData(Operator.MINUS.showText, functionColor(), KeyIndex_Minus),
+    ),
+    listOf(
+        KeyBoardData("log", functionColor(), KeyIndex_Log),
+        KeyBoardData("logᵧx", functionColor(), KeyIndex_LogYX),
+        KeyBoardData("1", numberColor(), KeyIndex_1),
+        KeyBoardData("2", numberColor(), KeyIndex_2),
+        KeyBoardData("3", numberColor(), KeyIndex_3),
+        KeyBoardData(Operator.ADD.showText, functionColor(), KeyIndex_Add),
+    ),
+    listOf(
+        KeyBoardData("ln", functionColor(), KeyIndex_Ln),
+        KeyBoardData("eˣ", functionColor(), KeyIndex_EPowX),
+        KeyBoardData("±", functionColor(), KeyIndex_NegativeNumber),
+        KeyBoardData("0", numberColor(), KeyIndex_0,),
+        KeyBoardData(".", functionColor(), KeyIndex_Point),
+        KeyBoardData("=", equalColor(), KeyIndex_Equal, isFilled = true),
+    )
+)
 
 @Composable
 fun programmerNumberKeyBoardBtn(): List<List<KeyBoardData>> = listOf(

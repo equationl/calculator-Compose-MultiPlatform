@@ -32,15 +32,18 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.equationl.common.constant.KeyBoardTypeEnum
 import com.equationl.common.constant.PlatformType
 import com.equationl.common.platform.currentPlatform
 import com.equationl.common.theme.CalculatorComposeTheme
 import com.equationl.common.view.HomeScreen
 import com.equationl.common.viewModel.HomeAction
 import com.equationl.common.viewModel.ProgrammerAction
+import com.equationl.common.viewModel.ScienceAction
 import com.equationl.common.viewModel.StandardAction
 import com.equationl.common.viewModel.homePresenter
 import com.equationl.common.viewModel.programmerPresenter
+import com.equationl.common.viewModel.sciencePresenter
 import com.equationl.common.viewModel.standardPresenter
 import com.equationl.shared.generated.resources.Res
 import com.equationl.shared.generated.resources.long_press_select_copy
@@ -50,7 +53,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 
 
@@ -92,14 +94,14 @@ fun hideKeyBoard() {
     softwareKeyboardController?.hide()
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun APP(
     standardChannelTop: Channel<StandardAction>? = null,
     programmerChannelTop: Channel<ProgrammerAction>? = null,
+    scienceChannelTop: Channel<ScienceAction>? = null,
     homeChannelTop: Channel<HomeAction>? = null,
     isFloat: Boolean? = null,
-    boardType: Int? = null,
+    boardType: KeyBoardTypeEnum? = null,
     onStart: (@Composable (backgroundColor: Color, isLight: Boolean) -> Unit)? = null
 ) {
     val homeChannel = homeChannelTop ?: remember { Channel(capacity = Channel.UNLIMITED) }
@@ -114,6 +116,10 @@ fun APP(
     val programmerChannel = programmerChannelTop ?: remember { Channel(capacity = Channel.UNLIMITED) }
     val programmerFlow = remember(programmerChannel) { programmerChannel.consumeAsFlow() }
     val programmerState = programmerPresenter(programmerFlow)
+
+    val scienceChannel = scienceChannelTop ?: remember { Channel(capacity = Channel.UNLIMITED) }
+    val scienceFlow = remember(scienceChannel) { scienceChannel.consumeAsFlow() }
+    val scienceState = sciencePresenter(scienceFlow)
 
     softwareKeyboardController = LocalSoftwareKeyboardController.current
 
@@ -143,7 +149,9 @@ fun APP(
                     standardChannel,
                     standardState,
                     programmerChannel,
-                    programmerState
+                    programmerState,
+                    scienceChannel,
+                    scienceState
                 )
 
                 SnackbarHost(

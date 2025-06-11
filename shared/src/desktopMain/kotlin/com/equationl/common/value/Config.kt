@@ -1,9 +1,9 @@
 package com.equationl.common.value
 
 import androidx.compose.runtime.mutableStateOf
-import com.equationl.common.viewModel.KeyboardTypeStandard
+import com.equationl.common.constant.KeyBoardTypeEnum
 
 object Config {
-    val boardType = mutableStateOf(KeyboardTypeStandard)
+    val boardType = mutableStateOf(KeyBoardTypeEnum.Standard)
     val isFloat = mutableStateOf(false)
 }

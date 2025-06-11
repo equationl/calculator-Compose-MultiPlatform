@@ -4,6 +4,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import com.equationl.common.constant.KeyBoardTypeEnum
 import com.equationl.common.constant.Text
 import com.equationl.common.utils.asciiCode2BtnIndex
 import com.equationl.common.utils.isKeyTyped
@@ -11,7 +12,6 @@ import com.equationl.common.value.Config
 import com.equationl.common.value.defaultWindowPosition
 import com.equationl.common.value.defaultWindowSize
 import com.equationl.common.value.landWindowSize
-import com.equationl.common.viewModel.KeyboardTypeStandard
 import com.equationl.common.viewModel.ProgrammerAction
 import com.equationl.common.viewModel.StandardAction
 import kotlinx.coroutines.channels.Channel
@@ -19,10 +19,10 @@ import kotlinx.coroutines.channels.Channel
 
 fun main() = application {
 
-    val state = if (Config.boardType.value == KeyboardTypeStandard) {
-        rememberWindowState(size = defaultWindowSize, position = defaultWindowPosition)
-    } else {
+    val state = if (Config.boardType.value == KeyBoardTypeEnum.Programmer) {
         rememberWindowState(size = landWindowSize, position = defaultWindowPosition)
+    } else {
+        rememberWindowState(size = defaultWindowSize, position = defaultWindowPosition)
     }
 
 
@@ -42,11 +42,12 @@ fun main() = application {
                 if (isKeyTyped(it)) {
                     val btnIndex = asciiCode2BtnIndex(it.utf16CodePoint)
                     if (btnIndex != -1) {
-                        if (Config.boardType.value == KeyboardTypeStandard) {
-                            standardChannel.trySend(StandardAction.ClickBtn(btnIndex))
-                        }
-                        else {
-                            programmerChannel.trySend(ProgrammerAction.ClickBtn(btnIndex))
+                        when (Config.boardType.value) {
+                            KeyBoardTypeEnum.Standard -> standardChannel.trySend(StandardAction.ClickBtn(btnIndex))
+                            KeyBoardTypeEnum.Programmer -> programmerChannel.trySend(ProgrammerAction.ClickBtn(btnIndex))
+                            KeyBoardTypeEnum.Science -> {
+                                // TODO 科学计算器计算
+                            }
                         }
                     }
                 }
@@ -74,11 +75,12 @@ fun main() = application {
                 if (isKeyTyped(it)) {
                     val btnIndex = asciiCode2BtnIndex(it.utf16CodePoint)
                     if (btnIndex != -1) {
-                        if (Config.boardType.value == KeyboardTypeStandard) {
-                            standardChannel.trySend(StandardAction.ClickBtn(btnIndex))
-                        }
-                        else {
-                            programmerChannel.trySend(ProgrammerAction.ClickBtn(btnIndex))
+                        when (Config.boardType.value) {
+                            KeyBoardTypeEnum.Standard -> standardChannel.trySend(StandardAction.ClickBtn(btnIndex))
+                            KeyBoardTypeEnum.Programmer -> programmerChannel.trySend(ProgrammerAction.ClickBtn(btnIndex))
+                            KeyBoardTypeEnum.Science -> {
+                                // TODO 科学计算器计算
+                            }
                         }
                     }
                 }

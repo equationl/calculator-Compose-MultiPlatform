@@ -1,10 +1,9 @@
 
 import androidx.compose.ui.window.ComposeUIViewController
+import com.equationl.common.constant.KeyBoardTypeEnum
 import com.equationl.common.platform.changeScreenOrientationFunc
 import com.equationl.common.platform.vibrateFunc
 import com.equationl.common.viewModel.HomeAction
-import com.equationl.common.viewModel.KeyboardTypeProgrammer
-import com.equationl.common.viewModel.KeyboardTypeStandard
 import kotlinx.coroutines.channels.Channel
 
 private var homeChannel: Channel<HomeAction>? = Channel(capacity = Channel.UNLIMITED)
@@ -23,14 +22,14 @@ fun onScreenChange(orientation: Int) {
     if (orientation == 0) {
         homeChannel?.trySend(
             HomeAction.OnScreenOrientationChange(
-                changeToType = KeyboardTypeStandard
+                changeToType = KeyBoardTypeEnum.Standard
             )
         )
     }
     else if (orientation == 1) {
         homeChannel?.trySend(
             HomeAction.OnScreenOrientationChange(
-                changeToType = KeyboardTypeProgrammer
+                changeToType = KeyBoardTypeEnum.Programmer
             )
         )
     }

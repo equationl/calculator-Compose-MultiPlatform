@@ -22,6 +22,7 @@
     <string name="please_wait">Please wait</string>
     <string name="back_app_home">Return to APP</string>
     <string name="close">Close</string>
+    <string name="more">More function</string>
 
     <string name="long_press_select_copy">Long press to select and copy</string>
     <string name="text_is_too_long">The number is too large to be displayed, please click to view</string>
@@ -40,4 +41,5 @@
 
     <string name="keyBoard_title_standard">Standard</string>
     <string name="keyBoard_title_programmer">Programmer</string>
+    <string name="keyBoard_title_science">Science</string>
 </resources>

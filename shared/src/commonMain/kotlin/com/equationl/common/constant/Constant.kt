@@ -14,3 +14,9 @@ enum class PlatformType {
     Android,
     Ios,
 }
+
+enum class KeyBoardTypeEnum(val typeIndex: Int) {
+    Standard(1),
+    Programmer(2),
+    Science(3),
+}

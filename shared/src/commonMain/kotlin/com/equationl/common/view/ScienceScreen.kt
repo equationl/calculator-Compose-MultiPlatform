@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
@@ -40,7 +39,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -52,17 +50,15 @@ import com.equationl.common.dataModel.KeyIndex_MemoryRead
 import com.equationl.common.dataModel.Operator
 import com.equationl.common.dataModel.memoryForbidBtnOnNoData
 import com.equationl.common.dataModel.memoryFunctionKeyBoardBtn
-import com.equationl.common.dataModel.standardKeyBoardBtn
+import com.equationl.common.dataModel.scienceKeyBoardBtn
 import com.equationl.common.theme.InputLargeFontSize
 import com.equationl.common.theme.ShowNormalFontSize
-import com.equationl.common.theme.ShowSmallFontSize
 import com.equationl.common.utils.formatNumber
 import com.equationl.common.utils.onPointerEvent
-import com.equationl.common.view.widgets.AutoSizeText
 import com.equationl.common.view.widgets.noRippleClickable
 import com.equationl.common.view.widgets.scrollToLeftAnimation
-import com.equationl.common.viewModel.StandardAction
-import com.equationl.common.viewModel.StandardState
+import com.equationl.common.viewModel.ScienceAction
+import com.equationl.common.viewModel.ScienceState
 import com.equationl.shared.generated.resources.Res
 import com.equationl.shared.generated.resources.scroll_left
 import com.equationl.shared.generated.resources.text_is_too_long
@@ -70,25 +66,26 @@ import kotlinx.coroutines.channels.Channel
 import org.jetbrains.compose.resources.stringResource
 import showDialog
 
+// TODO 科学计算器界面
 @Composable
-fun StandardScreen(
-    channel: Channel<StandardAction>,
-    state: StandardState
+fun ScienceScreen(
+    channel: Channel<ScienceAction>,
+    state: ScienceState
 ) {
     // 显示数据
     ShowScreen(state) {
-        channel.trySend(StandardAction.ToggleHistory(it))
-        channel.trySend(StandardAction.ToggleMemoryScreen(it))
+        channel.trySend(ScienceAction.ToggleHistory(it))
+        channel.trySend(ScienceAction.ToggleMemoryScreen(it))
     }
 
     // 记忆按钮
     MemoryKeyBoard(
         isDataEmpty = state.memoryData.isEmpty(),
         onClick = {
-            channel.trySend(StandardAction.ClickBtn(it))
+            channel.trySend(ScienceAction.ClickBtn(it))
         },
         onHoldPress = { isPress, btnIndex ->
-            channel.trySend(StandardAction.OnHoldPress(isPress, btnIndex))
+            channel.trySend(ScienceAction.OnHoldPress(isPress, btnIndex))
         }
     )
 
@@ -101,12 +98,12 @@ fun StandardScreen(
         val isShowKeyBoard = state.historyList.isEmpty()
 
         // 键盘
-        StandardKeyBoard(
+        ScienceKeyBoard(
             onClick = {
-                channel.trySend(StandardAction.ClickBtn(it))
+                channel.trySend(ScienceAction.ClickBtn(it))
             },
             onHoldPress = { isPress, btnIndex ->
-                channel.trySend(StandardAction.OnHoldPress(isPress, btnIndex))
+                channel.trySend(ScienceAction.OnHoldPress(isPress, btnIndex))
             }
         )
 
@@ -118,8 +115,8 @@ fun StandardScreen(
         ) {
             HistoryWidget(
                 historyList = state.historyList,
-                onClick = { channel.trySend(StandardAction.ReadFromHistory(it)) },
-                onDelete = { channel.trySend(StandardAction.DeleteHistory(it)) })
+                onClick = { channel.trySend(ScienceAction.ReadFromHistory(it)) },
+                onDelete = { channel.trySend(ScienceAction.DeleteHistory(it)) })
         }
 
         // 记忆数据列表
@@ -130,25 +127,26 @@ fun StandardScreen(
         ) {
             MemoryDataWidget(
                 dataList = state.memoryData,
-                onClick = { channel.trySend(StandardAction.ClickBtn(KeyIndex_MemoryRead)) },
+                onClick = { channel.trySend(ScienceAction.ClickBtn(KeyIndex_MemoryRead)) },
                 onDelete = {
                     if (it == null) {
-                        channel.trySend(StandardAction.ClickBtn(KeyIndex_MemoryClear))
+                        channel.trySend(ScienceAction.ClickBtn(KeyIndex_MemoryClear))
                     }
                     else {
-                        channel.trySend(StandardAction.DeleteMemoryItem(it))
+                        channel.trySend(ScienceAction.DeleteMemoryItem(it))
                     }
                 },
-                onAdd = { channel.trySend(StandardAction.MemoryOperation(Operator.ADD, it)) },
-                onMinus = { channel.trySend(StandardAction.MemoryOperation(Operator.MINUS, it)) }
+                onAdd = { channel.trySend(ScienceAction.MemoryOperation(Operator.ADD, it)) },
+                onMinus = { channel.trySend(ScienceAction.MemoryOperation(Operator.MINUS, it)) }
             )
         }
     }
 }
 
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun ShowScreen(state: StandardState, onToggleFloatScreen: (Boolean) -> Unit) {
+private fun ShowScreen(state: ScienceState, onToggleFloatScreen: (Boolean) -> Unit) {
     val inputScrollerState = rememberScrollState()
     val showTextScrollerState = rememberScrollState()
     val isShowTextTipIcon by remember { derivedStateOf { showTextScrollerState.value != showTextScrollerState.maxValue } }
@@ -163,23 +161,6 @@ private fun ShowScreen(state: StandardState, onToggleFloatScreen: (Boolean) -> U
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.SpaceAround
     ) {
-        // 上一个计算结果
-        AnimatedContent(targetState = state.lastShowText) { targetState: String ->
-            SelectionContainer {
-                AutoSizeText(
-                    text = targetState,
-                    fontSize = ShowSmallFontSize,
-                    fontWeight = FontWeight.Light,
-                    color = if (MaterialTheme.colors.isLight) Color.Unspecified else MaterialTheme.colors.primary,
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 16.dp)
-                        .alpha(0.5f),
-                    minSize = 10.sp
-                )
-            }
-        }
-
         Column(horizontalAlignment = Alignment.End) {
             // 计算公式
             AnimatedContent(targetState = state.showText) { targetState: String ->
@@ -264,9 +245,9 @@ private fun ShowScreen(state: StandardState, onToggleFloatScreen: (Boolean) -> U
 }
 
 @Composable
-private fun StandardKeyBoard(onClick: (index: Int) -> Unit, onHoldPress: (isPress: Boolean, btnIndex: Int) -> Unit) {
+private fun ScienceKeyBoard(onClick: (index: Int) -> Unit, onHoldPress: (isPress: Boolean, btnIndex: Int) -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
-        for (btnRow in standardKeyBoardBtn()) {
+        for (btnRow in scienceKeyBoardBtn()) {
             Row(modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)) {
@@ -280,7 +261,7 @@ private fun StandardKeyBoard(onClick: (index: Int) -> Unit, onHoldPress: (isPres
                             },
                             backGround = btn.background,
                             paddingValues = PaddingValues(0.5.dp),
-                            isFilled = btn.isFilled
+                            isFilled = btn.isFilled,
                         )
                     }
                 }
@@ -319,7 +300,7 @@ private fun KeyBoardButton(
     onHoldPress: (isPress: Boolean) -> Unit,
     backGround: Color = Color.White,
     isFilled: Boolean = false,
-    paddingValues: PaddingValues = PaddingValues(0.dp)
+    paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
     Card(
         onClick = { onClick() },
@@ -338,7 +319,7 @@ private fun KeyBoardButton(
         border = BorderStroke(0.dp, Color.Transparent)
     ) {
         Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            Text(text, fontSize = 32.sp, color = if (isFilled) Color.Unspecified else backGround)
+            Text(text, fontSize = 16.sp, color = if (isFilled) Color.Unspecified else backGround)
         }
     }
 }
@@ -353,7 +334,7 @@ private fun TextKeyBoardButton(
     modifier: Modifier = Modifier
 ) {
     Card(
-        onClick = {  },
+        onClick = { },
         modifier = modifier
             .fillMaxSize()
             //.padding(paddingValues)
@@ -373,7 +354,11 @@ private fun TextKeyBoardButton(
         border = BorderStroke(0.dp, Color.Transparent),
         enabled = isAvailable
     ) {
-        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text,
                 fontSize = 14.sp,

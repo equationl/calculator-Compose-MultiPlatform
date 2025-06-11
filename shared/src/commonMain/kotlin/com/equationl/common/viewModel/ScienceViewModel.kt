@@ -54,36 +54,39 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
 
+// TODO 科学计算的 viewModel
+
+
 private var holdPressJob: Job? = null
 
 @Composable
-fun standardPresenter(
-    standardActionFlow: Flow<StandardAction>
-): StandardState {
-    val standardState = remember { mutableStateOf(StandardState()) }
+fun sciencePresenter(
+    scienceActionFlow: Flow<ScienceAction>
+): ScienceState {
+    val scienceState = remember { mutableStateOf(ScienceState()) }
 
     LaunchedEffect(Unit) {
-        standardActionFlow.collect { action ->
+        scienceActionFlow.collect { action ->
             when (action) {
-                is StandardAction.ClickBtn -> clickBtn(action.no, standardState)
-                is StandardAction.ToggleHistory -> toggleHistory(action.forceClose, standardState)
-                is StandardAction.ToggleMemoryScreen -> toggleMemoryList(action.forceClose, standardState)
-                is StandardAction.ReadFromHistory -> readFromHistory(action.item, standardState)
-                is StandardAction.DeleteHistory -> deleteHistory(action.item, standardState)
-                is StandardAction.DeleteMemoryItem -> deleteMemoryItem(action.item, standardState)
-                is StandardAction.MemoryOperation -> memoryOperation(standardState, action.operator, action.value)
-                is StandardAction.Init -> init(action.coroutineScope, standardState)
-                is StandardAction.OnHoldPress -> {
+                is ScienceAction.ClickBtn -> clickBtn(action.no, scienceState)
+                is ScienceAction.ToggleHistory -> toggleHistory(action.forceClose, scienceState)
+                is ScienceAction.ToggleMemoryScreen -> toggleMemoryList(action.forceClose, scienceState)
+                is ScienceAction.ReadFromHistory -> readFromHistory(action.item, scienceState)
+                is ScienceAction.DeleteHistory -> deleteHistory(action.item, scienceState)
+                is ScienceAction.DeleteMemoryItem -> deleteMemoryItem(action.item, scienceState)
+                is ScienceAction.MemoryOperation -> memoryOperation(scienceState, action.operator, action.value)
+                is ScienceAction.Init -> init(action.coroutineScope, scienceState)
+                is ScienceAction.OnHoldPress -> {
                     holdPressJob?.cancel()
                     holdPressJob = launch {
-                        onHoldPress(action.isPress, action.no, standardState)
+                        onHoldPress(action.isPress, action.no, scienceState)
                     }
                 }
             }
         }
     }
 
-    return standardState.value
+    return scienceState.value
 }
 
 
@@ -100,14 +103,14 @@ private var isNeedClrInput: Boolean = false
 
 private val historyDao = HistoryDb.instance.history()
 
-private fun init(coroutineScope: CoroutineScope, viewStates: MutableState<StandardState>) {
+private fun init(coroutineScope: CoroutineScope, viewStates: MutableState<ScienceState>) {
     CoroutineScope(Dispatchers.Default).launch {
         val memoryData = historyDao.getAllMemory()
         viewStates.value = viewStates.value.copy(coroutineScope = coroutineScope, memoryData = memoryData)
     }
 }
 
-private suspend fun toggleHistory(forceClose: Boolean, viewStates: MutableState<StandardState>) {
+private suspend fun toggleHistory(forceClose: Boolean, viewStates: MutableState<ScienceState>) {
     vibrateOnClick()
 
     if (viewStates.value.historyList.isNotEmpty() || forceClose) {
@@ -130,10 +133,10 @@ private suspend fun toggleHistory(forceClose: Boolean, viewStates: MutableState<
     }
 }
 
-private fun readFromHistory(item: HistoryData, viewStates: MutableState<StandardState>) {
+private fun readFromHistory(item: HistoryData, viewStates: MutableState<ScienceState>) {
     if (item.id != -1) {
         vibrateOnEqual()
-        viewStates.value = StandardState(
+        viewStates.value = ScienceState(
             inputValue = item.result,
             lastInputValue = item.lastInputText,
             inputOperator = item.operator,
@@ -143,7 +146,7 @@ private fun readFromHistory(item: HistoryData, viewStates: MutableState<Standard
     }
 }
 
-private fun deleteHistory(item: HistoryData?, viewStates: MutableState<StandardState>) {
+private fun deleteHistory(item: HistoryData?, viewStates: MutableState<ScienceState>) {
     CoroutineScope(Dispatchers.Default).launch {
         vibrateOnError()
         viewStates.value = if (item == null) {
@@ -161,7 +164,7 @@ private fun deleteHistory(item: HistoryData?, viewStates: MutableState<StandardS
     }
 }
 
-private fun deleteMemoryItem(item: MemoryData, viewStates: MutableState<StandardState>) {
+private fun deleteMemoryItem(item: MemoryData, viewStates: MutableState<ScienceState>) {
     CoroutineScope(Dispatchers.Default).launch {
         historyDao.deleteMemory(item)
         val newList = viewStates.value.memoryData - item
@@ -169,7 +172,7 @@ private fun deleteMemoryItem(item: MemoryData, viewStates: MutableState<Standard
     }
 }
 
-private suspend fun onHoldPress(isPress: Boolean, no: Int, viewStates: MutableState<StandardState>) {
+private suspend fun onHoldPress(isPress: Boolean, no: Int, viewStates: MutableState<ScienceState>) {
     if (isPress) {
         // 先触发一次点击事件
         clickBtn(no, viewStates)
@@ -189,9 +192,9 @@ private suspend fun onHoldPress(isPress: Boolean, no: Int, viewStates: MutableSt
 }
 
 
-private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
+private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
     if (isErr) {
-        viewStates.value = StandardState()
+        viewStates.value = ScienceState()
         isErr = false
         isAdvancedCalculated = false
         isCalculated = false
@@ -207,7 +210,7 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
                     isAdvancedCalculated = false
                     isCalculated = false
                     isInputSecondValue = false
-                    viewStates.value = StandardState()
+                    viewStates.value = ScienceState()
                     no.toString()
                 }
                 no.toString()
@@ -220,7 +223,7 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
             else if (isCalculated) {
                 isCalculated = false
                 isInputSecondValue = false
-                viewStates.value = StandardState(
+                viewStates.value = ScienceState(
                     lastShowText =
                         if (!isAdvancedCalculated)
                             viewStates.value.showText+viewStates.value.inputValue
@@ -232,7 +235,7 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
                 isAdvancedCalculated = false
                 isCalculated = false
                 isInputSecondValue = false
-                viewStates.value = StandardState()
+                viewStates.value = ScienceState()
                 no.toString()
             }
             else if (!isCalculated && isInputSecondValue && isNeedClrInput) {
@@ -388,7 +391,7 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
  *
  * @param value 计算使用的数据，如果为 NUll 则使用当前储存的第一条数据，否则使用传入的数据
  * */
-private fun memoryOperation(viewStates: MutableState<StandardState>, operator: Operator, value: MemoryData? = null) {
+private fun memoryOperation(viewStates: MutableState<ScienceState>, operator: Operator, value: MemoryData? = null) {
     CoroutineScope(Dispatchers.Default).launch {
         var inputValue: String? = viewStates.value.inputValue
         val memoryValue = value ?: viewStates.value.memoryData.firstOrNull()
@@ -406,15 +409,15 @@ private fun memoryOperation(viewStates: MutableState<StandardState>, operator: O
     }
 }
 
-private fun clickClear(viewStates: MutableState<StandardState>) {
+private fun clickClear(viewStates: MutableState<ScienceState>) {
     isInputSecondValue = false
     isCalculated = false
     isAdvancedCalculated = false
     isErr = false
-    viewStates.value = StandardState(memoryData = viewStates.value.memoryData)
+    viewStates.value = ScienceState(memoryData = viewStates.value.memoryData)
 }
 
-private fun clickReciprocal(viewStates: MutableState<StandardState>) {
+private fun clickReciprocal(viewStates: MutableState<ScienceState>) {
     viewStates.value.coroutineScope?.launch {
         syncCalculate("1", viewStates.value.inputValue, Operator.Divide) { result ->
             val resultText = if (result.isSuccess) {
@@ -454,7 +457,7 @@ private fun clickReciprocal(viewStates: MutableState<StandardState>) {
     }
 }
 
-private fun clickSqrt(viewStates: MutableState<StandardState>) {
+private fun clickSqrt(viewStates: MutableState<ScienceState>) {
     viewStates.value.coroutineScope?.launch {
         syncCalculate(viewStates.value.inputValue, "0", Operator.SQRT) { result ->
             val resultText = if (result.isSuccess) {
@@ -494,7 +497,7 @@ private fun clickSqrt(viewStates: MutableState<StandardState>) {
     }
 }
 
-private fun clickPow2(viewStates: MutableState<StandardState>) {
+private fun clickPow2(viewStates: MutableState<ScienceState>) {
     viewStates.value.coroutineScope?.launch {
         syncCalculate(viewStates.value.inputValue, "0", Operator.POW2) { result ->
             val resultText = if (result.isSuccess) {
@@ -534,7 +537,7 @@ private fun clickPow2(viewStates: MutableState<StandardState>) {
     }
 }
 
-private fun clickEqual(viewStates: MutableState<StandardState>) {
+private fun clickEqual(viewStates: MutableState<ScienceState>) {
     val inputValueCache = viewStates.value.inputValue
 
     if (viewStates.value.inputOperator == Operator.NUll) { // 没有添加操作符
@@ -630,7 +633,7 @@ private fun clickEqual(viewStates: MutableState<StandardState>) {
     }
 }
 
-private fun onCalculateFinish(viewStates: MutableState<StandardState>, inputValueCache: String) {
+private fun onCalculateFinish(viewStates: MutableState<ScienceState>, inputValueCache: String) {
     isAdvancedCalculated = false
 
     CoroutineScope(Dispatchers.Default).launch {
@@ -650,7 +653,7 @@ private fun onCalculateFinish(viewStates: MutableState<StandardState>, inputValu
     }
 }
 
-private fun clickArithmetic(operator: Operator, viewStates: MutableState<StandardState>) {
+private fun clickArithmetic(operator: Operator, viewStates: MutableState<ScienceState>) {
     vibrateOnClick()
     var newState = viewStates.value.copy(
         inputOperator = operator,
@@ -712,7 +715,7 @@ private fun clickArithmetic(operator: Operator, viewStates: MutableState<Standar
     viewStates.value = newState
 }
 
-private fun toggleMemoryList(forceClose: Boolean, viewStates: MutableState<StandardState>) {
+private fun toggleMemoryList(forceClose: Boolean, viewStates: MutableState<ScienceState>) {
     if (forceClose) {
         viewStates.value = viewStates.value.copy(isShowMemoryScreen = false)
     }
@@ -721,7 +724,7 @@ private fun toggleMemoryList(forceClose: Boolean, viewStates: MutableState<Stand
     }
 }
 
-data class StandardState(
+data class ScienceState(
     /** 当前输入的值 */
     val inputValue: String = "0",
     /** 输入的操作符 */
@@ -741,14 +744,14 @@ data class StandardState(
     val coroutineScope: CoroutineScope? = null,
 )
 
-sealed class StandardAction {
-    data class ToggleHistory(val forceClose: Boolean = false): StandardAction()
-    data class ToggleMemoryScreen(val forceClose: Boolean = false): StandardAction()
-    data class ClickBtn(val no: Int): StandardAction()
-    data class ReadFromHistory(val item: HistoryData): StandardAction()
-    data class DeleteHistory(val item: HistoryData?): StandardAction()
-    data class DeleteMemoryItem(val item: MemoryData): StandardAction()
-    data class MemoryOperation(val operator: Operator, val value: MemoryData? = null): StandardAction()
-    data class Init(val coroutineScope: CoroutineScope): StandardAction()
-    data class OnHoldPress(val isPress: Boolean, val no: Int): StandardAction()
+sealed class ScienceAction {
+    data class ToggleHistory(val forceClose: Boolean = false): ScienceAction()
+    data class ToggleMemoryScreen(val forceClose: Boolean = false): ScienceAction()
+    data class ClickBtn(val no: Int): ScienceAction()
+    data class ReadFromHistory(val item: HistoryData): ScienceAction()
+    data class DeleteHistory(val item: HistoryData?): ScienceAction()
+    data class DeleteMemoryItem(val item: MemoryData): ScienceAction()
+    data class MemoryOperation(val operator: Operator, val value: MemoryData? = null): ScienceAction()
+    data class Init(val coroutineScope: CoroutineScope): ScienceAction()
+    data class OnHoldPress(val isPress: Boolean, val no: Int): ScienceAction()
 }

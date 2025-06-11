@@ -6,13 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.equationl.common.constant.KeyBoardTypeEnum
 import com.equationl.common.platform.changeKeyBoardType
 import com.equationl.common.platform.showFloatWindows
 import com.equationl.common.platform.vibrateOnClick
+import com.equationl.common.utils.getKeyBoardTypeByIndex
 import kotlinx.coroutines.flow.Flow
-
-const val KeyboardTypeStandard = 1
-const val KeyboardTypeProgrammer = 2
 
 const val ProgrammerNumberKeyBoard = 3
 const val ProgrammerBitKeyBoard = 4
@@ -29,9 +28,9 @@ fun homePresenter(
                 is HomeAction.ClickMenu -> {
                     vibrateOnClick()
 
-                    homeState = homeState.copy(keyBoardType = action.changeToType)
+                    homeState = homeState.copy(keyBoardType = getKeyBoardTypeByIndex(action.changeToType))
 
-                    clickChangeKeyBoardType(action.changeToType, action.isFromUser)
+                    clickChangeKeyBoardType(homeState.keyBoardType, action.isFromUser)
                 }
                 is HomeAction.ClickOverlay -> {
                     vibrateOnClick()
@@ -84,12 +83,12 @@ private suspend fun clickOverlay() {
     showFloatWindows()
 }
 
-private fun clickChangeKeyBoardType(changeToType: Int, isFromUser: Boolean) {
+private fun clickChangeKeyBoardType(changeToType: KeyBoardTypeEnum, isFromUser: Boolean) {
     changeKeyBoardType(changeToType, isFromUser)
 }
 
 data class HomeState(
-    val keyBoardType: Int = KeyboardTypeStandard,
+    val keyBoardType: KeyBoardTypeEnum = KeyBoardTypeEnum.Standard,
     val isFloat: Boolean = false,
     val programmerKeyBoardType: Int = ProgrammerNumberKeyBoard,
     val transparency: Float = 1f
@@ -99,7 +98,7 @@ sealed class HomeAction {
     data object ClickOverlay: HomeAction()
     data object ChangeTransparency: HomeAction()
     data class ClickMenu(val changeToType: Int, val isFromUser: Boolean): HomeAction()
-    data class OnScreenOrientationChange(val changeToType: Int): HomeAction()
+    data class OnScreenOrientationChange(val changeToType: KeyBoardTypeEnum): HomeAction()
     data class OnChangeProgrammerKeyBoardType(val newType: Int): HomeAction()
-    data class InitState(val isFloat: Boolean, val boardType: Int): HomeAction()
+    data class InitState(val isFloat: Boolean, val boardType: KeyBoardTypeEnum): HomeAction()
 }

@@ -3,11 +3,9 @@ package com.equationl.common.constant
 import com.equationl.shared.generated.resources.Res
 import com.equationl.shared.generated.resources.app_name
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.getString
 
 object Text {
-    @OptIn(ExperimentalResourceApi::class)
     val AppName: String
         get() {
             return runBlocking {

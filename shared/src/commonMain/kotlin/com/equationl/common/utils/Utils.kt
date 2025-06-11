@@ -1,5 +1,6 @@
 package com.equationl.common.utils
 
+import com.equationl.common.constant.KeyBoardTypeEnum
 import com.equationl.common.constant.Text
 import com.equationl.common.dataModel.InputBase
 import com.equationl.common.viewModel.baseConversion
@@ -197,6 +198,15 @@ fun String.formatAsciiToHex(): String {
 
 fun getNonDisplayAscii(code: Int): String {
     return Text.NonDisplayAscii.getOrNull(code) ?: ""
+}
+
+fun getKeyBoardTypeByIndex(index: Int): KeyBoardTypeEnum {
+    return when (index) {
+        1 -> KeyBoardTypeEnum.Standard
+        2 -> KeyBoardTypeEnum.Programmer
+        3 -> KeyBoardTypeEnum.Science
+        else -> KeyBoardTypeEnum.Standard
+    }
 }
 
 suspend fun runWithTimeTip(
