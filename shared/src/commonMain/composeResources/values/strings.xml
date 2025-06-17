@@ -23,6 +23,8 @@
     <string name="back_app_home">返回 APP 首页</string>
     <string name="close">关闭</string>
     <string name="more">更多功能</string>
+    <string name="trigonometric_function">三角函数</string>
+    <string name="other_function">其他函数</string>
 
     <string name="long_press_select_copy">长按后可以选择并复制</string>
     <string name="text_is_too_long">数字过大，无法显示，请点击查看</string>

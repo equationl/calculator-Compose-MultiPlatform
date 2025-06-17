@@ -124,6 +124,7 @@ fun APP(
     softwareKeyboardController = LocalSoftwareKeyboardController.current
 
     standardChannel.trySend(StandardAction.Init(rememberCoroutineScope()))
+    scienceChannel.trySend(ScienceAction.Init(rememberCoroutineScope()))
 
 
     CalculatorComposeTheme {

@@ -14,7 +14,6 @@ import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.getString
 import showSnackSuspend
 
@@ -45,7 +44,6 @@ fun BigDecimal.sqrt(decimalPrecision: Int = 16): BigDecimal {
     return x1
 }
 
-@OptIn(ExperimentalResourceApi::class)
 suspend fun calculate(
     leftValue: String,
     rightValue: String,
@@ -113,7 +111,6 @@ suspend fun syncCalculate(
     )
 }
 
-@OptIn(ExperimentalResourceApi::class)
 suspend fun syncCalculate(
     calculate: suspend () -> Result<BigDecimal>,
     onFinish: (result: Result<BigDecimal>) -> Unit

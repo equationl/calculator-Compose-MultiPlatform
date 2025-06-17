@@ -2,14 +2,14 @@ package com.equationl.common.view
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -17,11 +17,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
@@ -30,7 +33,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowLeft
+import androidx.compose.material.icons.automirrored.outlined.ArrowLeft
+import androidx.compose.material.icons.automirrored.outlined.ArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -39,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -47,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.equationl.common.dataModel.KeyIndex_MemoryClear
 import com.equationl.common.dataModel.KeyIndex_MemoryRead
-import com.equationl.common.dataModel.Operator
+import com.equationl.common.dataModel.ScienceOperator
 import com.equationl.common.dataModel.memoryForbidBtnOnNoData
 import com.equationl.common.dataModel.memoryFunctionKeyBoardBtn
 import com.equationl.common.dataModel.scienceKeyBoardBtn
@@ -60,8 +65,10 @@ import com.equationl.common.view.widgets.scrollToLeftAnimation
 import com.equationl.common.viewModel.ScienceAction
 import com.equationl.common.viewModel.ScienceState
 import com.equationl.shared.generated.resources.Res
+import com.equationl.shared.generated.resources.other_function
 import com.equationl.shared.generated.resources.scroll_left
 import com.equationl.shared.generated.resources.text_is_too_long
+import com.equationl.shared.generated.resources.trigonometric_function
 import kotlinx.coroutines.channels.Channel
 import org.jetbrains.compose.resources.stringResource
 import showDialog
@@ -72,6 +79,16 @@ fun ScienceScreen(
     channel: Channel<ScienceAction>,
     state: ScienceState
 ) {
+
+    LaunchedEffect(state.inputValue) {
+        if (state.inputValue == "0" || state.inputValue.isBlank()) {
+            channel.trySend(ScienceAction.ChangeClearType(0))
+        }
+        else {
+            channel.trySend(ScienceAction.ChangeClearType(1))
+        }
+    }
+
     // 显示数据
     ShowScreen(state) {
         channel.trySend(ScienceAction.ToggleHistory(it))
@@ -81,13 +98,17 @@ fun ScienceScreen(
     // 记忆按钮
     MemoryKeyBoard(
         isDataEmpty = state.memoryData.isEmpty(),
-        onClick = {
-            channel.trySend(ScienceAction.ClickBtn(it))
-        },
         onHoldPress = { isPress, btnIndex ->
             channel.trySend(ScienceAction.OnHoldPress(isPress, btnIndex))
         }
     )
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    // 更多功能按钮
+    MoreFunctionButtonList(showType = state.moreFunctionShowType) {
+        channel.trySend(ScienceAction.ChangeMoreFunctionShowType(it))
+    }
 
     Divider(modifier = Modifier
         .fillMaxWidth()
@@ -99,9 +120,9 @@ fun ScienceScreen(
 
         // 键盘
         ScienceKeyBoard(
-            onClick = {
-                channel.trySend(ScienceAction.ClickBtn(it))
-            },
+            angleType = state.angleType,
+            resultType = state.resultType,
+            clearType = state.clearType,
             onHoldPress = { isPress, btnIndex ->
                 channel.trySend(ScienceAction.OnHoldPress(isPress, btnIndex))
             }
@@ -113,7 +134,7 @@ fun ScienceScreen(
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
             exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
         ) {
-            HistoryWidget(
+            ScienceHistoryWidget(
                 historyList = state.historyList,
                 onClick = { channel.trySend(ScienceAction.ReadFromHistory(it)) },
                 onDelete = { channel.trySend(ScienceAction.DeleteHistory(it)) })
@@ -136,15 +157,28 @@ fun ScienceScreen(
                         channel.trySend(ScienceAction.DeleteMemoryItem(it))
                     }
                 },
-                onAdd = { channel.trySend(ScienceAction.MemoryOperation(Operator.ADD, it)) },
-                onMinus = { channel.trySend(ScienceAction.MemoryOperation(Operator.MINUS, it)) }
+                onAdd = { channel.trySend(ScienceAction.MemoryOperation(ScienceOperator.ADD, it)) },
+                onMinus = { channel.trySend(ScienceAction.MemoryOperation(ScienceOperator.MINUS, it)) }
+            )
+        }
+
+        // 更多功能列表
+        AnimatedVisibility(
+            visible = state.moreFunctionShowType != 0,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            MoreFunctionWidget(
+                state.moreFunctionShowType,
+                onClick = {
+                    channel.trySend(ScienceAction.ClickBtn(it))
+                }
             )
         }
     }
 }
 
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ShowScreen(state: ScienceState, onToggleFloatScreen: (Boolean) -> Unit) {
     val inputScrollerState = rememberScrollState()
@@ -185,7 +219,7 @@ private fun ShowScreen(state: ScienceState, onToggleFloatScreen: (Boolean) -> Un
 
                     if (isShowTextTipIcon) {
                         Icon(
-                            imageVector = Icons.Outlined.ArrowLeft,
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowLeft,
                             contentDescription = stringResource(Res.string.scroll_left),
                             modifier = Modifier.scale(1.5f).align(Alignment.CenterStart).absoluteOffset(x = scrollToLeftAnimation(-10f).dp),
                             tint = MaterialTheme.colors.primary
@@ -199,11 +233,11 @@ private fun ShowScreen(state: ScienceState, onToggleFloatScreen: (Boolean) -> Un
                 targetState = state.inputValue,
                 transitionSpec = {
                     if (targetState.length > initialState.length) {
-                        slideInVertically { height -> height } + fadeIn() with
-                                slideOutVertically { height -> -height } + fadeOut()
+                        (slideInVertically { height -> height } + fadeIn()).togetherWith(
+                            slideOutVertically { height -> -height } + fadeOut())
                     } else {
-                        slideInVertically { height -> -height } + fadeIn() with
-                                slideOutVertically { height -> height } + fadeOut()
+                        (slideInVertically { height -> -height } + fadeIn()).togetherWith(
+                            slideOutVertically { height -> height } + fadeOut())
                     }.using(
                         SizeTransform(clip = false)
                     )
@@ -232,7 +266,7 @@ private fun ShowScreen(state: ScienceState, onToggleFloatScreen: (Boolean) -> Un
 
                     if (isShowInputTipIcon && state.inputValue.length > 1) {
                         Icon(
-                            imageVector = Icons.Outlined.ArrowLeft,
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowLeft,
                             contentDescription = stringResource(Res.string.scroll_left),
                             modifier = Modifier.scale(2f).align(Alignment.CenterStart).absoluteOffset(x = scrollToLeftAnimation(-10f).dp),
                             tint = MaterialTheme.colors.primary
@@ -245,9 +279,14 @@ private fun ShowScreen(state: ScienceState, onToggleFloatScreen: (Boolean) -> Un
 }
 
 @Composable
-private fun ScienceKeyBoard(onClick: (index: Int) -> Unit, onHoldPress: (isPress: Boolean, btnIndex: Int) -> Unit) {
+private fun ScienceKeyBoard(
+    angleType: Int,
+    resultType: Int,
+    clearType: Int,
+    onHoldPress: (isPress: Boolean, btnIndex: Int) -> Unit
+) {
     Column(modifier = Modifier.fillMaxSize()) {
-        for (btnRow in scienceKeyBoardBtn()) {
+        for (btnRow in scienceKeyBoardBtn(angleType = angleType, resultType = resultType, clearType = clearType)) {
             Row(modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)) {
@@ -271,7 +310,7 @@ private fun ScienceKeyBoard(onClick: (index: Int) -> Unit, onHoldPress: (isPress
 }
 
 @Composable
-private fun MemoryKeyBoard(isDataEmpty: Boolean, onClick: (index: Int) -> Unit, onHoldPress: (isPress: Boolean, btnIndex: Int) -> Unit) {
+private fun MemoryKeyBoard(isDataEmpty: Boolean, onHoldPress: (isPress: Boolean, btnIndex: Int) -> Unit) {
     Column(modifier = Modifier.fillMaxHeight(0.1f)) {
         Row(
             modifier = Modifier.fillMaxWidth().weight(1f),
@@ -289,6 +328,56 @@ private fun MemoryKeyBoard(isDataEmpty: Boolean, onClick: (index: Int) -> Unit, 
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun MoreFunctionButtonList(showType: Int, changeShowType: (type: Int) -> Unit) {
+    Column(modifier = Modifier.fillMaxHeight(0.1f)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ToggleButton(
+                text = stringResource(Res.string.trigonometric_function),
+                isExpand = showType == 1,
+                onClick = {
+                    changeShowType(if (showType == 1) 0 else 1)
+                }
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            ToggleButton(
+                text = stringResource(Res.string.other_function),
+                isExpand = showType == 2,
+                onClick = {
+                    changeShowType(if (showType == 2) 0 else 2)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ToggleButton(
+    text: String,
+    isExpand: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Text(text)
+        Icon(
+            Icons.AutoMirrored.Outlined.ArrowRight,
+            contentDescription = null,
+            modifier = Modifier.padding(start = 2.dp)
+                .rotate(if (isExpand) 90f else 0f)
+        )
     }
 }
 
@@ -368,6 +457,31 @@ private fun TextKeyBoardButton(
                     if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun MoreFunctionWidget(
+    showType: Int,
+    onClick: (btnIndex: Int) -> Unit
+) {
+    // TODO
+    Column(
+        Modifier
+            .padding(horizontal = 8.dp)
+            .fillMaxWidth(0.8f)
+            .fillMaxHeight(0.2f)
+            .background(MaterialTheme.colors.background)
+    ) {
+        when (showType) {
+            1 -> {
+                Text("三角函数 TODOTODOTODOTODOT")
+            }
+            2 -> {
+                Text("其他函数 TODOTODOTODOTODOT")
+
+            }
         }
     }
 }

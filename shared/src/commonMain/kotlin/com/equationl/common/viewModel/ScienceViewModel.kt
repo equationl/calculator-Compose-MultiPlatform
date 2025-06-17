@@ -7,13 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.equationl.common.constant.HoldPressMinInterval
 import com.equationl.common.constant.HoldPressStartTime
-import com.equationl.common.dataModel.HistoryData
 import com.equationl.common.dataModel.KeyIndex_0
 import com.equationl.common.dataModel.KeyIndex_9
 import com.equationl.common.dataModel.KeyIndex_Add
 import com.equationl.common.dataModel.KeyIndex_Back
-import com.equationl.common.dataModel.KeyIndex_CE
-import com.equationl.common.dataModel.KeyIndex_Clear
+import com.equationl.common.dataModel.KeyIndex_CE_Clear
 import com.equationl.common.dataModel.KeyIndex_Divide
 import com.equationl.common.dataModel.KeyIndex_Equal
 import com.equationl.common.dataModel.KeyIndex_MemoryClear
@@ -30,13 +28,18 @@ import com.equationl.common.dataModel.KeyIndex_Point
 import com.equationl.common.dataModel.KeyIndex_Pow2
 import com.equationl.common.dataModel.KeyIndex_Reciprocal
 import com.equationl.common.dataModel.KeyIndex_Sqrt
+import com.equationl.common.dataModel.KeyIndex_ToggleAngle
+import com.equationl.common.dataModel.KeyIndex_ToggleResultType
 import com.equationl.common.dataModel.MemoryData
 import com.equationl.common.dataModel.Operator
+import com.equationl.common.dataModel.ScienceHistoryData
+import com.equationl.common.dataModel.ScienceOperator
 import com.equationl.common.database.HistoryDb
 import com.equationl.common.platform.vibrateOnClear
 import com.equationl.common.platform.vibrateOnClick
 import com.equationl.common.platform.vibrateOnEqual
 import com.equationl.common.platform.vibrateOnError
+import com.equationl.common.utils.ScienceCalculate
 import com.equationl.common.utils.calculate
 import com.equationl.common.utils.formatNumber
 import com.equationl.common.utils.syncCalculate
@@ -76,6 +79,8 @@ fun sciencePresenter(
                 is ScienceAction.DeleteMemoryItem -> deleteMemoryItem(action.item, scienceState)
                 is ScienceAction.MemoryOperation -> memoryOperation(scienceState, action.operator, action.value)
                 is ScienceAction.Init -> init(action.coroutineScope, scienceState)
+                is ScienceAction.ChangeClearType -> changeClearType(action.type, scienceState)
+                is ScienceAction.ChangeMoreFunctionShowType -> changeMoreFunctionShowType(action.type, scienceState)
                 is ScienceAction.OnHoldPress -> {
                     holdPressJob?.cancel()
                     holdPressJob = launch {
@@ -101,13 +106,22 @@ private var isErr: Boolean = false
 /** 标记输入新的数字时是否需要清除当前输入值 */
 private var isNeedClrInput: Boolean = false
 
-private val historyDao = HistoryDb.instance.history()
+private val historyDao = HistoryDb.instance.scienceHistory()
+private val memoryDao = HistoryDb.instance.memory()
 
 private fun init(coroutineScope: CoroutineScope, viewStates: MutableState<ScienceState>) {
     CoroutineScope(Dispatchers.Default).launch {
-        val memoryData = historyDao.getAllMemory()
+        val memoryData = memoryDao.getAllMemory()
         viewStates.value = viewStates.value.copy(coroutineScope = coroutineScope, memoryData = memoryData)
     }
+}
+
+private fun changeMoreFunctionShowType(type: Int, viewStates: MutableState<ScienceState>) {
+    viewStates.value = viewStates.value.copy(moreFunctionShowType = type)
+}
+
+private fun changeClearType(type: Int, viewStates: MutableState<ScienceState>) {
+    viewStates.value = viewStates.value.copy(clearType = type)
 }
 
 private suspend fun toggleHistory(forceClose: Boolean, viewStates: MutableState<ScienceState>) {
@@ -118,14 +132,14 @@ private suspend fun toggleHistory(forceClose: Boolean, viewStates: MutableState<
     }
     else {
         viewStates.value = viewStates.value.copy(historyList = listOf(
-            HistoryData(-1, showText = getString(Res.string.loading), "null", "null", Operator.NUll, getString(Res.string.please_wait))
+            ScienceHistoryData(-1, showText = getString(Res.string.loading), "null", "null", ScienceOperator.NUll, getString(Res.string.please_wait))
         ))
 
         CoroutineScope(Dispatchers.Default).launch {
             var list = historyDao.getAll()
             if (list.isEmpty()) {
                 list = listOf(
-                    HistoryData(-1, showText = "", "null", "null", Operator.NUll, getString(Res.string.history_is_empty))
+                    ScienceHistoryData(-1, showText = "", "null", "null", ScienceOperator.NUll, getString(Res.string.history_is_empty))
                 )
             }
             viewStates.value = viewStates.value.copy(historyList = list)
@@ -133,7 +147,7 @@ private suspend fun toggleHistory(forceClose: Boolean, viewStates: MutableState<
     }
 }
 
-private fun readFromHistory(item: HistoryData, viewStates: MutableState<ScienceState>) {
+private fun readFromHistory(item: ScienceHistoryData, viewStates: MutableState<ScienceState>) {
     if (item.id != -1) {
         vibrateOnEqual()
         viewStates.value = ScienceState(
@@ -146,7 +160,7 @@ private fun readFromHistory(item: HistoryData, viewStates: MutableState<ScienceS
     }
 }
 
-private fun deleteHistory(item: HistoryData?, viewStates: MutableState<ScienceState>) {
+private fun deleteHistory(item: ScienceHistoryData?, viewStates: MutableState<ScienceState>) {
     CoroutineScope(Dispatchers.Default).launch {
         vibrateOnError()
         viewStates.value = if (item == null) {
@@ -155,7 +169,7 @@ private fun deleteHistory(item: HistoryData?, viewStates: MutableState<ScienceSt
         } else {
             vibrateOnClick()
             historyDao.delete(item)
-            val newList = mutableListOf<HistoryData>()
+            val newList = mutableListOf<ScienceHistoryData>()
             newList.addAll(viewStates.value.historyList)
             newList.remove(item)
 
@@ -166,7 +180,7 @@ private fun deleteHistory(item: HistoryData?, viewStates: MutableState<ScienceSt
 
 private fun deleteMemoryItem(item: MemoryData, viewStates: MutableState<ScienceState>) {
     CoroutineScope(Dispatchers.Default).launch {
-        historyDao.deleteMemory(item)
+        memoryDao.deleteMemory(item)
         val newList = viewStates.value.memoryData - item
         viewStates.value = viewStates.value.copy(memoryData = newList, isShowMemoryScreen = newList.isNotEmpty())
     }
@@ -205,8 +219,8 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
         vibrateOnClick()
         val newValue =
             if (viewStates.value.inputValue == "0") {
-                if (viewStates.value.inputOperator != Operator.NUll) isInputSecondValue = true
-                if (isAdvancedCalculated && viewStates.value.inputOperator == Operator.NUll) {  // 如果在输入高级运算符后直接输入数字，则重置状态
+                if (viewStates.value.inputOperator != ScienceOperator.NUll) isInputSecondValue = true
+                if (isAdvancedCalculated && viewStates.value.inputOperator == ScienceOperator.NUll) {  // 如果在输入高级运算符后直接输入数字，则重置状态
                     isAdvancedCalculated = false
                     isCalculated = false
                     isInputSecondValue = false
@@ -215,7 +229,7 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
                 }
                 no.toString()
             }
-            else if (viewStates.value.inputOperator != Operator.NUll && !isInputSecondValue) {
+            else if (viewStates.value.inputOperator != ScienceOperator.NUll && !isInputSecondValue) {
                 isCalculated = false
                 isInputSecondValue = true
                 no.toString()
@@ -231,7 +245,7 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
                 )
                 no.toString()
             }
-            else if (isAdvancedCalculated && viewStates.value.inputOperator == Operator.NUll) { // 如果在输入高级运算符后直接输入数字，则重置状态
+            else if (isAdvancedCalculated && viewStates.value.inputOperator == ScienceOperator.NUll) { // 如果在输入高级运算符后直接输入数字，则重置状态
                 isAdvancedCalculated = false
                 isCalculated = false
                 isInputSecondValue = false
@@ -249,16 +263,16 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
 
     when (no) {
         KeyIndex_Add -> { // "+"
-            clickArithmetic(Operator.ADD, viewStates)
+            clickArithmetic(ScienceOperator.ADD, viewStates)
         }
         KeyIndex_Minus -> { // "-"
-            clickArithmetic(Operator.MINUS, viewStates)
+            clickArithmetic(ScienceOperator.MINUS, viewStates)
         }
         KeyIndex_Multiply -> { // "×"
-            clickArithmetic(Operator.MULTIPLY, viewStates)
+            clickArithmetic(ScienceOperator.MULTIPLY, viewStates)
         }
         KeyIndex_Divide -> { // "÷"
-            clickArithmetic(Operator.Divide, viewStates)
+            clickArithmetic(ScienceOperator.Divide, viewStates)
         }
         KeyIndex_NegativeNumber -> { // "+/-"
             vibrateOnClick()
@@ -288,7 +302,7 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
             clickSqrt(viewStates)
         }
         KeyIndex_Percentage -> { // "%"
-            if (isInputSecondValue && viewStates.value.lastInputValue != "" && viewStates.value.inputOperator != Operator.NUll) {
+            if (isInputSecondValue && viewStates.value.lastInputValue != "" && viewStates.value.inputOperator != ScienceOperator.NUll) {
                 vibrateOnClick()
 
                 viewStates.value.coroutineScope?.launch {
@@ -315,25 +329,12 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
                     inputValue = "0",
                     showText = "0",
                     lastInputValue = "",
-                    inputOperator = Operator.NUll
+                    inputOperator = ScienceOperator.NUll
                 )
             }
         }
         KeyIndex_Equal -> { // "="
             clickEqual(viewStates)
-        }
-        KeyIndex_CE -> { // "CE"
-            vibrateOnClear()
-            if (isCalculated) {
-                clickClear(viewStates)
-            }
-            else {
-                viewStates.value = viewStates.value.copy(inputValue = "0")
-            }
-        }
-        KeyIndex_Clear -> {  // "C"
-            vibrateOnClear()
-            clickClear(viewStates)
         }
         KeyIndex_Back -> { // "←"
             vibrateOnClick()
@@ -343,11 +344,53 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
                 viewStates.value = viewStates.value.copy(inputValue = newValue)
             }
         }
+        KeyIndex_CE_Clear -> {
+            vibrateOnClear()
+            if (viewStates.value.clearType == 0) {
+                clickClear(viewStates)
+            }
+            else {
+                if (isCalculated) {
+                    clickClear(viewStates)
+                }
+                else {
+                    viewStates.value = viewStates.value.copy(inputValue = "0")
+                }
+            }
+        }
+
+        KeyIndex_ToggleAngle -> {
+            // TODO 切换角度模式
+            vibrateOnClear()
+
+            var newValue = viewStates.value.angleType + 1
+            if (newValue > 2) {
+                newValue = 0
+            }
+
+            viewStates.value = viewStates.value.copy(
+                angleType = newValue
+            )
+        }
+
+        KeyIndex_ToggleResultType -> {
+            // TODO 切换结果类型
+            vibrateOnClick()
+
+            var newValue = viewStates.value.resultType + 1
+            if (newValue > 1) {
+                newValue = 0
+            }
+
+            viewStates.value = viewStates.value.copy(
+                resultType = newValue
+            )
+        }
 
         KeyIndex_MemoryClear -> { // "MC"
             vibrateOnClick()
             CoroutineScope(Dispatchers.Default).launch {
-                historyDao.deleteAllMemory()
+                memoryDao.deleteAllMemory()
                 viewStates.value = viewStates.value.copy(memoryData = listOf(), isShowMemoryScreen = false)
             }
         }
@@ -360,17 +403,17 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
         }
         KeyIndex_MemoryPlus -> { // "M+"
             vibrateOnClick()
-            memoryOperation(viewStates, Operator.ADD)
+            memoryOperation(viewStates, ScienceOperator.ADD)
         }
         KeyIndex_MemoryMinus -> { // "M-"
             vibrateOnClick()
-            memoryOperation(viewStates, Operator.MINUS)
+            memoryOperation(viewStates, ScienceOperator.MINUS)
         }
         KeyIndex_MemorySave -> { // "MS"
             vibrateOnClick()
             CoroutineScope(Dispatchers.Default).launch {
-                historyDao.insertMemory(MemoryData(inputValue = viewStates.value.inputValue))
-                val memoryDataList = historyDao.getAllMemory()
+                memoryDao.insertMemory(MemoryData(inputValue = viewStates.value.inputValue))
+                val memoryDataList = memoryDao.getAllMemory()
                 viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
             }
         }
@@ -391,20 +434,20 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
  *
  * @param value 计算使用的数据，如果为 NUll 则使用当前储存的第一条数据，否则使用传入的数据
  * */
-private fun memoryOperation(viewStates: MutableState<ScienceState>, operator: Operator, value: MemoryData? = null) {
+private fun memoryOperation(viewStates: MutableState<ScienceState>, operator: ScienceOperator, value: MemoryData? = null) {
     CoroutineScope(Dispatchers.Default).launch {
         var inputValue: String? = viewStates.value.inputValue
         val memoryValue = value ?: viewStates.value.memoryData.firstOrNull()
 
         if (memoryValue == null) {
-            historyDao.insertMemory(MemoryData(inputValue = inputValue!!))
+            memoryDao.insertMemory(MemoryData(inputValue = inputValue!!))
         }
         else {
-            inputValue = calculate(memoryValue.inputValue, inputValue ?: "0", operator).getOrNull()?.toPlainString()
-            historyDao.updateMemory(memoryValue.copy(inputValue = inputValue!!))
+            inputValue = ScienceCalculate.calculate(memoryValue.inputValue, inputValue ?: "0", operator).getOrNull()?.toPlainString()
+            memoryDao.updateMemory(memoryValue.copy(inputValue = inputValue!!))
         }
 
-        val memoryDataList = historyDao.getAllMemory()
+        val memoryDataList = memoryDao.getAllMemory()
         viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
     }
 }
@@ -444,7 +487,7 @@ private fun clickReciprocal(viewStates: MutableState<ScienceState>) {
             }
             else {
                 viewStates.value = newState.copy(
-                    inputOperator = Operator.NUll,
+                    inputOperator = ScienceOperator.NUll,
                     lastInputValue = viewStates.value.inputValue,
                     showText = "1/(${viewStates.value.inputValue})",
                     isFinalResult = false
@@ -484,7 +527,7 @@ private fun clickSqrt(viewStates: MutableState<ScienceState>) {
             }
             else {
                 viewStates.value = newState.copy(
-                    inputOperator = Operator.NUll,
+                    inputOperator = ScienceOperator.NUll,
                     lastInputValue = resultText,
                     showText = "${Operator.SQRT.showText}(${viewStates.value.inputValue})",
                     isFinalResult = false
@@ -524,7 +567,7 @@ private fun clickPow2(viewStates: MutableState<ScienceState>) {
             }
             else {
                 viewStates.value = newState.copy(
-                    inputOperator = Operator.NUll,
+                    inputOperator = ScienceOperator.NUll,
                     lastInputValue = result.getOrNull().toString(),
                     showText = "(${viewStates.value.inputValue})${Operator.POW2.showText}",
                     isFinalResult = false
@@ -540,7 +583,7 @@ private fun clickPow2(viewStates: MutableState<ScienceState>) {
 private fun clickEqual(viewStates: MutableState<ScienceState>) {
     val inputValueCache = viewStates.value.inputValue
 
-    if (viewStates.value.inputOperator == Operator.NUll) { // 没有添加操作符
+    if (viewStates.value.inputOperator == ScienceOperator.NUll) { // 没有添加操作符
         vibrateOnEqual()
         viewStates.value = if (isAdvancedCalculated) {
             viewStates.value.copy(
@@ -572,7 +615,7 @@ private fun clickEqual(viewStates: MutableState<ScienceState>) {
                 calValue2 = viewStates.value.inputValue
             }
 
-            syncCalculate(calValue1, calValue2, viewStates.value.inputOperator) { result ->
+            ScienceCalculate.syncCalculate(calValue1, calValue2, viewStates.value.inputOperator) { result ->
                 if (result.isSuccess) {
                     vibrateOnEqual()
                     val resultText = result.getOrNull()?.toPlainString() ?: "Null"
@@ -640,7 +683,7 @@ private fun onCalculateFinish(viewStates: MutableState<ScienceState>, inputValue
         withContext(Dispatchers.Default) {
             if (!isErr) {  // 不保存错误结果
                 historyDao.insert(
-                    HistoryData(
+                    ScienceHistoryData(
                         showText = viewStates.value.showText,
                         lastInputText = viewStates.value.lastInputValue,
                         operator = viewStates.value.inputOperator,
@@ -653,7 +696,7 @@ private fun onCalculateFinish(viewStates: MutableState<ScienceState>, inputValue
     }
 }
 
-private fun clickArithmetic(operator: Operator, viewStates: MutableState<ScienceState>) {
+private fun clickArithmetic(operator: ScienceOperator, viewStates: MutableState<ScienceState>) {
     vibrateOnClick()
     var newState = viewStates.value.copy(
         inputOperator = operator,
@@ -674,7 +717,7 @@ private fun clickArithmetic(operator: Operator, viewStates: MutableState<Science
     if (isAdvancedCalculated) {
         isInputSecondValue = false
 
-        if (viewStates.value.inputOperator == Operator.NUll) {  // 第一次添加操作符
+        if (viewStates.value.inputOperator == ScienceOperator.NUll) {  // 第一次添加操作符
             newState = newState.copy(
                 showText = "${viewStates.value.showText}${operator.showText}"
             )
@@ -694,7 +737,7 @@ private fun clickArithmetic(operator: Operator, viewStates: MutableState<Science
 
     }
     else {
-        if (viewStates.value.inputOperator == Operator.NUll) { // 第一次添加操作符
+        if (viewStates.value.inputOperator == ScienceOperator.NUll) { // 第一次添加操作符
             newState = newState.copy(
                 showText = "${viewStates.value.inputValue}${operator.showText}"
             )
@@ -728,13 +771,13 @@ data class ScienceState(
     /** 当前输入的值 */
     val inputValue: String = "0",
     /** 输入的操作符 */
-    val inputOperator: Operator = Operator.NUll,
+    val inputOperator: ScienceOperator = ScienceOperator.NUll,
     /** 上次输入的值 */
     val lastInputValue: String = "",
     /** 结果区展示的字符 */
     val showText: String = "",
     val isFinalResult: Boolean = false,
-    val historyList: List<HistoryData> = listOf(),
+    val historyList: List<ScienceHistoryData> = listOf(),
     /** 计算历史展示的字符 */
     val lastShowText: String = "",
     /** 当前记忆数据 */
@@ -742,16 +785,26 @@ data class ScienceState(
     /** 是否显示记忆数据 */
     val isShowMemoryScreen: Boolean = false,
     val coroutineScope: CoroutineScope? = null,
+    /** 角度类型 */
+    val angleType: Int = 0,
+    /** 数值结果类型 */
+    val resultType: Int = 0,
+    /** 清除类型 */
+    val clearType: Int = 0,
+    /** 更多功能弹窗显示类型：0 不显示；1 显示三角函数；2 显示其他函数*/
+    val moreFunctionShowType: Int = 0
 )
 
 sealed class ScienceAction {
     data class ToggleHistory(val forceClose: Boolean = false): ScienceAction()
     data class ToggleMemoryScreen(val forceClose: Boolean = false): ScienceAction()
     data class ClickBtn(val no: Int): ScienceAction()
-    data class ReadFromHistory(val item: HistoryData): ScienceAction()
-    data class DeleteHistory(val item: HistoryData?): ScienceAction()
+    data class ReadFromHistory(val item: ScienceHistoryData): ScienceAction()
+    data class DeleteHistory(val item: ScienceHistoryData?): ScienceAction()
     data class DeleteMemoryItem(val item: MemoryData): ScienceAction()
-    data class MemoryOperation(val operator: Operator, val value: MemoryData? = null): ScienceAction()
+    data class MemoryOperation(val operator: ScienceOperator, val value: MemoryData? = null): ScienceAction()
     data class Init(val coroutineScope: CoroutineScope): ScienceAction()
     data class OnHoldPress(val isPress: Boolean, val no: Int): ScienceAction()
+    data class ChangeClearType(val type: Int): ScienceAction()
+    data class ChangeMoreFunctionShowType(val type: Int): ScienceAction()
 }

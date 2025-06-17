@@ -99,10 +99,11 @@ private var isErr: Boolean = false
 private var isNeedClrInput: Boolean = false
 
 private val historyDao = HistoryDb.instance.history()
+private val memoryDao = HistoryDb.instance.memory()
 
 private fun init(coroutineScope: CoroutineScope, viewStates: MutableState<StandardState>) {
     CoroutineScope(Dispatchers.Default).launch {
-        val memoryData = historyDao.getAllMemory()
+        val memoryData = memoryDao.getAllMemory()
         viewStates.value = viewStates.value.copy(coroutineScope = coroutineScope, memoryData = memoryData)
     }
 }
@@ -163,7 +164,7 @@ private fun deleteHistory(item: HistoryData?, viewStates: MutableState<StandardS
 
 private fun deleteMemoryItem(item: MemoryData, viewStates: MutableState<StandardState>) {
     CoroutineScope(Dispatchers.Default).launch {
-        historyDao.deleteMemory(item)
+        memoryDao.deleteMemory(item)
         val newList = viewStates.value.memoryData - item
         viewStates.value = viewStates.value.copy(memoryData = newList, isShowMemoryScreen = newList.isNotEmpty())
     }
@@ -344,7 +345,7 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
         KeyIndex_MemoryClear -> { // "MC"
             vibrateOnClick()
             CoroutineScope(Dispatchers.Default).launch {
-                historyDao.deleteAllMemory()
+                memoryDao.deleteAllMemory()
                 viewStates.value = viewStates.value.copy(memoryData = listOf(), isShowMemoryScreen = false)
             }
         }
@@ -366,8 +367,8 @@ private fun clickBtn(no: Int, viewStates: MutableState<StandardState>) {
         KeyIndex_MemorySave -> { // "MS"
             vibrateOnClick()
             CoroutineScope(Dispatchers.Default).launch {
-                historyDao.insertMemory(MemoryData(inputValue = viewStates.value.inputValue))
-                val memoryDataList = historyDao.getAllMemory()
+                memoryDao.insertMemory(MemoryData(inputValue = viewStates.value.inputValue))
+                val memoryDataList = memoryDao.getAllMemory()
                 viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
             }
         }
@@ -394,14 +395,14 @@ private fun memoryOperation(viewStates: MutableState<StandardState>, operator: O
         val memoryValue = value ?: viewStates.value.memoryData.firstOrNull()
 
         if (memoryValue == null) {
-            historyDao.insertMemory(MemoryData(inputValue = inputValue!!))
+            memoryDao.insertMemory(MemoryData(inputValue = inputValue!!))
         }
         else {
             inputValue = calculate(memoryValue.inputValue, inputValue ?: "0", operator).getOrNull()?.toPlainString()
-            historyDao.updateMemory(memoryValue.copy(inputValue = inputValue!!))
+            memoryDao.updateMemory(memoryValue.copy(inputValue = inputValue!!))
         }
 
-        val memoryDataList = historyDao.getAllMemory()
+        val memoryDataList = memoryDao.getAllMemory()
         viewStates.value = viewStates.value.copy(memoryData = memoryDataList)
     }
 }
