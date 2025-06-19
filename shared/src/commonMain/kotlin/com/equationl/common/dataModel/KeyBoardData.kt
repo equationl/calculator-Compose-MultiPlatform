@@ -75,11 +75,43 @@ const val KeyIndex_MemoryMinus = 1107
 const val KeyIndex_MemorySave = 1108
 const val KeyIndex_MemoryList = 1109
 
+// 三角函数按键
+const val KeyIndex_Sin = 2000
+const val KeyIndex_Cos = 2001
+const val KeyIndex_Tan = 2002
+const val KeyIndex_Sec = 2003
+const val KeyIndex_Csc = 2004
+const val KeyIndex_Cot = 2005
+const val KeyIndex_ArcSin = 2006
+const val KeyIndex_ArcCos = 2007
+const val KeyIndex_ArcTan = 2008
+const val KeyIndex_ArcSec = 2009
+const val KeyIndex_ArcCsc = 2010
+const val KeyIndex_ArcCot = 2011
+const val KeyIndex_SinH = 2012
+const val KeyIndex_CosH = 2013
+const val KeyIndex_TanH = 2014
+const val KeyIndex_SecH = 2015
+const val KeyIndex_CscH = 2016
+const val KeyIndex_CotH = 2017
+const val KeyIndex_ArcSinH = 2018
+const val KeyIndex_ArcCosH = 2019
+const val KeyIndex_ArcTanH = 2020
+const val KeyIndex_ArcSecH = 2021
+const val KeyIndex_ArcCscH = 2022
+const val KeyIndex_ArcCotH = 2023
+
+
 // 其他按键
 /** 切换角度、弧度、梯度*/
-const val KeyIndex_ToggleAngle = 2000
+const val KeyIndex_ToggleAngle = 3000
 /** 切换数字显示方式，科学计数法*/
-const val KeyIndex_ToggleResultType = 2001
+const val KeyIndex_ToggleResultType = 3001
+const val KeyIndex_Floor = 3002
+const val KeyIndex_Ceil = 3003
+const val KeyIndex_Dms = 3004
+const val KeyIndex_Deg = 3005
+const val KeyIndex_Random = 3006
 
 
 @Composable
@@ -189,6 +221,56 @@ fun scienceKeyBoardBtn(angleType: Int = 0, resultType: Int = 0, clearType: Int =
         KeyBoardData(".", functionColor(), KeyIndex_Point),
         KeyBoardData("=", equalColor(), KeyIndex_Equal, isFilled = true),
     )
+)
+
+@Composable
+fun scienceTrigonometricFunctionKeyBoardBtn(): List<List<KeyBoardData>> = listOf(
+    listOf(
+        KeyBoardData(ScienceOperator.Sin.showText, functionColor(),  KeyIndex_Sin),
+        KeyBoardData(ScienceOperator.Cos.showText, functionColor(),  KeyIndex_Cos),
+        KeyBoardData(ScienceOperator.Tan.showText, functionColor(),  KeyIndex_Tan),
+        KeyBoardData(ScienceOperator.Sec.showText, functionColor(),  KeyIndex_Sec),
+        KeyBoardData(ScienceOperator.Csc.showText, functionColor(),  KeyIndex_Csc),
+        KeyBoardData(ScienceOperator.Cot.showText, functionColor(),  KeyIndex_Cot),
+    ),
+    listOf(
+        KeyBoardData(ScienceOperator.SinH.showText, functionColor(),  KeyIndex_SinH, isFilled = true),
+        KeyBoardData(ScienceOperator.CosH.showText, functionColor(),  KeyIndex_CosH, isFilled = true),
+        KeyBoardData(ScienceOperator.TanH.showText, functionColor(),  KeyIndex_TanH, isFilled = true),
+        KeyBoardData(ScienceOperator.SecH.showText, functionColor(),  KeyIndex_SecH, isFilled = true),
+        KeyBoardData(ScienceOperator.CscH.showText, functionColor(),  KeyIndex_CscH, isFilled = true),
+        KeyBoardData(ScienceOperator.CotH.showText, functionColor(),  KeyIndex_CotH, isFilled = true),
+    ),
+    listOf(
+        KeyBoardData(ScienceOperator.ArcSin.showText, functionColor(),  KeyIndex_ArcSin),
+        KeyBoardData(ScienceOperator.ArcCos.showText, functionColor(),  KeyIndex_ArcCos),
+        KeyBoardData(ScienceOperator.ArcTan.showText, functionColor(),  KeyIndex_ArcTan),
+        KeyBoardData(ScienceOperator.ArcSec.showText, functionColor(),  KeyIndex_ArcSec),
+        KeyBoardData(ScienceOperator.ArcCsc.showText, functionColor(),  KeyIndex_ArcCsc),
+        KeyBoardData(ScienceOperator.ArcCot.showText, functionColor(),  KeyIndex_ArcCot),
+    ),
+    listOf(
+        KeyBoardData(ScienceOperator.ArcSinH.showText, functionColor(),  KeyIndex_ArcSinH, isFilled = true),
+        KeyBoardData(ScienceOperator.ArcCosH.showText, functionColor(),  KeyIndex_ArcCosH, isFilled = true),
+        KeyBoardData(ScienceOperator.ArcTanH.showText, functionColor(),  KeyIndex_ArcTanH, isFilled = true),
+        KeyBoardData(ScienceOperator.ArcSecH.showText, functionColor(),  KeyIndex_ArcSecH, isFilled = true),
+        KeyBoardData(ScienceOperator.ArcCscH.showText, functionColor(),  KeyIndex_ArcCscH, isFilled = true),
+        KeyBoardData(ScienceOperator.ArcCotH.showText, functionColor(),  KeyIndex_ArcCotH, isFilled = true),
+    )
+)
+
+@Composable
+fun scienceOtherFunctionKeyBoardBtn(): List<List<KeyBoardData>> = listOf(
+    listOf(
+        KeyBoardData(ScienceOperator.Abs.showText, functionColor(), KeyIndex_Abs),
+        KeyBoardData(ScienceOperator.Floor.showText, functionColor(), KeyIndex_Floor),
+        KeyBoardData(ScienceOperator.Ceil.showText, functionColor(), KeyIndex_Ceil),
+    ),
+    listOf(
+        KeyBoardData(ScienceOperator.Random.showText, functionColor(), KeyIndex_Random),
+        KeyBoardData(ScienceOperator.Dms.showText, functionColor(), KeyIndex_Dms),
+        KeyBoardData(ScienceOperator.DEG.showText, functionColor(), KeyIndex_Deg),
+    ),
 )
 
 @Composable
@@ -385,6 +467,35 @@ enum class ScienceOperator(val showText: String, vararg val showTextGroup: Strin
     Ln("ln"),
     EPowX("eˣ"),
     NegativeNumber("±"),
+    Sin("sin"),
+    Cos("cos"),
+    Tan("tan"),
+    Sec("sec"),
+    Csc("csc"),
+    Cot("cot"),
+    ArcSin("sin⁻¹"),
+    ArcCos("cos⁻¹"),
+    ArcTan("tan⁻¹"),
+    ArcSec("sec⁻¹"),
+    ArcCsc("csc⁻¹"),
+    ArcCot("cot⁻¹"),
+    SinH("sinh"),
+    CosH("cosh"),
+    TanH("tanh"),
+    SecH("sech"),
+    CscH("csch"),
+    CotH("coth"),
+    ArcSinH("sinh⁻¹"),
+    ArcCosH("cosh⁻¹"),
+    ArcTanH("tanh⁻¹"),
+    ArcSecH("sech⁻¹"),
+    ArcCscH("csch⁻¹"),
+    ArcCotH("coth⁻¹"),
+    Floor("⌊x⌋"),
+    Ceil("⌈x⌉"),
+    Random("Rand"),
+    Dms("→DMS"),
+    DEG("→DEG"),
     NUll("")
 }
 

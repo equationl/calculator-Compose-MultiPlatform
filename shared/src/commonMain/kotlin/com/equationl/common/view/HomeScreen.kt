@@ -31,7 +31,9 @@ import androidx.compose.material.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,6 +45,7 @@ import com.equationl.common.constant.KeyBoardTypeEnum.Standard
 import com.equationl.common.constant.PlatformType
 import com.equationl.common.platform.currentPlatform
 import com.equationl.common.platform.isNeedShowFloatBtn
+import com.equationl.common.utils.onPointerEvent
 import com.equationl.common.viewModel.HomeAction
 import com.equationl.common.viewModel.HomeState
 import com.equationl.common.viewModel.ProgrammerAction
@@ -70,6 +73,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HomeScreen(
     homeChannel: Channel<HomeAction>,
@@ -106,6 +110,16 @@ fun HomeScreen(
         Column(
             Modifier
                 .fillMaxSize()
+                .onPointerEvent(PointerEventType.Press) {
+                    if (scienceState.moreFunctionShowType != 0) {
+                        scienceChannel.trySend(ScienceAction.ChangeMoreFunctionShowType(0))
+                    }
+                }
+                .onPointerEvent(PointerEventType.Enter) {
+                    if (scienceState.moreFunctionShowType != 0) {
+                        scienceChannel.trySend(ScienceAction.ChangeMoreFunctionShowType(0))
+                    }
+                }
         ) {
             MenuTitle(
                 keyBoardType = homeState.keyBoardType,

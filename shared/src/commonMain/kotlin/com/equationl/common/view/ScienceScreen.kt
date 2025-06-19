@@ -9,7 +9,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +55,8 @@ import com.equationl.common.dataModel.ScienceOperator
 import com.equationl.common.dataModel.memoryForbidBtnOnNoData
 import com.equationl.common.dataModel.memoryFunctionKeyBoardBtn
 import com.equationl.common.dataModel.scienceKeyBoardBtn
+import com.equationl.common.dataModel.scienceOtherFunctionKeyBoardBtn
+import com.equationl.common.dataModel.scienceTrigonometricFunctionKeyBoardBtn
 import com.equationl.common.theme.InputLargeFontSize
 import com.equationl.common.theme.ShowNormalFontSize
 import com.equationl.common.utils.formatNumber
@@ -168,12 +169,17 @@ fun ScienceScreen(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            MoreFunctionWidget(
-                state.moreFunctionShowType,
-                onClick = {
-                    channel.trySend(ScienceAction.ClickBtn(it))
-                }
-            )
+            Card(
+                elevation = 5.dp,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            ) {
+                MoreFunctionWidget(
+                    state.moreFunctionShowType,
+                    onPress = { isHold, index ->
+                        channel.trySend(ScienceAction.OnHoldPress(isHold, index))
+                    }
+                )
+            }
         }
     }
 }
@@ -464,23 +470,39 @@ private fun TextKeyBoardButton(
 @Composable
 private fun MoreFunctionWidget(
     showType: Int,
-    onClick: (btnIndex: Int) -> Unit
+    onPress: (isPress: Boolean, btnIndex: Int) -> Unit
 ) {
-    // TODO
     Column(
-        Modifier
-            .padding(horizontal = 8.dp)
-            .fillMaxWidth(0.8f)
-            .fillMaxHeight(0.2f)
-            .background(MaterialTheme.colors.background)
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .fillMaxHeight(0.4f)
     ) {
-        when (showType) {
-            1 -> {
-                Text("三角函数 TODOTODOTODOTODOT")
-            }
-            2 -> {
-                Text("其他函数 TODOTODOTODOTODOT")
 
+        val data = when (showType) {
+            1 -> scienceTrigonometricFunctionKeyBoardBtn()
+            2 -> scienceOtherFunctionKeyBoardBtn()
+            else -> listOf()
+        }
+
+        for (btnRow in data) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)) {
+                for (btn in btnRow) {
+                    Row(modifier = Modifier.weight(1f)) {
+                        KeyBoardButton(
+                            text = btn.text,
+                            onClick = {  },  // 这里不再单独处理，统一放到 onHoldPress 处理
+                            onHoldPress = {
+                                onPress(it, btn.index)
+                            },
+                            backGround = btn.background,
+                            paddingValues = PaddingValues(0.5.dp),
+                            isFilled = btn.isFilled,
+                        )
+                    }
+                }
             }
         }
     }
