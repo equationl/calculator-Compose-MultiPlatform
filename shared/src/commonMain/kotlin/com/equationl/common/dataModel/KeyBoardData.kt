@@ -166,10 +166,10 @@ fun standardKeyBoardBtn(): List<List<KeyBoardData>> = listOf(
 @Composable
 fun scienceKeyBoardBtn(angleType: Int = 0, resultType: Int = 0, clearType: Int = 0): List<List<KeyBoardData>> = listOf(
     listOf(
-        KeyBoardData(ScienceOperator.ToggleAngle.showTextGroup.getOrNull(angleType) ?: ScienceOperator.ToggleAngle.showText, functionColor(),  KeyIndex_ToggleAngle),
-        KeyBoardData(ScienceOperator.ToggleResultType.showText, functionColor(), KeyIndex_ToggleResultType, isFilled = resultType == 1),
-        KeyBoardData(ScienceOperator.PI.showText, functionColor(),  KeyIndex_Constant_PI),
-        KeyBoardData(ScienceOperator.E.showText, functionColor(),  KeyIndex_Constant_E),
+        KeyBoardData(getScienceAngleTypeShowText(angleType), functionColor(),  KeyIndex_ToggleAngle),
+        KeyBoardData("F-E", functionColor(), KeyIndex_ToggleResultType, isFilled = resultType == 1),
+        KeyBoardData("π", functionColor(),  KeyIndex_Constant_PI),
+        KeyBoardData("e", functionColor(),  KeyIndex_Constant_E),
         KeyBoardData(if (clearType == 0) "C" else "CE", functionColor(),  KeyIndex_CE_Clear),
         KeyBoardData("⇦", functionColor(),  KeyIndex_Back),
     ),
@@ -178,7 +178,7 @@ fun scienceKeyBoardBtn(angleType: Int = 0, resultType: Int = 0, clearType: Int =
         KeyBoardData(ScienceOperator.Pow3.showText, functionColor(), KeyIndex_Pow3),
         KeyBoardData(ScienceOperator.Reciprocal.showText, functionColor(), KeyIndex_Reciprocal),
         KeyBoardData(ScienceOperator.Abs.showText, functionColor(), KeyIndex_Abs),
-        KeyBoardData(ScienceOperator.Exp.showText, functionColor(), KeyIndex_Exp),
+        KeyBoardData("exp", functionColor(), KeyIndex_Exp),
         KeyBoardData(ScienceOperator.Mod.showText, functionColor(), KeyIndex_Mod),
     ),
     listOf(
@@ -216,7 +216,7 @@ fun scienceKeyBoardBtn(angleType: Int = 0, resultType: Int = 0, clearType: Int =
     listOf(
         KeyBoardData(ScienceOperator.Ln.showText, functionColor(), KeyIndex_Ln),
         KeyBoardData(ScienceOperator.EPowX.showText, functionColor(), KeyIndex_EPowX),
-        KeyBoardData(ScienceOperator.NegativeNumber.showText, functionColor(), KeyIndex_NegativeNumber),
+        KeyBoardData("±", functionColor(), KeyIndex_NegativeNumber),
         KeyBoardData("0", numberColor(), KeyIndex_0,),
         KeyBoardData(".", functionColor(), KeyIndex_Point),
         KeyBoardData("=", equalColor(), KeyIndex_Equal, isFilled = true),
@@ -267,7 +267,7 @@ fun scienceOtherFunctionKeyBoardBtn(): List<List<KeyBoardData>> = listOf(
         KeyBoardData(ScienceOperator.Ceil.showText, functionColor(), KeyIndex_Ceil),
     ),
     listOf(
-        KeyBoardData(ScienceOperator.Random.showText, functionColor(), KeyIndex_Random),
+        KeyBoardData("Rand", functionColor(), KeyIndex_Random),
         KeyBoardData(ScienceOperator.Dms.showText, functionColor(), KeyIndex_Dms),
         KeyBoardData(ScienceOperator.DEG.showText, functionColor(), KeyIndex_Deg),
     ),
@@ -438,64 +438,67 @@ enum class Operator(val showText: String) {
     NUll("")
 }
 
-enum class ScienceOperator(val showText: String, vararg val showTextGroup: String = arrayOf()) {
-    ADD("+"),
-    MINUS("-"),
-    MULTIPLY("×"),
-    Divide("÷"),
-    ToggleAngle("DEG", "DEG", "RAD", "GRAD"),
-    ToggleResultType("F-E"),
-    PI("π"),
-    E("e"),
-    Pow2("x²"),
-    Pow3("x³"),
-    Reciprocal("1/x"),
-    Abs("|x|"),
-    Exp("exp"),
+/**
+ * @param showTemp 显示模板，用于显示在输入区域，其中 ${value} 表示替换值
+ * */
+enum class ScienceOperator(val showText: String, val showTemp: String = "") {
+    ADD("+", showTemp = "+"),
+    MINUS("-", showTemp = "-"),
+    MULTIPLY("×", showTemp = "×"),
+    Divide("÷", showTemp = "÷"),
+//    ToggleAngle("DEG", "DEG", "RAD", "GRAD"),
+//    ToggleResultType("F-E"),
+//    PI("π"),
+//    E("e"),
+    Pow2("x²", showTemp = "sqr(\${value})"),
+    Pow3("x³", showTemp = "cube(\${value})"),
+    Reciprocal("1/x", showTemp = "1/(\${value})"),
+    Abs("|x|", showTemp = "abs(\${value})"),
+//    Exp("exp"),
     Mod("Mod"),
-    Sqrt("²√x"),
-    Sqrt3("³√x"),
+    Sqrt("²√x", showTemp = "√(\${value})"),
+    Sqrt3("³√x", showTemp = "cuberoot(\${value})"),
     LeftBrackets("("),
     RightBrackets(")"),
-    Factorial("n!"),
-    XPowY("xʸ"),
-    XSqrtY("ʸ√x"),
-    Op10PowX("10ˣ"),
-    Op2PowX("2ˣ"),
-    Log("log"),
-    LogYX("logᵧx"),
-    Ln("ln"),
-    EPowX("eˣ"),
-    NegativeNumber("±"),
-    Sin("sin"),
-    Cos("cos"),
-    Tan("tan"),
-    Sec("sec"),
-    Csc("csc"),
-    Cot("cot"),
-    ArcSin("sin⁻¹"),
-    ArcCos("cos⁻¹"),
-    ArcTan("tan⁻¹"),
-    ArcSec("sec⁻¹"),
-    ArcCsc("csc⁻¹"),
-    ArcCot("cot⁻¹"),
-    SinH("sinh"),
-    CosH("cosh"),
-    TanH("tanh"),
-    SecH("sech"),
-    CscH("csch"),
-    CotH("coth"),
-    ArcSinH("sinh⁻¹"),
-    ArcCosH("cosh⁻¹"),
-    ArcTanH("tanh⁻¹"),
-    ArcSecH("sech⁻¹"),
-    ArcCscH("csch⁻¹"),
-    ArcCotH("coth⁻¹"),
-    Floor("⌊x⌋"),
-    Ceil("⌈x⌉"),
-    Random("Rand"),
-    Dms("→DMS"),
-    DEG("→DEG"),
+    Factorial("n!", showTemp = "fact(\${value})"),
+    XPowY("xʸ", showTemp = "^"),
+    XSqrtY("ʸ√x", showTemp = "yroot"),
+    Op10PowX("10ˣ", showTemp = "10^(\${value})"),
+    Op2PowX("2ˣ", showTemp = "2^(\${value})"),
+    Log("log", showTemp = "log(\${value})"),
+    LogYX("logᵧx", showTemp = "log base"),
+    Ln("ln", showTemp = "ln(\${value})"),
+    EPowX("eˣ", showTemp = "e^(\${value})"),
+//    NegativeNumber("±"),
+    Sin("sin", showTemp = "sin(\${value})"),
+    Cos("cos", showTemp = "cos(\${value})"),
+    Tan("tan", showTemp = "tan(\${value})"),
+    Sec("sec", showTemp = "sec(\${value})"),
+    Csc("csc", showTemp = "csc(\${value})"),
+    Cot("cot", showTemp = "cot(\${value})"),
+    ArcSin("sin⁻¹", showTemp = "sin⁻¹(\${value})"),
+    ArcCos("cos⁻¹", showTemp = "cos⁻¹(\${value})"),
+    ArcTan("tan⁻¹", showTemp = "tan⁻¹(\${value})"),
+    ArcSec("sec⁻¹", showTemp = "sec⁻¹(\${value})"),
+    ArcCsc("csc⁻¹", showTemp = "csc⁻¹(\${value})"),
+    ArcCot("cot⁻¹", showTemp = "cot⁻¹(\${value})"),
+    SinH("sinh", showTemp = "sinh(\${value})"),
+    CosH("cosh", showTemp = "cosh(\${value})"),
+    TanH("tanh", showTemp = "tanh(\${value})"),
+    SecH("sech", showTemp = "sech(\${value})"),
+    CscH("csch", showTemp = "csch(\${value})"),
+    CotH("coth", showTemp = "coth(\${value})"),
+    ArcSinH("sinh⁻¹", showTemp = "sinh⁻¹(\${value})"),
+    ArcCosH("cosh⁻¹", showTemp = "cosh⁻¹(\${value})"),
+    ArcTanH("tanh⁻¹", showTemp = "tanh⁻¹(\${value})"),
+    ArcSecH("sech⁻¹", showTemp = "sech⁻¹(\${value})"),
+    ArcCscH("csch⁻¹", showTemp = "csch⁻¹(\${value})"),
+    ArcCotH("coth⁻¹", showTemp = "coth⁻¹(\${value})"),
+    Floor("⌊x⌋", showTemp = "floor(\${value})"),
+    Ceil("⌈x⌉", showTemp = "ceil(\${value})"),
+//    Random("Rand"),
+    Dms("→DMS", showTemp = "dms(\${value})"),
+    DEG("→DEG", showTemp = "degrees(\${value})"),
     NUll("")
 }
 
@@ -535,4 +538,13 @@ enum class InputBase(val number: Int, val forbidBtn: List<Int>) {
         KeyIndex_3,
         KeyIndex_2
     ))
+}
+
+private fun getScienceAngleTypeShowText(type: Int): String {
+    return when (type) {
+        0 -> "DEG"
+        1 -> "RAD"
+        2 -> "GRAD"
+        else -> "DEG"
+    }
 }

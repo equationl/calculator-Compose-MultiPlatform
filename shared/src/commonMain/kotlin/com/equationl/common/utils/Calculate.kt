@@ -44,6 +44,79 @@ fun BigDecimal.sqrt(decimalPrecision: Int = 16): BigDecimal {
     return x1
 }
 
+fun BigDecimal.ln(precision: Long = 30): BigDecimal {
+    val decimalModel = DecimalMode(decimalPrecision = precision, roundingMode = RoundingMode.ROUND_HALF_TO_EVEN)
+
+    // 处理特殊情况
+    if (this <= BigDecimal.ZERO) {
+        throw ArithmeticException("无法计算非正数的对数")
+    }
+
+    if (this == BigDecimal.ONE) {
+        return BigDecimal.ZERO
+    }
+
+    // 使用变换 ln(x) = 2 * ln(sqrt(x)) 将 x 转换到接近 1 的范围
+    var value = this
+    var multiplier = BigDecimal.ONE
+
+    // 如果 x 远大于 1，使用 ln(x) = ln(x/2^k) + k*ln(2)
+    while (value > "2".toBigDecimal()) {
+        value = value.divide(BigDecimal.TWO, decimalModel)
+        multiplier = multiplier.add(BigDecimal.ONE)
+    }
+
+    // 如果 x 远小于 1，使用 ln(x) = ln(x*2^k) - k*ln(2)
+    while (value < "0.4".toBigDecimal()) {
+        value = value.multiply(BigDecimal.TWO)
+        multiplier = multiplier.subtract(BigDecimal.ONE)
+    }
+
+    // 使用级数展开计算 ln(y) 其中 y 接近 1
+    // ln(y) = 2 * (z + z^3/3 + z^5/5 + ...) 其中 z = (y-1)/(y+1)
+    val y = value
+    val z = (y.subtract(BigDecimal.ONE)).divide(y.add(BigDecimal.ONE), decimalModel)
+    val z2 = z.multiply(z)
+
+    var result = BigDecimal.ZERO
+    var term = z
+    var n = BigDecimal.ONE
+
+    // 计算级数
+    for (i in 0 until precision) {
+        result = result.add(term.divide(n, decimalModel))
+        n = n.add(BigDecimal.TWO)
+        term = term.multiply(z2)
+
+        // 当项变得足够小时停止
+        if (term.abs() < BigDecimal.ONE.divide(BigDecimal.TEN.pow(precision), decimalModel)) {
+            break
+        }
+    }
+
+    result = result.multiply(BigDecimal.TWO)
+
+    // 应用乘数调整
+    if (multiplier != BigDecimal.ZERO) {
+        val ln2 = "0.693147180559945309417232121458176568075500134360255254120680009".toBigDecimal()
+        result = result.add(multiplier.multiply(ln2))
+    }
+
+    return result
+}
+
+fun BigDecimal.log10(precision: Long = 30): BigDecimal {
+    val ln10 = "2.302585092994045684017991454684364207601101488628772976033327900".toBigDecimal()
+    return this.ln(precision).divide(ln10, DecimalMode(precision, RoundingMode.ROUND_HALF_TO_EVEN))
+}
+
+fun BigDecimal.log(base: BigDecimal, precision: Long = 30): BigDecimal {
+    if (base <= BigDecimal.ZERO || base == BigDecimal.ONE) {
+        throw ArithmeticException("对数的底数必须为正数且不等于1")
+    }
+    return this.ln(precision).divide(base.ln(precision), DecimalMode(precision, RoundingMode.ROUND_HALF_TO_EVEN))
+}
+
 suspend fun calculate(
     leftValue: String,
     rightValue: String,

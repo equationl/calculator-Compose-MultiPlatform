@@ -8,12 +8,46 @@ import androidx.compose.runtime.remember
 import com.equationl.common.constant.HoldPressMinInterval
 import com.equationl.common.constant.HoldPressStartTime
 import com.equationl.common.dataModel.KeyIndex_0
+import com.equationl.common.dataModel.KeyIndex_10PowX
+import com.equationl.common.dataModel.KeyIndex_2PowX
 import com.equationl.common.dataModel.KeyIndex_9
+import com.equationl.common.dataModel.KeyIndex_Abs
 import com.equationl.common.dataModel.KeyIndex_Add
+import com.equationl.common.dataModel.KeyIndex_ArcCos
+import com.equationl.common.dataModel.KeyIndex_ArcCosH
+import com.equationl.common.dataModel.KeyIndex_ArcCot
+import com.equationl.common.dataModel.KeyIndex_ArcCotH
+import com.equationl.common.dataModel.KeyIndex_ArcCsc
+import com.equationl.common.dataModel.KeyIndex_ArcCscH
+import com.equationl.common.dataModel.KeyIndex_ArcSec
+import com.equationl.common.dataModel.KeyIndex_ArcSecH
+import com.equationl.common.dataModel.KeyIndex_ArcSin
+import com.equationl.common.dataModel.KeyIndex_ArcSinH
+import com.equationl.common.dataModel.KeyIndex_ArcTan
+import com.equationl.common.dataModel.KeyIndex_ArcTanH
 import com.equationl.common.dataModel.KeyIndex_Back
 import com.equationl.common.dataModel.KeyIndex_CE_Clear
+import com.equationl.common.dataModel.KeyIndex_Ceil
+import com.equationl.common.dataModel.KeyIndex_Constant_E
+import com.equationl.common.dataModel.KeyIndex_Constant_PI
+import com.equationl.common.dataModel.KeyIndex_Cos
+import com.equationl.common.dataModel.KeyIndex_CosH
+import com.equationl.common.dataModel.KeyIndex_Cot
+import com.equationl.common.dataModel.KeyIndex_CotH
+import com.equationl.common.dataModel.KeyIndex_Csc
+import com.equationl.common.dataModel.KeyIndex_CscH
+import com.equationl.common.dataModel.KeyIndex_Deg
 import com.equationl.common.dataModel.KeyIndex_Divide
+import com.equationl.common.dataModel.KeyIndex_Dms
+import com.equationl.common.dataModel.KeyIndex_EPowX
 import com.equationl.common.dataModel.KeyIndex_Equal
+import com.equationl.common.dataModel.KeyIndex_Exp
+import com.equationl.common.dataModel.KeyIndex_Factorial
+import com.equationl.common.dataModel.KeyIndex_Floor
+import com.equationl.common.dataModel.KeyIndex_LeftBrackets
+import com.equationl.common.dataModel.KeyIndex_Ln
+import com.equationl.common.dataModel.KeyIndex_Log
+import com.equationl.common.dataModel.KeyIndex_LogYX
 import com.equationl.common.dataModel.KeyIndex_MemoryClear
 import com.equationl.common.dataModel.KeyIndex_MemoryList
 import com.equationl.common.dataModel.KeyIndex_MemoryMinus
@@ -21,17 +55,28 @@ import com.equationl.common.dataModel.KeyIndex_MemoryPlus
 import com.equationl.common.dataModel.KeyIndex_MemoryRead
 import com.equationl.common.dataModel.KeyIndex_MemorySave
 import com.equationl.common.dataModel.KeyIndex_Minus
+import com.equationl.common.dataModel.KeyIndex_Mod
 import com.equationl.common.dataModel.KeyIndex_Multiply
 import com.equationl.common.dataModel.KeyIndex_NegativeNumber
-import com.equationl.common.dataModel.KeyIndex_Percentage
 import com.equationl.common.dataModel.KeyIndex_Point
 import com.equationl.common.dataModel.KeyIndex_Pow2
+import com.equationl.common.dataModel.KeyIndex_Pow3
+import com.equationl.common.dataModel.KeyIndex_Random
 import com.equationl.common.dataModel.KeyIndex_Reciprocal
+import com.equationl.common.dataModel.KeyIndex_RightBrackets
+import com.equationl.common.dataModel.KeyIndex_Sec
+import com.equationl.common.dataModel.KeyIndex_SecH
+import com.equationl.common.dataModel.KeyIndex_Sin
+import com.equationl.common.dataModel.KeyIndex_SinH
 import com.equationl.common.dataModel.KeyIndex_Sqrt
+import com.equationl.common.dataModel.KeyIndex_Sqrt3
+import com.equationl.common.dataModel.KeyIndex_Tan
+import com.equationl.common.dataModel.KeyIndex_TanH
 import com.equationl.common.dataModel.KeyIndex_ToggleAngle
 import com.equationl.common.dataModel.KeyIndex_ToggleResultType
+import com.equationl.common.dataModel.KeyIndex_XPowY
+import com.equationl.common.dataModel.KeyIndex_XSqrtY
 import com.equationl.common.dataModel.MemoryData
-import com.equationl.common.dataModel.Operator
 import com.equationl.common.dataModel.ScienceHistoryData
 import com.equationl.common.dataModel.ScienceOperator
 import com.equationl.common.database.HistoryDb
@@ -40,9 +85,6 @@ import com.equationl.common.platform.vibrateOnClick
 import com.equationl.common.platform.vibrateOnEqual
 import com.equationl.common.platform.vibrateOnError
 import com.equationl.common.utils.ScienceCalculate
-import com.equationl.common.utils.calculate
-import com.equationl.common.utils.formatNumber
-import com.equationl.common.utils.syncCalculate
 import com.equationl.shared.generated.resources.Res
 import com.equationl.shared.generated.resources.history_is_empty
 import com.equationl.shared.generated.resources.loading
@@ -56,6 +98,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
+import kotlin.random.Random
 
 // TODO 科学计算的 viewModel
 
@@ -261,18 +304,172 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
         viewStates.value = viewStates.value.copy(inputValue = newValue, isFinalResult = false)
     }
 
-    when (no) {
-        KeyIndex_Add -> { // "+"
-            clickArithmetic(ScienceOperator.ADD, viewStates)
+    if (no in KeyIndex_Sin..KeyIndex_ArcCotH) {
+        // TODO 三角函数
+        val operator = when (no) {
+            KeyIndex_Sin -> ScienceOperator.Sin
+            KeyIndex_Cos -> ScienceOperator.Cos
+            KeyIndex_Tan -> ScienceOperator.Tan
+            KeyIndex_Sec -> ScienceOperator.Sec
+            KeyIndex_Csc -> ScienceOperator.Csc
+            KeyIndex_Cot -> ScienceOperator.Cot
+            KeyIndex_ArcSin -> ScienceOperator.ArcSin
+            KeyIndex_ArcCos -> ScienceOperator.ArcCos
+            KeyIndex_ArcTan -> ScienceOperator.ArcTan
+            KeyIndex_ArcSec -> ScienceOperator.ArcSec
+            KeyIndex_ArcCsc -> ScienceOperator.ArcCsc
+            KeyIndex_ArcCot -> ScienceOperator.ArcCot
+            KeyIndex_SinH -> ScienceOperator.SinH
+            KeyIndex_CosH -> ScienceOperator.CosH
+            KeyIndex_TanH -> ScienceOperator.TanH
+            KeyIndex_SecH -> ScienceOperator.SecH
+            KeyIndex_CscH -> ScienceOperator.CscH
+            KeyIndex_CotH -> ScienceOperator.CotH
+            KeyIndex_ArcSinH -> ScienceOperator.ArcSinH
+            KeyIndex_ArcCosH -> ScienceOperator.ArcCosH
+            KeyIndex_ArcTanH -> ScienceOperator.ArcTanH
+            KeyIndex_ArcSecH -> ScienceOperator.ArcSecH
+            KeyIndex_ArcCscH -> ScienceOperator.ArcCscH
+            KeyIndex_ArcCotH -> ScienceOperator.ArcCotH
+            else -> ScienceOperator.NUll
         }
-        KeyIndex_Minus -> { // "-"
-            clickArithmetic(ScienceOperator.MINUS, viewStates)
+        clickInnerOperation(viewStates, viewStates.value.inputValue, "0", operator)
+    }
+
+    when (no) {
+        KeyIndex_ToggleAngle -> {
+            // 切换角度模式
+            vibrateOnClick()
+
+            var newValue = viewStates.value.angleType + 1
+            if (newValue > 2) {
+                newValue = 0
+            }
+
+            viewStates.value = viewStates.value.copy(
+                angleType = newValue
+            )
+        }
+        KeyIndex_ToggleResultType -> {
+            // TODO 切换结果类型
+            vibrateOnClick()
+
+            var newValue = viewStates.value.resultType + 1
+            if (newValue > 1) {
+                newValue = 0
+            }
+
+            viewStates.value = viewStates.value.copy(
+                resultType = newValue
+            )
+        }
+        KeyIndex_Constant_PI, KeyIndex_Constant_E, KeyIndex_Random -> {
+            vibrateOnClick()
+            clickConst(viewStates, no)
+        }
+        KeyIndex_CE_Clear -> {
+            vibrateOnClear()
+            if (viewStates.value.clearType == 0) {
+                clickClear(viewStates)
+            }
+            else {
+                if (isCalculated) {
+                    clickClear(viewStates)
+                }
+                else {
+                    viewStates.value = viewStates.value.copy(inputValue = "0")
+                }
+            }
+        }
+        KeyIndex_Back -> { // "←"
+            vibrateOnClick()
+            if (viewStates.value.inputValue != "0") {
+                var newValue = viewStates.value.inputValue.substring(0, viewStates.value.inputValue.length - 1)
+                if (newValue.isEmpty()) newValue = "0"
+                viewStates.value = viewStates.value.copy(inputValue = newValue)
+            }
+        }
+
+        KeyIndex_Pow2 -> { // "x²"
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Pow2)
+        }
+        KeyIndex_Pow3 -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Pow3)
+        }
+        KeyIndex_Reciprocal -> { // "1/x"
+            vibrateOnClick()
+            clickInnerOperation(viewStates, "1", viewStates.value.inputValue, ScienceOperator.Reciprocal)
+        }
+        KeyIndex_Abs -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Abs)
+        }
+        KeyIndex_Exp -> {
+            // TODO
+        }
+        KeyIndex_Mod -> {
+            clickArithmetic(ScienceOperator.Mod, viewStates)
+        }
+        KeyIndex_Sqrt -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Sqrt)
+        }
+        KeyIndex_Sqrt3 -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Sqrt3)
+        }
+        KeyIndex_LeftBrackets -> {
+            // TODO
+        }
+        KeyIndex_RightBrackets -> {
+            // TODO
+        }
+        KeyIndex_Factorial -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Factorial)
+        }
+        KeyIndex_Divide -> { // "÷"
+            clickArithmetic(ScienceOperator.Divide, viewStates)
+        }
+        KeyIndex_XPowY -> {
+            clickArithmetic(ScienceOperator.XPowY, viewStates)
+        }
+        KeyIndex_XSqrtY -> {
+            clickArithmetic(ScienceOperator.XSqrtY, viewStates)
         }
         KeyIndex_Multiply -> { // "×"
             clickArithmetic(ScienceOperator.MULTIPLY, viewStates)
         }
-        KeyIndex_Divide -> { // "÷"
-            clickArithmetic(ScienceOperator.Divide, viewStates)
+        KeyIndex_10PowX -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Op10PowX)
+        }
+        KeyIndex_2PowX -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Op2PowX)
+        }
+        KeyIndex_Minus -> { // "-"
+            clickArithmetic(ScienceOperator.MINUS, viewStates)
+        }
+        KeyIndex_Log -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Log)
+        }
+        KeyIndex_LogYX -> {
+            clickArithmetic(ScienceOperator.LogYX, viewStates)
+        }
+        KeyIndex_Add -> { // "+"
+            clickArithmetic(ScienceOperator.ADD, viewStates)
+        }
+        KeyIndex_Ln -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Ln)
+        }
+        KeyIndex_EPowX -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.EPowX)
         }
         KeyIndex_NegativeNumber -> { // "+/-"
             vibrateOnClick()
@@ -289,102 +486,25 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
                 viewStates.value = viewStates.value.copy(inputValue = viewStates.value.inputValue + ".")
             }
         }
-        KeyIndex_Reciprocal -> { // "1/x"
-            vibrateOnClick()
-            clickReciprocal(viewStates)
-        }
-        KeyIndex_Pow2 -> { // "x²"
-            vibrateOnClick()
-            clickPow2(viewStates)
-        }
-        KeyIndex_Sqrt -> { // "√x"
-            vibrateOnClick()
-            clickSqrt(viewStates)
-        }
-        KeyIndex_Percentage -> { // "%"
-            if (isInputSecondValue && viewStates.value.lastInputValue != "" && viewStates.value.inputOperator != ScienceOperator.NUll) {
-                vibrateOnClick()
-
-                viewStates.value.coroutineScope?.launch {
-                    syncCalculate(
-                        calculate = {
-                            val temp: String = calculate(viewStates.value.inputValue, "100", Operator.Divide).getOrNull().toString()
-                            calculate(viewStates.value.lastInputValue, temp, Operator.MULTIPLY)
-                        },
-                        onFinish = { resultBigDecimal ->
-                            val result = resultBigDecimal.getOrNull().toString()
-                            viewStates.value = viewStates.value.copy(
-                                inputValue = result,
-                                showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}" +
-                                        result.formatNumber(formatDecimal = true, formatInteger = false),
-                                isFinalResult = true
-                            )
-                        }
-                    )
-                }
-            }
-            else {
-                vibrateOnClear()
-                viewStates.value = viewStates.value.copy(
-                    inputValue = "0",
-                    showText = "0",
-                    lastInputValue = "",
-                    inputOperator = ScienceOperator.NUll
-                )
-            }
-        }
         KeyIndex_Equal -> { // "="
             clickEqual(viewStates)
         }
-        KeyIndex_Back -> { // "←"
+        KeyIndex_Floor -> {
             vibrateOnClick()
-            if (viewStates.value.inputValue != "0") {
-                var newValue = viewStates.value.inputValue.substring(0, viewStates.value.inputValue.length - 1)
-                if (newValue.isEmpty()) newValue = "0"
-                viewStates.value = viewStates.value.copy(inputValue = newValue)
-            }
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Floor)
         }
-        KeyIndex_CE_Clear -> {
-            vibrateOnClear()
-            if (viewStates.value.clearType == 0) {
-                clickClear(viewStates)
-            }
-            else {
-                if (isCalculated) {
-                    clickClear(viewStates)
-                }
-                else {
-                    viewStates.value = viewStates.value.copy(inputValue = "0")
-                }
-            }
-        }
-
-        KeyIndex_ToggleAngle -> {
-            // TODO 切换角度模式
-            vibrateOnClear()
-
-            var newValue = viewStates.value.angleType + 1
-            if (newValue > 2) {
-                newValue = 0
-            }
-
-            viewStates.value = viewStates.value.copy(
-                angleType = newValue
-            )
-        }
-
-        KeyIndex_ToggleResultType -> {
-            // TODO 切换结果类型
+        KeyIndex_Ceil -> {
             vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Ceil)
+        }
+        KeyIndex_Dms -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Dms)
+        }
+        KeyIndex_Deg -> {
+            vibrateOnClick()
+            clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.DEG)
 
-            var newValue = viewStates.value.resultType + 1
-            if (newValue > 1) {
-                newValue = 0
-            }
-
-            viewStates.value = viewStates.value.copy(
-                resultType = newValue
-            )
         }
 
         KeyIndex_MemoryClear -> { // "MC"
@@ -460,9 +580,9 @@ private fun clickClear(viewStates: MutableState<ScienceState>) {
     viewStates.value = ScienceState(memoryData = viewStates.value.memoryData)
 }
 
-private fun clickReciprocal(viewStates: MutableState<ScienceState>) {
+private fun clickInnerOperation(viewStates: MutableState<ScienceState>, leftValue: String, rightValue: String, operator: ScienceOperator) {
     viewStates.value.coroutineScope?.launch {
-        syncCalculate("1", viewStates.value.inputValue, Operator.Divide) { result ->
+        ScienceCalculate.syncCalculate(leftValue, rightValue, operator) { result ->
             val resultText = if (result.isSuccess) {
                 result.getOrNull()?.toPlainString() ?: "Null"
             } else {
@@ -477,59 +597,19 @@ private fun clickReciprocal(viewStates: MutableState<ScienceState>) {
 
             if (isInputSecondValue) {
                 viewStates.value = newState.copy(
-                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}1/(${viewStates.value.inputValue})",
+                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}${operator.showTemp.replace("\${value}", leftValue)}",
                     isFinalResult = false,
                     lastShowText =
-                    if (viewStates.value.showText.indexOf("=") != -1)
-                        viewStates.value.showText+viewStates.value.inputValue
-                    else viewStates.value.lastShowText
-                )
-            }
-            else {
-                viewStates.value = newState.copy(
-                    inputOperator = ScienceOperator.NUll,
-                    lastInputValue = viewStates.value.inputValue,
-                    showText = "1/(${viewStates.value.inputValue})",
-                    isFinalResult = false
-                )
-                // isInputSecondValue = true
-            }
-
-            isAdvancedCalculated = true
-        }
-    }
-}
-
-private fun clickSqrt(viewStates: MutableState<ScienceState>) {
-    viewStates.value.coroutineScope?.launch {
-        syncCalculate(viewStates.value.inputValue, "0", Operator.SQRT) { result ->
-            val resultText = if (result.isSuccess) {
-                result.getOrNull()?.toPlainString() ?: "Null"
-            } else {
-                vibrateOnError()
-                isErr = true
-                result.exceptionOrNull()?.message ?: "Err"
-            }
-
-            val newState = viewStates.value.copy(
-                inputValue = resultText
-            )
-
-            if (isInputSecondValue) {
-                viewStates.value = newState.copy(
-                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}${Operator.SQRT.showText}(${viewStates.value.inputValue})",
-                    isFinalResult = false,
-                    lastShowText =
-                    if (viewStates.value.showText.indexOf("=") != -1)
-                        viewStates.value.showText+viewStates.value.inputValue
-                    else viewStates.value.lastShowText
+                        if (viewStates.value.showText.indexOf("=") != -1)
+                            viewStates.value.showText+viewStates.value.inputValue
+                        else viewStates.value.lastShowText
                 )
             }
             else {
                 viewStates.value = newState.copy(
                     inputOperator = ScienceOperator.NUll,
                     lastInputValue = resultText,
-                    showText = "${Operator.SQRT.showText}(${viewStates.value.inputValue})",
+                    showText = operator.showTemp.replace("\${value}", leftValue),
                     isFinalResult = false
                 )
                 //isInputSecondValue = true
@@ -540,44 +620,54 @@ private fun clickSqrt(viewStates: MutableState<ScienceState>) {
     }
 }
 
-private fun clickPow2(viewStates: MutableState<ScienceState>) {
-    viewStates.value.coroutineScope?.launch {
-        syncCalculate(viewStates.value.inputValue, "0", Operator.POW2) { result ->
-            val resultText = if (result.isSuccess) {
-                result.getOrNull()!!.toPlainString()
-            } else {
-                vibrateOnError()
-                isErr = true
-                result.exceptionOrNull()?.message ?: "Err"
+private fun clickConst(viewStates: MutableState<ScienceState>, keyIndex: Int) {
+    val inputValue = when (keyIndex) {
+        KeyIndex_Constant_PI -> ScienceCalculate.PI
+        KeyIndex_Constant_E -> ScienceCalculate.E
+        KeyIndex_Random -> Random.nextDouble().toString()
+        else -> ""
+    }
+    val newValue =
+        if (viewStates.value.inputValue == "0") {
+            if (viewStates.value.inputOperator != ScienceOperator.NUll) isInputSecondValue = true
+            if (isAdvancedCalculated && viewStates.value.inputOperator == ScienceOperator.NUll) {  // 如果在输入高级运算符后直接输入数字，则重置状态
+                isAdvancedCalculated = false
+                isCalculated = false
+                isInputSecondValue = false
+                viewStates.value = ScienceState()
             }
-
-            val newState = viewStates.value.copy(
-                inputValue = resultText
-            )
-
-            if (isInputSecondValue) {
-                viewStates.value = newState.copy(
-                    showText = "${viewStates.value.lastInputValue}${viewStates.value.inputOperator.showText}(${viewStates.value.inputValue})${Operator.POW2.showText}",
-                    isFinalResult = false,
-                    lastShowText =
-                    if (viewStates.value.showText.indexOf("=") != -1)
+            inputValue
+        }
+        else if (viewStates.value.inputOperator != ScienceOperator.NUll && !isInputSecondValue) {
+            isCalculated = false
+            isInputSecondValue = true
+            inputValue
+        }
+        else if (isCalculated) {
+            isCalculated = false
+            isInputSecondValue = false
+            viewStates.value = ScienceState(
+                lastShowText =
+                    if (!isAdvancedCalculated)
                         viewStates.value.showText+viewStates.value.inputValue
                     else viewStates.value.lastShowText
-                )
-            }
-            else {
-                viewStates.value = newState.copy(
-                    inputOperator = ScienceOperator.NUll,
-                    lastInputValue = result.getOrNull().toString(),
-                    showText = "(${viewStates.value.inputValue})${Operator.POW2.showText}",
-                    isFinalResult = false
-                )
-                //isInputSecondValue = true
-            }
-
-            isAdvancedCalculated = true
+            )
+            inputValue
         }
-    }
+        else if (isAdvancedCalculated && viewStates.value.inputOperator == ScienceOperator.NUll) { // 如果在输入高级运算符后直接输入数字，则重置状态
+            isAdvancedCalculated = false
+            isCalculated = false
+            isInputSecondValue = false
+            viewStates.value = ScienceState()
+            inputValue
+        }
+        else if (!isCalculated && isInputSecondValue && isNeedClrInput) {
+            isNeedClrInput = false
+            inputValue
+        }
+        else inputValue
+
+    viewStates.value = viewStates.value.copy(inputValue = newValue, isFinalResult = false)
 }
 
 private fun clickEqual(viewStates: MutableState<ScienceState>) {
@@ -719,7 +809,7 @@ private fun clickArithmetic(operator: ScienceOperator, viewStates: MutableState<
 
         if (viewStates.value.inputOperator == ScienceOperator.NUll) {  // 第一次添加操作符
             newState = newState.copy(
-                showText = "${viewStates.value.showText}${operator.showText}"
+                showText = "${viewStates.value.showText}${operator.showTemp}"
             )
         }
         else {  // 不是第一次添加操作符，则需要把计算结果置于左边，并去掉高级运算的符号
@@ -730,7 +820,7 @@ private fun clickArithmetic(operator: ScienceOperator, viewStates: MutableState<
 
             newState = newState.copy(
                 lastInputValue = viewStates.value.inputValue,
-                showText = "${viewStates.value.inputValue}${operator.showText}",
+                showText = "${viewStates.value.inputValue}${operator.showTemp}",
                 inputValue = viewStates.value.inputValue
             )
         }
@@ -739,7 +829,7 @@ private fun clickArithmetic(operator: ScienceOperator, viewStates: MutableState<
     else {
         if (viewStates.value.inputOperator == ScienceOperator.NUll) { // 第一次添加操作符
             newState = newState.copy(
-                showText = "${viewStates.value.inputValue}${operator.showText}"
+                showText = "${viewStates.value.inputValue}${operator.showTemp}"
             )
         }
         else { // 不是第一次添加操作符
@@ -749,7 +839,7 @@ private fun clickArithmetic(operator: ScienceOperator, viewStates: MutableState<
 
             newState = newState.copy(
                 lastInputValue = viewStates.value.inputValue,
-                showText = "${viewStates.value.inputValue}${operator.showText}",
+                showText = "${viewStates.value.inputValue}${operator.showTemp}",
                 inputValue = viewStates.value.inputValue
             )
         }
