@@ -133,7 +133,12 @@ fun HomeScreen(
                     }
                 },
                 onClickHistory = {
-                    standardChannel.trySend(StandardAction.ToggleHistory())
+                    if (homeState.keyBoardType == Standard) {
+                        standardChannel.trySend(StandardAction.ToggleHistory())
+                    }
+                    else  if (homeState.keyBoardType == Science) {
+                        scienceChannel.trySend(ScienceAction.ToggleHistory())
+                    }
                 },
                 onClickOverlay = {
                     homeChannel.trySend(HomeAction.ClickOverlay)
@@ -208,7 +213,9 @@ private fun MenuTitle(
                 onClickToggleShowAscii = onClickToggleShowAscii,
                 onClickOverlay = onClickOverlay
             )
-            Science -> TitleActionScience()
+            Science -> TitleActionScience(
+                onClickHistory = onClickHistory,
+            )
         }
     }
 }
@@ -377,8 +384,15 @@ private fun TitleActionProgrammer(
 }
 
 @Composable
-private fun TitleActionScience() {
- // TODO 科学计算器
+private fun TitleActionScience(onClickHistory: () -> Unit) {
+    Row {
+        Icon(imageVector = Icons.Outlined.History,
+            contentDescription = stringResource(Res.string.history),
+            modifier = Modifier
+                .padding(4.dp)
+                .clickable { onClickHistory() }
+        )
+    }
 }
 
 @Composable

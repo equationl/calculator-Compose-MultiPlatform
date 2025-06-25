@@ -13,6 +13,7 @@ import com.equationl.common.value.defaultWindowPosition
 import com.equationl.common.value.defaultWindowSize
 import com.equationl.common.value.landWindowSize
 import com.equationl.common.viewModel.ProgrammerAction
+import com.equationl.common.viewModel.ScienceAction
 import com.equationl.common.viewModel.StandardAction
 import kotlinx.coroutines.channels.Channel
 
@@ -29,6 +30,7 @@ fun main() = application {
     if (Config.isFloat.value) {
         val standardChannel = remember { Channel<StandardAction>(capacity = Channel.UNLIMITED) }
         val programmerChannel = remember { Channel<ProgrammerAction>(capacity = Channel.UNLIMITED) }
+        val scienceChannel = remember { Channel<ScienceAction>(capacity = Channel.UNLIMITED) }
 
         Window(
             onCloseRequest = ::exitApplication,
@@ -45,9 +47,7 @@ fun main() = application {
                         when (Config.boardType.value) {
                             KeyBoardTypeEnum.Standard -> standardChannel.trySend(StandardAction.ClickBtn(btnIndex))
                             KeyBoardTypeEnum.Programmer -> programmerChannel.trySend(ProgrammerAction.ClickBtn(btnIndex))
-                            KeyBoardTypeEnum.Science -> {
-                                // TODO 科学计算器计算
-                            }
+                            KeyBoardTypeEnum.Science -> scienceChannel.trySend(ScienceAction.ClickBtn(btnIndex))
                         }
                     }
                 }
@@ -57,6 +57,7 @@ fun main() = application {
             APP(
                 standardChannelTop = standardChannel,
                 programmerChannelTop = programmerChannel,
+                scienceChannelTop = scienceChannel,
                 isFloat = Config.isFloat.value,
                 boardType = Config.boardType.value,
             )
@@ -65,6 +66,7 @@ fun main() = application {
     else {
         val standardChannel = remember { Channel<StandardAction>(capacity = Channel.UNLIMITED) }
         val programmerChannel = remember { Channel<ProgrammerAction>(capacity = Channel.UNLIMITED) }
+        val scienceChannel = remember { Channel<ScienceAction>(capacity = Channel.UNLIMITED) }
 
         Window(
             onCloseRequest = ::exitApplication,
@@ -78,9 +80,7 @@ fun main() = application {
                         when (Config.boardType.value) {
                             KeyBoardTypeEnum.Standard -> standardChannel.trySend(StandardAction.ClickBtn(btnIndex))
                             KeyBoardTypeEnum.Programmer -> programmerChannel.trySend(ProgrammerAction.ClickBtn(btnIndex))
-                            KeyBoardTypeEnum.Science -> {
-                                // TODO 科学计算器计算
-                            }
+                            KeyBoardTypeEnum.Science -> scienceChannel.trySend(ScienceAction.ClickBtn(btnIndex))
                         }
                     }
                 }
@@ -90,6 +90,7 @@ fun main() = application {
             APP(
                 standardChannelTop = standardChannel,
                 programmerChannelTop = programmerChannel,
+                scienceChannelTop = scienceChannel,
                 isFloat = Config.isFloat.value,
                 boardType = Config.boardType.value,
             )

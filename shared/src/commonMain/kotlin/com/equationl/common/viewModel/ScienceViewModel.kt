@@ -305,7 +305,6 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
     }
 
     if (no in KeyIndex_Sin..KeyIndex_ArcCotH) {
-        // TODO 三角函数
         val operator = when (no) {
             KeyIndex_Sin -> ScienceOperator.Sin
             KeyIndex_Cos -> ScienceOperator.Cos
@@ -407,7 +406,7 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
             clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Abs)
         }
         KeyIndex_Exp -> {
-            // TODO
+            // TODO Exp 计算
         }
         KeyIndex_Mod -> {
             clickArithmetic(ScienceOperator.Mod, viewStates)
@@ -421,10 +420,10 @@ private fun clickBtn(no: Int, viewStates: MutableState<ScienceState>) {
             clickInnerOperation(viewStates, viewStates.value.inputValue, "0", ScienceOperator.Sqrt3)
         }
         KeyIndex_LeftBrackets -> {
-            // TODO
+            // TODO 左括号
         }
         KeyIndex_RightBrackets -> {
-            // TODO
+            // TODO 右括号
         }
         KeyIndex_Factorial -> {
             vibrateOnClick()
@@ -877,7 +876,7 @@ data class ScienceState(
     val coroutineScope: CoroutineScope? = null,
     /** 角度类型 */
     val angleType: Int = 0,
-    /** 数值结果类型 */
+    /** 数值结果类型 0: 纯净文本 1: 科学计数法*/
     val resultType: Int = 0,
     /** 清除类型 */
     val clearType: Int = 0,
